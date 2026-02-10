@@ -61,3 +61,11 @@ export function formatRatioAsFraction(x: number, maxDen = 4096): string {
   const { n, d } = approxFraction(x, maxDen);
   return formatFraction(n, d);
 }
+
+export function normalizeFracString(frac: string): string {
+  const s = String(frac).trim();
+  if (!s.includes('/')) return `${s}/1`;
+  const [a, b] = s.split('/').map((x) => x.trim());
+  if (!a || !b) return `${a || '1'}/${b || '1'}`;
+  return `${a}/${b}`;
+}

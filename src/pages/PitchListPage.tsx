@@ -16,6 +16,7 @@ import { useAudio } from '../audio/AudioContextProvider';
 import { useMicrorimbaData } from '../data/useMicrorimbaData';
 import type { Bar, PitchGroup, ScaleId } from '../data/types';
 import { formatHz } from '../lib/format';
+import { normalizeFracString } from '../lib/rational';
 import { prettyInstrumentLabel } from '../lib/labels';
 import { setTheme, type ThemeMode } from '../ui/theme';
 
@@ -51,22 +52,8 @@ function instrumentLabel(bar: Bar) {
   return prettyInstrumentLabel(bar.scaleId, bar.instrumentId, bar.edo);
 }
 
-function harmonicPartial(bar: Bar): number | null {
-  const idMatch = bar.barId.match(/harmonic-(\d+)$/i);
-  if (idMatch) return Number(idMatch[1]);
-  const stepMatch = bar.stepName.match(/H(\d+)/i);
-  if (stepMatch) return Number(stepMatch[1]);
-  const ratioMatch = bar.ratioToStep0.match(/^(\d+)\/1$/);
-  if (ratioMatch) return Number(ratioMatch[1]);
-  return null;
-}
-
 function ratioForDisplay(bar: Bar): string {
-  if (bar.scaleId === 'harmonic') {
-    const partial = harmonicPartial(bar) ?? 1;
-    return `${partial}/1`;
-  }
-  return bar.ratioToStep0;
+  return normalizeFracString(bar.ratioToStep0 ?? '');
 }
 
 function formatSignedCents(value: number): string {
@@ -226,78 +213,90 @@ export function PitchListPage() {
 
       <motion.section className="glass-panel glass-rim p-4" {...motionProps}>
         <div className="h-[520px] overflow-auto rounded-2xl border border-rim/70">
-          <div className="sticky top-0 z-20 grid grid-cols-[64px_120px_1fr_84px_100px_90px_90px_110px_72px] gap-2 border-b border-rim bg-white/70 px-3 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70">
-            {['Play', 'Hz', 'Instrument', 'Bar #', 'Scale', 'Degree', 'Index', 'Ratio', 'More'].map((label) => <div key={label}>{label}</div>)}
-          </div>
-          <div className="w-full min-w-0 space-y-2 p-2">
-            {(mode === 'all'
-              ? allVisible.map((bar) => ({ key: bar.barId, bar, cluster: null as PitchGroup | null, members: [bar] }))
-              : uniqueVisible.map((item) => ({ key: item.rep.barId, bar: item.rep, cluster: item.cluster, members: item.members })))
-              .map(({ key, bar, cluster, members }, index) => {
-                const expandedRow = Boolean(expanded[key]);
-                const hz = formatHz(bar.hz);
-                return (
-                  <div key={key} className="block w-full min-w-0 rounded-2xl border border-rim/80 bg-white/40 p-2 dark:bg-slate-900/30" style={{ borderColor: `hsla(${SCALE_ACCENTS[bar.scaleId] ?? '220 10% 50%'}, 0.32)` }}>
-                    <div className="grid w-full min-w-0 grid-cols-[64px_120px_1fr_84px_100px_90px_90px_110px_72px] items-center gap-2 text-sm">
-                      <button onClick={() => void toggleBar(bar.barId)} className={`inline-flex h-9 w-9 items-center justify-center rounded-full border ${playingBarIds.has(bar.barId) ? 'border-emerald-400 bg-emerald-500/25' : 'border-rim'}`}>
-                        {playingBarIds.has(bar.barId) ? (
-                          <motion.span animate={reduced ? { opacity: [0.55, 1, 0.55] } : { scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }} transition={{ repeat: Infinity, duration: 1.2 }}>
-                            <Volume2 className="h-4 w-4" />
-                          </motion.span>
-                        ) : <Play className="h-4 w-4" />}
-                      </button>
-                      <div>{hz.text}</div>
-                      <div>{instrumentLabel(bar)}</div>
-                      <div>{barNumber(bar.barId)}</div>
-                      <div className="uppercase">{bar.scaleId}</div>
-                      <div>{degreeFor(bar)}</div>
-                      <div>{index + 1}</div>
-                      <div className="min-w-0 font-mono text-xs">
-                        {Math.abs(bar.ratioErrorCents) >= 1 ? '≈ ' : ''}
-                        {ratioForDisplay(bar)}
-                      </div>
-                      <button className="opacity-60 hover:opacity-100" onClick={() => setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))}>{expandedRow ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</button>
-                    </div>
-                    <AnimatePresence initial={false}>
-                      {expandedRow && (
-                        <motion.div
-                          className="mt-2 overflow-hidden rounded-xl border border-rim bg-white/50 p-3 text-xs dark:bg-black/25"
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                        >
-                          <div className="grid grid-cols-2 gap-2 md:grid-cols-6">
-                            <div>bar_id: <span className="font-mono">{bar.barId}</span></div>
-                            <div>step_name: {bar.stepName}</div>
-                            <div>cents_from_step0: {bar.centsFromStep0}</div>
-                            <div>ratio_to_step0: <span className="font-mono">{ratioForDisplay(bar)}</span></div>
-                            <div>Ratio error: <span className="font-mono">{formatSignedCents(bar.ratioErrorCents)}</span></div>
-                            <div title={`raw: ${bar.hz}`}>raw Hz: <span className="font-mono">{bar.hz}</span></div>
-                          </div>
-                          {cluster && (
-                            <div className="mt-2 border-t border-rim pt-2">Tolerance ±{tolerance}c · members {cluster.stats.count} · max spread {cluster.stats.maxCentsSpread.toFixed(2)} cents</div>
-                          )}
-                          {cluster && (
-                            <div className="mt-2 space-y-1 pl-4">
-                              {members.map((member) => (
-                                <div key={member.barId} className="grid min-w-0 grid-cols-[40px_90px_1fr_80px_100px_1fr] items-center gap-2">
-                                  <button onClick={() => void toggleBar(member.barId)} className="rounded border border-rim p-1"><Play className="h-3 w-3" /></button>
-                                  <span>{formatHz(member.hz).text}</span>
-                                  <span>{instrumentLabel(member)}</span>
-                                  <span>{barNumber(member.barId)}</span>
-                                  <span className="uppercase">{member.scaleId}</span>
-                                  <span className="font-mono">{Math.abs(member.ratioErrorCents) >= 1 ? '≈ ' : ''}{ratioForDisplay(member)}</span>
-                                </div>
-                              ))}
+          <table className="w-full table-fixed border-collapse">
+            <thead className="sticky top-0 z-20 bg-white/70 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70">
+              <tr className="border-b border-rim">
+                {['Play', 'Hz', 'Instrument', 'Bar #', 'Scale', 'Degree', 'Index', 'Ratio', 'More'].map((label) => (
+                  <th key={label} className="px-3 py-3 text-left font-normal">{label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {(mode === 'all'
+                ? allVisible.map((bar) => ({ key: bar.barId, bar, cluster: null as PitchGroup | null, members: [bar] }))
+                : uniqueVisible.map((item) => ({ key: item.rep.barId, bar: item.rep, cluster: item.cluster, members: item.members })))
+                .map(({ key, bar, cluster, members }, index) => {
+                  const expandedRow = Boolean(expanded[key]);
+                  const hz = formatHz(bar.hz);
+                  return (
+                    <tr key={key} className="align-top">
+                      <td className="px-3 py-2 align-top" colSpan={9}>
+                        <div className="block w-full min-w-0">
+                          <div className="block w-full min-w-0 rounded-2xl border border-rim/80 bg-white/40 p-2 dark:bg-slate-900/30" style={{ borderColor: `hsla(${SCALE_ACCENTS[bar.scaleId] ?? '220 10% 50%'}, 0.32)` }}>
+                            <div className="grid w-full min-w-0 grid-cols-[64px_120px_1fr_84px_100px_90px_90px_110px_72px] items-center gap-2 text-sm">
+                              <button onClick={() => void toggleBar(bar.barId)} className={`inline-flex h-9 w-9 items-center justify-center rounded-full border ${playingBarIds.has(bar.barId) ? 'border-emerald-400 bg-emerald-500/25' : 'border-rim'}`}>
+                                {playingBarIds.has(bar.barId) ? (
+                                  <motion.span animate={reduced ? { opacity: [0.55, 1, 0.55] } : { scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }} transition={{ repeat: Infinity, duration: 1.2 }}>
+                                    <Volume2 className="h-4 w-4" />
+                                  </motion.span>
+                                ) : <Play className="h-4 w-4" />}
+                              </button>
+                              <div>{hz.text}</div>
+                              <div>{instrumentLabel(bar)}</div>
+                              <div>{barNumber(bar.barId)}</div>
+                              <div className="uppercase">{bar.scaleId}</div>
+                              <div>{degreeFor(bar)}</div>
+                              <div>{index + 1}</div>
+                              <div className="min-w-0 font-mono text-xs tabular-nums">
+                                {Math.abs(bar.ratioErrorCents) >= 1 ? '≈ ' : ''}
+                                {ratioForDisplay(bar)}
+                              </div>
+                              <button className="opacity-60 hover:opacity-100" onClick={() => setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))}>{expandedRow ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</button>
                             </div>
-                          )}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
-          </div>
+                            <AnimatePresence initial={false}>
+                              {expandedRow && (
+                                <motion.div
+                                  className="mt-2 overflow-hidden rounded-xl border border-rim bg-white/50 p-3 text-xs dark:bg-black/25"
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                >
+                                  <div className="grid grid-cols-2 gap-2 md:grid-cols-6">
+                                    <div>bar_id: <span className="font-mono">{bar.barId}</span></div>
+                                    <div>step_name: {bar.stepName}</div>
+                                    <div>cents_from_step0: {bar.centsFromStep0}</div>
+                                    <div>ratio_to_step0: <span className="font-mono tabular-nums">{ratioForDisplay(bar)}</span></div>
+                                    <div>Ratio error: <span className="font-mono">{formatSignedCents(bar.ratioErrorCents)}</span></div>
+                                    <div title={`raw: ${bar.hz}`}>raw Hz: <span className="font-mono">{bar.hz}</span></div>
+                                  </div>
+                                  {cluster && (
+                                    <div className="mt-2 border-t border-rim pt-2">Tolerance ±{tolerance}c · members {cluster.stats.count} · max spread {cluster.stats.maxCentsSpread.toFixed(2)} cents</div>
+                                  )}
+                                  {cluster && (
+                                    <div className="mt-2 space-y-1 pl-4">
+                                      {members.map((member) => (
+                                        <div key={member.barId} className="grid min-w-0 grid-cols-[40px_90px_1fr_80px_100px_1fr] items-center gap-2">
+                                          <button onClick={() => void toggleBar(member.barId)} className="rounded border border-rim p-1"><Play className="h-3 w-3" /></button>
+                                          <span>{formatHz(member.hz).text}</span>
+                                          <span>{instrumentLabel(member)}</span>
+                                          <span>{barNumber(member.barId)}</span>
+                                          <span className="uppercase">{member.scaleId}</span>
+                                          <span className="font-mono tabular-nums">{Math.abs(member.ratioErrorCents) >= 1 ? '≈ ' : ''}{ratioForDisplay(member)}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
         </div>
       </motion.section>
 

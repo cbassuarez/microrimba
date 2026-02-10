@@ -83,6 +83,14 @@ function bestSimpleFraction(x: number, maxDen = 64) {
   };
 }
 
+function normalizeFracString(frac: string): string {
+  const s = String(frac).trim();
+  if (!s.includes('/')) return `${s}/1`;
+  const [a, b] = s.split('/').map((x) => x.trim());
+  if (!a || !b) return `${a || '1'}/${b || '1'}`;
+  return `${a}/${b}`;
+}
+
 const normalizeScaleId = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '');
 
 const scaleIdFromFilename = (fileName: string): string => {
@@ -214,13 +222,14 @@ async function main() {
 
       if (isHarmonic) {
         return barsSorted.map((bar) => {
-          const partial =
-            bar.step === 0
-              ? 1
-              : Number(bar.ratioToStep0.match(/^(\d+)\/1$/)?.[1] ?? bar.stepName.match(/H(\d+)/i)?.[1] ?? Math.max(1, bar.step + 1));
+          const partial = Number(bar.barId.match(/harmonic-(\d+)$/i)?.[1] ?? bar.stepName.match(/H(\d+)/i)?.[1] ?? Math.max(1, bar.step + 1));
+          const ratioToStep0 = normalizeFracString(bar.barId.toLowerCase() === 'harmonic-001' ? '1/1' : `${Math.max(1, partial)}/1`);
+          if (!ratioToStep0.includes('/')) {
+            throw new Error(`Invalid ratioToStep0 '${ratioToStep0}' for ${bar.barId}`);
+          }
           return {
             ...bar,
-            ratioToStep0: `${partial}/1`,
+            ratioToStep0,
             ratioErrorCents: 0,
           };
         });
@@ -237,9 +246,13 @@ async function main() {
       return barsSorted.map((bar) => {
         const x = bar.hz / refHz;
         const quant = bestSimpleFraction(x, 64);
+        const ratioToStep0 = normalizeFracString(quant.frac);
+        if (!ratioToStep0.includes('/')) {
+          throw new Error(`Invalid ratioToStep0 '${ratioToStep0}' for ${bar.barId}`);
+        }
         return {
           ...bar,
-          ratioToStep0: quant.frac,
+          ratioToStep0,
           ratioErrorCents: quant.errCents,
         };
       });
