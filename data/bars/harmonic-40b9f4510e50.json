@@ -1,99 +1,99 @@
 {
   "bar_id": "harmonic-40b9f4510e50",
   "edo_interpretation": null,
-  "global_order_index": 25,
+  "global_order_index": 39,
   "instrument_id": "harmonic",
   "ji": {
     "ji_candidates": [
       {
-        "cents_error": 18.04727935696941,
-        "complexity_score": 6.643856189774724,
-        "label": "25/4",
-        "p": 25,
-        "prime_limit": 5,
-        "q": 4
-      },
-      {
-        "cents_error": 18.04727935696941,
-        "complexity_score": 6.643856189774724,
-        "label": "25/4",
-        "p": 25,
+        "cents_error": 6.8836434589737525,
+        "complexity_score": 6.392317422778761,
+        "label": "28/3",
+        "p": 28,
         "prime_limit": 7,
-        "q": 4
+        "q": 3
       },
       {
-        "cents_error": -52.625147507313024,
-        "complexity_score": 2.584962500721156,
-        "label": "6/1",
-        "p": 6,
-        "prime_limit": 5,
-        "q": 1
-      },
-      {
-        "cents_error": 10.335756365649567,
-        "complexity_score": 8.977279923499916,
-        "label": "56/9",
-        "p": 56,
-        "prime_limit": 7,
-        "q": 9
-      },
-      {
-        "cents_error": 18.04727935696941,
-        "complexity_score": 6.643856189774724,
-        "label": "25/4",
-        "p": 25,
+        "cents_error": 6.8836434589737525,
+        "complexity_score": 6.392317422778761,
+        "label": "28/3",
+        "p": 28,
         "prime_limit": 11,
-        "q": 4
+        "q": 3
       },
       {
-        "cents_error": -52.625147507313024,
-        "complexity_score": 2.584962500721156,
-        "label": "6/1",
-        "p": 6,
-        "prime_limit": 7,
-        "q": 1
+        "cents_error": 6.8836434589737525,
+        "complexity_score": 6.392317422778761,
+        "label": "28/3",
+        "p": 28,
+        "prime_limit": 13,
+        "q": 3
       },
       {
-        "cents_error": -16.92833543445057,
-        "complexity_score": 8.614709844115207,
-        "label": "49/8",
-        "p": 49,
+        "cents_error": 14.595166450293094,
+        "complexity_score": 9.228818690495881,
+        "label": "75/8",
+        "p": 75,
+        "prime_limit": 5,
+        "q": 8
+      },
+      {
+        "cents_error": -1.9717929797434333,
+        "complexity_score": 8.829722735086058,
+        "label": "65/7",
+        "p": 65,
+        "prime_limit": 13,
+        "q": 7
+      },
+      {
+        "cents_error": 14.595166450293094,
+        "complexity_score": 9.228818690495881,
+        "label": "75/8",
+        "p": 75,
         "prime_limit": 7,
         "q": 8
       },
       {
-        "cents_error": 18.04727935696941,
-        "complexity_score": 6.643856189774724,
-        "label": "25/4",
-        "p": 25,
+        "cents_error": -56.077260413989244,
+        "complexity_score": 3.169925001442312,
+        "label": "9/1",
+        "p": 9,
+        "prime_limit": 5,
+        "q": 1
+      },
+      {
+        "cents_error": -56.077260413989244,
+        "complexity_score": 3.169925001442312,
+        "label": "9/1",
+        "p": 9,
+        "prime_limit": 7,
+        "q": 1
+      },
+      {
+        "cents_error": 2.120960815438714,
+        "complexity_score": 10.619302955415687,
+        "label": "121/13",
+        "p": 121,
         "prime_limit": 13,
-        "q": 4
+        "q": 13
       },
       {
-        "cents_error": 10.335756365649567,
-        "complexity_score": 8.977279923499916,
-        "label": "56/9",
-        "p": 56,
+        "cents_error": 14.595166450293094,
+        "complexity_score": 9.228818690495881,
+        "label": "75/8",
+        "p": 75,
         "prime_limit": 11,
-        "q": 9
-      },
-      {
-        "cents_error": 0.6477957228311199,
-        "complexity_score": 10.62935662007961,
-        "label": "99/16",
-        "p": 99,
-        "prime_limit": 11,
-        "q": 16
+        "q": 8
       }
     ],
     "ji_primary": {
-      "cents_error": 18.04727935696941,
-      "complexity_score": 6.643856189774724,
-      "label": "25/4",
-      "p": 25,
-      "prime_limit": 5,
-      "q": 4,
-      "why": "closest weighted JI fit with 25/4 at 18.047 cents error, complexity 6.644, prime limit 5"
+      "cents_error": 6.8836434589737525,
+      "complexity_score": 6.392317422778761,
+      "label": "28/3",
+      "p": 28,
+      "prime_limit": 7,
+      "q": 3,
+      "why": "closest weighted JI fit with 28/3 at 6.884 cents error, complexity 6.392, prime limit 7"
     }
   },
   "label_index_mod": null,
@@ -104,21 +104,31 @@
   },
   "measurements": {
     "f0": {
-      "f0_confidence": 0.4757327744035069,
+      "f0_confidence": 0.5158192928334998,
       "f0_confidence_notes": "short audio; analysis window reduced; derived from natural filename order",
+      "f0_corrections": null,
       "f0_distribution": {
         "iqr_hz": 130.66666666666674,
-        "max_hz": 4009.090909090909,
+        "max_hz": 2004.5454545454545,
         "median_hz": 1633.3333333333333,
         "min_hz": 1633.3333333333333,
         "n_frames": 61
       },
       "f0_hz": 1633.3333333333333,
       "f0_method": "acf_median_tracker_v1",
+      "f0_search": {
+        "frame_size": 2028,
+        "lmax": 1103,
+        "lmin": 22,
+        "max_hz": 2000.0,
+        "median_lag": 27,
+        "min_hz": 40.0
+      },
       "f0_window": {
         "end_s": 0.9464625850340136,
         "start_s": 0.2
-      }
+      },
+      "harmonic_grid_fit": 0.3333333333333333
     },
     "partials": {
       "analysis_window": {
@@ -577,20 +587,20 @@
     "mallet": "",
     "measured_at": "",
     "measured_by": "",
-    "method_version": "504d0b4",
+    "method_version": "68bd384",
     "mic": "",
     "notes": "",
     "room": ""
   },
   "register": {
-    "octave_abs": 2,
-    "within_octave_ratio": 1.5462962962962963
+    "octave_abs": 3,
+    "within_octave_ratio": 1.162037037037037
   },
   "revision_history": [
     {
       "by": "build_dataset.py",
       "change": "initial record creation",
-      "date": "2026-02-10T05:48:40+00:00"
+      "date": "2026-02-09T21:52:34-08:00"
     }
   ],
   "source_filename": "harmonic-025.wav",

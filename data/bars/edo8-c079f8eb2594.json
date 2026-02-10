@@ -1,105 +1,105 @@
 {
   "bar_id": "edo8-c079f8eb2594",
   "edo_interpretation": {
-    "cents_error_from_target": 5.217206873331194,
+    "cents_error_from_target": -39.37567935460505,
     "edo": 8,
-    "octave": 0,
-    "step": 6,
-    "target_ratio": 1.681792830507429
+    "octave": 1,
+    "step": 3,
+    "target_ratio": 1.2968395546510096
   },
-  "global_order_index": 5,
+  "global_order_index": 17,
   "instrument_id": "edo8",
   "ji": {
     "ji_candidates": [
       {
-        "cents_error": -20.8584938738837,
-        "complexity_score": 3.9068905956085187,
-        "label": "5/3",
+        "cents_error": -24.3106067805602,
+        "complexity_score": 3.321928094887362,
+        "label": "5/2",
         "p": 5,
         "prime_limit": 5,
-        "q": 3
+        "q": 2
       },
       {
-        "cents_error": -20.8584938738837,
-        "complexity_score": 3.9068905956085187,
-        "label": "5/3",
+        "cents_error": -24.3106067805602,
+        "complexity_score": 3.321928094887362,
+        "label": "5/2",
         "p": 5,
         "prime_limit": 7,
-        "q": 3
+        "q": 2
       },
       {
-        "cents_error": 0.6477957228311199,
-        "complexity_score": 8.754887502163468,
-        "label": "27/16",
-        "p": 27,
-        "prime_limit": 5,
-        "q": 16
-      },
-      {
-        "cents_error": -20.8584938738837,
-        "complexity_score": 3.9068905956085187,
-        "label": "5/3",
+        "cents_error": -24.3106067805602,
+        "complexity_score": 3.321928094887362,
+        "label": "5/2",
         "p": 5,
         "prime_limit": 11,
-        "q": 3
+        "q": 2
       },
       {
-        "cents_error": 0.6477957228311199,
-        "complexity_score": 8.754887502163468,
-        "label": "27/16",
-        "p": 27,
-        "prime_limit": 7,
-        "q": 16
-      },
-      {
-        "cents_error": -20.8584938738837,
-        "complexity_score": 3.9068905956085187,
-        "label": "5/3",
+        "cents_error": -24.3106067805602,
+        "complexity_score": 3.321928094887362,
+        "label": "5/2",
         "p": 5,
         "prime_limit": 13,
-        "q": 3
+        "q": 2
       },
       {
-        "cents_error": 0.6477957228311199,
-        "complexity_score": 8.754887502163468,
-        "label": "27/16",
-        "p": 27,
+        "cents_error": 6.88364345897337,
+        "complexity_score": 8.266786540694902,
+        "label": "28/11",
+        "p": 28,
         "prime_limit": 11,
-        "q": 16
+        "q": 11
       },
       {
-        "cents_error": 0.6477957228311199,
-        "complexity_score": 8.754887502163468,
-        "label": "27/16",
-        "p": 27,
-        "prime_limit": 13,
-        "q": 16
-      },
-      {
-        "cents_error": 27.91188752293112,
-        "complexity_score": 6.392317422778761,
-        "label": "12/7",
-        "p": 12,
+        "cents_error": 24.459774616254983,
+        "complexity_score": 6.977279923499917,
+        "label": "18/7",
+        "p": 18,
         "prime_limit": 7,
         "q": 7
       },
       {
-        "cents_error": 5.573073722115077,
-        "complexity_score": 8.159871336778389,
-        "label": "22/13",
-        "p": 22,
+        "cents_error": 2.12096081543833,
+        "complexity_score": 8.744833837499545,
+        "label": "33/13",
+        "p": 33,
         "prime_limit": 13,
         "q": 13
+      },
+      {
+        "cents_error": -2.8043171838453174,
+        "complexity_score": 11.339850002884624,
+        "label": "81/32",
+        "p": 81,
+        "prime_limit": 5,
+        "q": 32
+      },
+      {
+        "cents_error": 6.88364345897337,
+        "complexity_score": 8.266786540694902,
+        "label": "28/11",
+        "p": 28,
+        "prime_limit": 13,
+        "q": 11
+      },
+      {
+        "cents_error": -2.8043171838453174,
+        "complexity_score": 11.339850002884624,
+        "label": "81/32",
+        "p": 81,
+        "prime_limit": 7,
+        "q": 32
       }
     ],
     "ji_primary": {
-      "cents_error": -20.8584938738837,
-      "complexity_score": 3.9068905956085187,
-      "label": "5/3",
+      "cents_error": -24.3106067805602,
+      "complexity_score": 3.321928094887362,
+      "label": "5/2",
       "p": 5,
       "prime_limit": 5,
-      "q": 3,
-      "why": "closest weighted JI fit with 5/3 at -20.858 cents error, complexity 3.907, prime limit 5"
+      "q": 2,
+      "why": "closest weighted JI fit with 5/2 at -24.311 cents error, complexity 3.322, prime limit 5"
     }
   },
   "label_index_mod": null,
@@ -110,21 +110,31 @@
   },
   "measurements": {
     "f0": {
-      "f0_confidence": 0.4754504453741601,
+      "f0_confidence": 0.45877825731289895,
       "f0_confidence_notes": "short audio; analysis window reduced; derived from natural filename order",
+      "f0_corrections": null,
       "f0_distribution": {
-        "iqr_hz": 3563.6363636363635,
-        "max_hz": 4009.090909090909,
+        "iqr_hz": 1559.090909090909,
+        "max_hz": 2004.5454545454545,
         "median_hz": 445.45454545454544,
         "min_hz": 441.0,
         "n_frames": 82
       },
       "f0_hz": 445.45454545454544,
       "f0_method": "acf_median_tracker_v1",
+      "f0_search": {
+        "frame_size": 2028,
+        "lmax": 1103,
+        "lmin": 22,
+        "max_hz": 2000.0,
+        "median_lag": 99,
+        "min_hz": 40.0
+      },
       "f0_window": {
         "end_s": 1.1795918367346938,
         "start_s": 0.2
-      }
+      },
+      "harmonic_grid_fit": 0.08333333333333333
     },
     "partials": {
       "analysis_window": {
@@ -583,20 +593,20 @@
     "mallet": "",
     "measured_at": "",
     "measured_by": "",
-    "method_version": "504d0b4",
+    "method_version": "68bd384",
     "mic": "",
     "notes": "",
     "room": ""
   },
   "register": {
-    "octave_abs": 0,
-    "within_octave_ratio": 1.6868686868686869
+    "octave_abs": 1,
+    "within_octave_ratio": 1.2676767676767677
   },
   "revision_history": [
     {
       "by": "build_dataset.py",
       "change": "initial record creation",
-      "date": "2026-02-10T05:48:40+00:00"
+      "date": "2026-02-09T21:52:34-08:00"
     }
   ],
   "source_filename": "8EDO-015.wav",

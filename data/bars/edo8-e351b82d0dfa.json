@@ -1,105 +1,105 @@
 {
   "bar_id": "edo8-e351b82d0dfa",
   "edo_interpretation": {
-    "cents_error_from_target": 4.580148372700323,
+    "cents_error_from_target": -40.01273785523594,
     "edo": 8,
-    "octave": 0,
-    "step": 5,
-    "target_ratio": 1.5422108254079407
+    "octave": 1,
+    "step": 2,
+    "target_ratio": 1.189207115002721
   },
-  "global_order_index": 4,
+  "global_order_index": 16,
   "instrument_id": "edo8",
   "ji": {
     "ji_candidates": [
       {
-        "cents_error": 10.335756365649567,
-        "complexity_score": 6.977279923499917,
-        "label": "14/9",
-        "p": 14,
+        "cents_error": 6.8836434589737525,
+        "complexity_score": 4.392317422778761,
+        "label": "7/3",
+        "p": 7,
         "prime_limit": 7,
-        "q": 9
+        "q": 3
       },
       {
-        "cents_error": 10.335756365649567,
-        "complexity_score": 6.977279923499917,
-        "label": "14/9",
-        "p": 14,
+        "cents_error": 6.8836434589737525,
+        "complexity_score": 4.392317422778761,
+        "label": "7/3",
+        "p": 7,
         "prime_limit": 11,
-        "q": 9
+        "q": 3
       },
       {
-        "cents_error": -52.625147507313024,
-        "complexity_score": 2.584962500721156,
-        "label": "3/2",
-        "p": 3,
-        "prime_limit": 5,
-        "q": 2
-      },
-      {
-        "cents_error": 10.335756365649567,
-        "complexity_score": 6.977279923499917,
-        "label": "14/9",
-        "p": 14,
+        "cents_error": 6.8836434589737525,
+        "complexity_score": 4.392317422778761,
+        "label": "7/3",
+        "p": 7,
         "prime_limit": 13,
-        "q": 9
+        "q": 3
       },
       {
-        "cents_error": 18.04727935696941,
-        "complexity_score": 8.643856189774725,
-        "label": "25/16",
-        "p": 25,
-        "prime_limit": 5,
-        "q": 16
-      },
-      {
-        "cents_error": -52.625147507313024,
-        "complexity_score": 2.584962500721156,
-        "label": "3/2",
-        "p": 3,
+        "cents_error": -28.813168613889125,
+        "complexity_score": 6.807354922057604,
+        "label": "16/7",
+        "p": 16,
         "prime_limit": 7,
-        "q": 2
+        "q": 7
       },
       {
-        "cents_error": -8.794096277176083,
-        "complexity_score": 8.022367813028454,
-        "label": "20/13",
-        "p": 20,
+        "cents_error": -12.246209183852557,
+        "complexity_score": 8.60733031374961,
+        "label": "30/13",
+        "p": 30,
         "prime_limit": 13,
         "q": 13
       },
       {
-        "cents_error": -3.8547661104978737,
-        "complexity_score": 10.884170519108435,
-        "label": "54/35",
-        "p": 54,
+        "cents_error": -7.3068790171739675,
+        "complexity_score": 11.469133019829592,
+        "label": "81/35",
+        "p": 81,
         "prime_limit": 7,
         "q": 35
       },
       {
-        "cents_error": 18.04727935696941,
-        "complexity_score": 8.643856189774725,
-        "label": "25/16",
-        "p": 25,
-        "prime_limit": 7,
-        "q": 16
-      },
-      {
-        "cents_error": 27.911887522931497,
-        "complexity_score": 6.266786540694901,
-        "label": "11/7",
-        "p": 11,
+        "cents_error": -28.813168613889125,
+        "complexity_score": 6.807354922057604,
+        "label": "16/7",
+        "p": 16,
         "prime_limit": 11,
         "q": 7
+      },
+      {
+        "cents_error": 14.595166450293094,
+        "complexity_score": 11.228818690495881,
+        "label": "75/32",
+        "p": 75,
+        "prime_limit": 5,
+        "q": 32
+      },
+      {
+        "cents_error": -1.9717929797434333,
+        "complexity_score": 10.829722735086058,
+        "label": "65/28",
+        "p": 65,
+        "prime_limit": 13,
+        "q": 28
+      },
+      {
+        "cents_error": -6.911123146421739,
+        "complexity_score": 12.720671786825555,
+        "label": "125/54",
+        "p": 125,
+        "prime_limit": 5,
+        "q": 54
       }
     ],
     "ji_primary": {
-      "cents_error": 10.335756365649567,
-      "complexity_score": 6.977279923499917,
-      "label": "14/9",
-      "p": 14,
+      "cents_error": 6.8836434589737525,
+      "complexity_score": 4.392317422778761,
+      "label": "7/3",
+      "p": 7,
       "prime_limit": 7,
-      "q": 9,
-      "why": "closest weighted JI fit with 14/9 at 10.336 cents error, complexity 6.977, prime limit 7"
+      "q": 3,
+      "why": "closest weighted JI fit with 7/3 at 6.884 cents error, complexity 4.392, prime limit 7"
     }
   },
   "label_index_mod": null,
@@ -110,21 +110,31 @@
   },
   "measurements": {
     "f0": {
-      "f0_confidence": 0.47332788480367965,
+      "f0_confidence": 0.45125802552256233,
       "f0_confidence_notes": "short audio; analysis window reduced; derived from natural filename order",
+      "f0_corrections": null,
       "f0_distribution": {
-        "iqr_hz": 3604.503753127606,
-        "max_hz": 4009.090909090909,
+        "iqr_hz": 1599.9582985821517,
+        "max_hz": 2004.5454545454545,
         "median_hz": 408.3333333333333,
         "min_hz": 404.58715596330273,
         "n_frames": 80
       },
       "f0_hz": 408.3333333333333,
       "f0_method": "acf_median_tracker_v1",
+      "f0_search": {
+        "frame_size": 2028,
+        "lmax": 1103,
+        "lmin": 22,
+        "max_hz": 2000.0,
+        "median_lag": 108,
+        "min_hz": 40.0
+      },
       "f0_window": {
         "end_s": 1.1639682539682539,
         "start_s": 0.2
-      }
+      },
+      "harmonic_grid_fit": 0.08333333333333333
     },
     "partials": {
       "analysis_window": {
@@ -583,20 +593,20 @@
     "mallet": "",
     "measured_at": "",
     "measured_by": "",
-    "method_version": "504d0b4",
+    "method_version": "68bd384",
     "mic": "",
     "notes": "",
     "room": ""
   },
   "register": {
-    "octave_abs": 0,
-    "within_octave_ratio": 1.5462962962962963
+    "octave_abs": 1,
+    "within_octave_ratio": 1.162037037037037
   },
   "revision_history": [
     {
       "by": "build_dataset.py",
       "change": "initial record creation",
-      "date": "2026-02-10T05:48:40+00:00"
+      "date": "2026-02-09T21:52:34-08:00"
     }
   ],
   "source_filename": "8EDO-014.wav",

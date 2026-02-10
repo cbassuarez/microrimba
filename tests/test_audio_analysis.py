@@ -28,6 +28,15 @@ def test_f0_estimator_close_to_tone() -> None:
     assert 0.0 <= float(np.mean(conf)) <= 1.0
 
 
+def test_f0_estimator_rejects_tiny_lag_failure_mode() -> None:
+    sr = 44100
+    y = synth_tone(freq=200.0, sr=sr)
+    f0_frames, _ = bd._estimate_f0_acf(y, sr)
+    est = float(np.median(f0_frames))
+    assert abs(est - 200.0) < 3.0
+    assert est < 1000.0
+
+
 def test_peak_picker_finds_harmonics() -> None:
     sr = 48000
     y = synth_tone(freq=220.0, sr=sr)
@@ -36,6 +45,38 @@ def test_peak_picker_finds_harmonics() -> None:
     freqs = [p["hz"] for p in summary]
     assert any(abs(f - 220.0) < 10.0 for f in freqs)
     assert any(abs(f - 440.0) < 20.0 for f in freqs)
+
+
+def test_harmonic_grid_prefers_true_fundamental() -> None:
+    sr = 48000
+    y = synth_tone(freq=220.0, sr=sr)
+    _, summary = bd._analyze_partials(y, sr, 220.0)
+
+    fit_true = bd._harmonic_grid_fit_score(summary, 220.0)
+    fit_double = bd._harmonic_grid_fit_score(summary, 440.0)
+    assert fit_true > fit_double
+
+    corrected, _fit, correction, accepted = bd._correct_octave_by_harmonic_fit(220.0, summary)
+    assert not accepted
+    assert correction is None
+    assert abs(corrected - 220.0) < 1e-6
+
+
+def test_harmonic_grid_can_correct_missing_fundamental() -> None:
+    sr = 48000
+    dur = 1.2
+    t = np.arange(int(sr * dur), dtype=np.float32) / sr
+    y = 1.0 * np.sin(2 * np.pi * 440.0 * t)
+    y += 0.7 * np.sin(2 * np.pi * 660.0 * t)
+    y += 0.5 * np.sin(2 * np.pi * 880.0 * t)
+    y = y.astype(np.float32)
+
+    _, summary = bd._analyze_partials(y, sr, 440.0)
+    corrected, fit, correction, accepted = bd._correct_octave_by_harmonic_fit(440.0, summary)
+    assert accepted
+    assert correction is not None
+    assert abs(corrected - 220.0) < 5.0
+    assert fit > 0.45
 
 
 def test_analysis_deterministic() -> None:

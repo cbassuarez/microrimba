@@ -1,105 +1,105 @@
 {
   "bar_id": "edo5-5e8b79eae9d3",
   "edo_interpretation": {
-    "cents_error_from_target": -90.87279139589407,
+    "cents_error_from_target": 0.0,
     "edo": 5,
-    "octave": 3,
-    "step": 5,
-    "target_ratio": 2.0
+    "octave": 0,
+    "step": 0,
+    "target_ratio": 1.0
   },
-  "global_order_index": 35,
+  "global_order_index": 1,
   "instrument_id": "edo5",
   "ji": {
     "ji_candidates": [
       {
-        "cents_error": -20.8584938738837,
-        "complexity_score": 3.9068905956085187,
-        "label": "15/1",
-        "p": 15,
+        "cents_error": 0.0,
+        "complexity_score": 0.0,
+        "label": "1/1",
+        "p": 1,
         "prime_limit": 5,
         "q": 1
       },
       {
-        "cents_error": -20.8584938738837,
-        "complexity_score": 3.9068905956085187,
-        "label": "15/1",
-        "p": 15,
+        "cents_error": 0.0,
+        "complexity_score": 0.0,
+        "label": "1/1",
+        "p": 1,
         "prime_limit": 7,
         "q": 1
       },
       {
-        "cents_error": -20.8584938738837,
-        "complexity_score": 3.9068905956085187,
-        "label": "15/1",
-        "p": 15,
+        "cents_error": 0.0,
+        "complexity_score": 0.0,
+        "label": "1/1",
+        "p": 1,
         "prime_limit": 11,
         "q": 1
       },
       {
-        "cents_error": -20.8584938738837,
-        "complexity_score": 3.9068905956085187,
-        "label": "15/1",
-        "p": 15,
+        "cents_error": 0.0,
+        "complexity_score": 0.0,
+        "label": "1/1",
+        "p": 1,
         "prime_limit": 13,
         "q": 1
       },
       {
-        "cents_error": 0.6477957228311199,
-        "complexity_score": 11.92481250360578,
-        "label": "243/16",
-        "p": 243,
+        "cents_error": 21.50628959671478,
+        "complexity_score": 12.661778097771988,
+        "label": "81/80",
+        "p": 81,
         "prime_limit": 5,
-        "q": 16
+        "q": 80
       },
       {
-        "cents_error": -1.728641231057904,
-        "complexity_score": 9.092757140919852,
-        "label": "91/6",
-        "p": 91,
-        "prime_limit": 13,
-        "q": 6
+        "cents_error": -21.50628959671495,
+        "complexity_score": 12.661778097771988,
+        "label": "80/81",
+        "p": 80,
+        "prime_limit": 5,
+        "q": 81
       },
       {
-        "cents_error": 0.6477957228311199,
-        "complexity_score": 11.92481250360578,
-        "label": "243/16",
-        "p": 243,
+        "cents_error": -13.794766605395264,
+        "complexity_score": 13.943064208162003,
+        "label": "125/126",
+        "p": 125,
         "prime_limit": 7,
-        "q": 16
+        "q": 126
       },
       {
-        "cents_error": -6.491323874592478,
-        "complexity_score": 9.918863237274595,
-        "label": "121/8",
-        "p": 121,
-        "prime_limit": 11,
-        "q": 8
+        "cents_error": 13.794766605395324,
+        "complexity_score": 13.943064208162003,
+        "label": "126/125",
+        "p": 126,
+        "prime_limit": 7,
+        "q": 125
       },
       {
-        "cents_error": -6.491323874592478,
-        "complexity_score": 9.918863237274595,
-        "label": "121/8",
-        "p": 121,
-        "prime_limit": 13,
-        "q": 8
+        "cents_error": 21.50628959671478,
+        "complexity_score": 12.661778097771988,
+        "label": "81/80",
+        "p": 81,
+        "prime_limit": 7,
+        "q": 80
       },
       {
-        "cents_error": 0.6477957228311199,
-        "complexity_score": 11.92481250360578,
-        "label": "243/16",
-        "p": 243,
-        "prime_limit": 11,
-        "q": 16
+        "cents_error": -21.50628959671495,
+        "complexity_score": 12.661778097771988,
+        "label": "80/81",
+        "p": 80,
+        "prime_limit": 7,
+        "q": 81
       }
     ],
     "ji_primary": {
-      "cents_error": -20.8584938738837,
-      "complexity_score": 3.9068905956085187,
-      "label": "15/1",
-      "p": 15,
+      "cents_error": 0.0,
+      "complexity_score": 0.0,
+      "label": "1/1",
+      "p": 1,
       "prime_limit": 5,
       "q": 1,
-      "why": "closest weighted JI fit with 15/1 at -20.858 cents error, complexity 3.907, prime limit 5"
+      "why": "closest weighted JI fit with 1/1 at 0.000 cents error, complexity 0.000, prime limit 5"
     }
   },
   "label_index_mod": null,
@@ -110,21 +110,31 @@
   },
   "measurements": {
     "f0": {
-      "f0_confidence": 0.982540312866049,
+      "f0_confidence": 0.44048491250468264,
       "f0_confidence_notes": "derived from natural filename order",
+      "f0_corrections": null,
       "f0_distribution": {
-        "iqr_hz": 0.0,
-        "max_hz": 4009.090909090909,
-        "median_hz": 4009.090909090909,
-        "min_hz": 4009.090909090909,
+        "iqr_hz": 1830.2371541501975,
+        "max_hz": 2004.5454545454545,
+        "median_hz": 175.69721115537848,
+        "min_hz": 173.6220472440945,
         "n_frames": 83
       },
-      "f0_hz": 4009.090909090909,
+      "f0_hz": 175.69721115537848,
       "f0_method": "acf_median_tracker_v1",
+      "f0_search": {
+        "frame_size": 2028,
+        "lmax": 1103,
+        "lmin": 22,
+        "max_hz": 2000.0,
+        "median_lag": 251,
+        "min_hz": 40.0
+      },
       "f0_window": {
         "end_s": 1.55,
         "start_s": 0.55
-      }
+      },
+      "harmonic_grid_fit": 0.16666666666666666
     },
     "partials": {
       "analysis_window": {
@@ -133,7 +143,7 @@
       },
       "peaks": [
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 1,
           "hz": 173.6114501953125,
           "peak_confidence": 1.0,
           "rel_amp_db": 0.0
@@ -193,7 +203,7 @@
           "rel_amp_db": -30.68018370654954
         },
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 1,
           "hz": 180.340576171875,
           "peak_confidence": 0.529952921548718,
           "rel_amp_db": -32.1265209329698
@@ -253,7 +263,7 @@
           "rel_amp_db": -43.74341759104131
         },
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 3,
           "hz": 520.1614379882812,
           "peak_confidence": 1.0,
           "rel_amp_db": -44.55556891736086
@@ -283,7 +293,7 @@
           "rel_amp_db": -46.31474928752981
         },
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 3,
           "hz": 539.6759033203125,
           "peak_confidence": 0.5271633740743986,
           "rel_amp_db": -46.68138369103218
@@ -313,7 +323,7 @@
           "rel_amp_db": -47.71711902889105
         },
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 3,
           "hz": 511.41357421875,
           "peak_confidence": 0.7861399546114993,
           "rel_amp_db": -48.12184171832959
@@ -325,7 +335,7 @@
           "rel_amp_db": -48.13695978507606
         },
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 2,
           "hz": 356.6436767578125,
           "peak_confidence": 0.8761258241814214,
           "rel_amp_db": -48.96719840016122
@@ -337,7 +347,7 @@
           "rel_amp_db": -49.65814998187196
         },
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 4,
           "hz": 699.8291015625,
           "peak_confidence": 0.7990084889036108,
           "rel_amp_db": -49.96179473618744
@@ -409,13 +419,13 @@
           "rel_amp_db": -52.56405972623944
         },
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 5,
           "hz": 874.1134643554688,
           "peak_confidence": 0.9060679990624153,
           "rel_amp_db": -52.92425415328056
         },
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 9,
           "hz": 1573.9425659179688,
           "peak_confidence": 1.0,
           "rel_amp_db": -53.189180570189926
@@ -457,7 +467,7 @@
           "rel_amp_db": -54.15267441242472
         },
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 5,
           "hz": 861.328125,
           "peak_confidence": 0.7144767110526868,
           "rel_amp_db": -54.3905688987223
@@ -481,13 +491,13 @@
           "rel_amp_db": -55.17681160506598
         },
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 4,
           "hz": 715.3060913085938,
           "peak_confidence": 0.6627408870310307,
           "rel_amp_db": -55.506697170040646
         },
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 12,
           "hz": 2050.3646850585938,
           "peak_confidence": 1.0,
           "rel_amp_db": -55.88384202594691
@@ -495,7 +505,7 @@
       ],
       "summary_peaks": [
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 1,
           "hz": 173.6114501953125,
           "peak_confidence": 1.0,
           "rel_amp_db": 0.0
@@ -555,7 +565,7 @@
           "rel_amp_db": -30.68018370654954
         },
         {
-          "harmonic_index_guess": null,
+          "harmonic_index_guess": 1,
           "hz": 180.340576171875,
           "peak_confidence": 0.529952921548718,
           "rel_amp_db": -32.1265209329698
@@ -583,20 +593,20 @@
     "mallet": "",
     "measured_at": "",
     "measured_by": "",
-    "method_version": "504d0b4",
+    "method_version": "68bd384",
     "mic": "",
     "notes": "",
     "room": ""
   },
   "register": {
-    "octave_abs": 3,
-    "within_octave_ratio": 1.8977272727272727
+    "octave_abs": 0,
+    "within_octave_ratio": 1.0
   },
   "revision_history": [
     {
       "by": "build_dataset.py",
       "change": "initial record creation",
-      "date": "2026-02-10T05:48:40+00:00"
+      "date": "2026-02-09T21:52:34-08:00"
     }
   ],
   "source_filename": "5EDO-003.wav",
