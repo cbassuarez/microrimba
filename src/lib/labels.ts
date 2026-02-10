@@ -3,7 +3,7 @@ export function prettyInstrumentLabel(
   instrumentId: string,
   edo?: number | 'harmonic',
 ) {
-  if (scaleId === 'harmonic') return 'C Harmonic Marimba';
+  if (scaleId === 'harmonic') return 'C Overtone Marimba';
   if (typeof edo === 'number') return `${edo}-EDO Marimba`;
 
   const m = scaleId.match(/^(\d+)edo$/);

@@ -100,7 +100,7 @@ export function AboutPage() {
           The instruments are curated bar sets recorded as playable references. Each set corresponds to a tuning framework, so you can compare how melodic and harmonic behavior changes while keeping a similar timbral palette.
         </p>
         <p className="mt-3 font-mono text-sm text-slate-700 dark:text-slate-200">
-          Instrument construction: Ron Samuels (pending verification; see LAPR for full details).
+          Instrument construction: Chris Banta
         </p>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">If you have the authoritative build notes, send a PR / contact.</p>
       </motion.section>
@@ -132,7 +132,7 @@ export function AboutPage() {
             <p>Recording & performance: Tim Feeney</p>
             <p>Analysis, code, data & web: Seb Suarez</p>
             <p>Class: Matthew H., Jake L., Paul Y.</p>
-            <p>Instrument construction: Ron Samuels (pending verification; see LAPR for full details)</p>
+            <p>Instrument construction: Chris Banta</p>
           </div>
         </article>
         <article className="glass-panel glass-rim p-6">

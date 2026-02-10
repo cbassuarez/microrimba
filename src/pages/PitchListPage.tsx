@@ -150,7 +150,7 @@ export function PitchListPage() {
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.24em] text-slate-600 dark:text-slate-300">VIEWER</p>
             <h1 className="mt-1 text-4xl font-semibold md:text-5xl">Microtonal Marimba Instruments</h1>
-            <p className="mt-3 max-w-2xl text-base text-slate-700 dark:text-slate-200">CalArts recently got some microtonal marimbas, and we measured and recorded the bars as a pitch set. View all pitches in a table, hear a whole-set gliss, or listen to the harmonic marimba glissando (ooh, ahh).</p>
+            <p className="mt-3 max-w-2xl text-base text-slate-700 dark:text-slate-200">CalArts recently got some microtonal marimbas, and we measured and recorded the bars as a pitch set. View all pitches in a table, hear a whole-set gliss, or listen to the overtone marimba glissando (ooh, ahh).</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button className="rounded-full border border-rim bg-white/60 px-4 py-2 text-sm shadow-sm dark:bg-black/20" onClick={() => void playSequenceByBarIds(uniqueVisible.map((row) => row.rep.barId), { intervalMs: 55, overlapMs: 0, mode: 'constant', gain: 0.9 })}> <Play className="mr-1 inline h-4 w-4" /> Play All </button>

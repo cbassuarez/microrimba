@@ -1,6 +1,6 @@
 # microrimba
 
-Archival of a set of 5 microtonal and harmonic marimbas that were given to CalArts this year.
+Archival of a set of 5 microtonal and overtone Marimbas that were given to CalArts this year.
 
 ## How to regenerate data
 
