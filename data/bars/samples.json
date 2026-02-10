@@ -1,0 +1,660 @@
+[
+  {
+    "bar_id": "5EDO-001",
+    "audio_path": "audio/5edo/5EDO-001.wav",
+    "duration_seconds": 1.428141,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "5EDO-002",
+    "audio_path": "audio/5edo/5EDO-002.wav",
+    "duration_seconds": 1.423968,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "5EDO-003",
+    "audio_path": "audio/5edo/5EDO-003.wav",
+    "duration_seconds": 1.59322,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "5EDO-004",
+    "audio_path": "audio/5edo/5EDO-004.wav",
+    "duration_seconds": 1.710431,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "5EDO-005",
+    "audio_path": "audio/5edo/5EDO-005.wav",
+    "duration_seconds": 1.845329,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "5EDO-006",
+    "audio_path": "audio/5edo/5EDO-006.wav",
+    "duration_seconds": 1.266168,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "5EDO-007",
+    "audio_path": "audio/5edo/5EDO-007.wav",
+    "duration_seconds": 1.465692,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "5EDO-008",
+    "audio_path": "audio/5edo/5EDO-008.wav",
+    "duration_seconds": 1.461451,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "5EDO-009",
+    "audio_path": "audio/5edo/5EDO-009.wav",
+    "duration_seconds": 1.442721,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "5EDO-010",
+    "audio_path": "audio/5edo/5EDO-010.wav",
+    "duration_seconds": 1.08585,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "5EDO-011",
+    "audio_path": "audio/5edo/5EDO-011.wav",
+    "duration_seconds": 1.546077,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-001",
+    "audio_path": "audio/7edo/7EDO-001.wav",
+    "duration_seconds": 1.302608,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-002",
+    "audio_path": "audio/7edo/7EDO-002.wav",
+    "duration_seconds": 1.401995,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-003",
+    "audio_path": "audio/7edo/7EDO-003.wav",
+    "duration_seconds": 1.677619,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-004",
+    "audio_path": "audio/7edo/7EDO-004.wav",
+    "duration_seconds": 2.234898,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-005",
+    "audio_path": "audio/7edo/7EDO-005.wav",
+    "duration_seconds": 2.009388,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-006",
+    "audio_path": "audio/7edo/7EDO-006.wav",
+    "duration_seconds": 2.07551,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-007",
+    "audio_path": "audio/7edo/7EDO-007.wav",
+    "duration_seconds": 2.060952,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-008",
+    "audio_path": "audio/7edo/7EDO-008.wav",
+    "duration_seconds": 1.903129,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-009",
+    "audio_path": "audio/7edo/7EDO-009.wav",
+    "duration_seconds": 1.993243,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-010",
+    "audio_path": "audio/7edo/7EDO-010.wav",
+    "duration_seconds": 1.813039,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-011",
+    "audio_path": "audio/7edo/7EDO-011.wav",
+    "duration_seconds": 1.88322,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-012",
+    "audio_path": "audio/7edo/7EDO-012.wav",
+    "duration_seconds": 2.073447,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-013",
+    "audio_path": "audio/7edo/7EDO-013.wav",
+    "duration_seconds": 1.969274,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-014",
+    "audio_path": "audio/7edo/7EDO-014.wav",
+    "duration_seconds": 1.996372,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "7EDO-015",
+    "audio_path": "audio/7edo/7EDO-015.wav",
+    "duration_seconds": 2.765556,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-001",
+    "audio_path": "audio/8edo/8EDO-001.wav",
+    "duration_seconds": 1.176961,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-002",
+    "audio_path": "audio/8edo/8EDO-002.wav",
+    "duration_seconds": 1.183741,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-003",
+    "audio_path": "audio/8edo/8EDO-003.wav",
+    "duration_seconds": 1.32229,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-004",
+    "audio_path": "audio/8edo/8EDO-004.wav",
+    "duration_seconds": 1.343651,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-005",
+    "audio_path": "audio/8edo/8EDO-005.wav",
+    "duration_seconds": 1.471247,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-006",
+    "audio_path": "audio/8edo/8EDO-006.wav",
+    "duration_seconds": 1.47907,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-007",
+    "audio_path": "audio/8edo/8EDO-007.wav",
+    "duration_seconds": 1.266553,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-008",
+    "audio_path": "audio/8edo/8EDO-008.wav",
+    "duration_seconds": 1.390499,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-009",
+    "audio_path": "audio/8edo/8EDO-009.wav",
+    "duration_seconds": 1.372812,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-010",
+    "audio_path": "audio/8edo/8EDO-010.wav",
+    "duration_seconds": 1.29,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-011",
+    "audio_path": "audio/8edo/8EDO-011.wav",
+    "duration_seconds": 1.263968,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-012",
+    "audio_path": "audio/8edo/8EDO-012.wav",
+    "duration_seconds": 1.153016,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-013",
+    "audio_path": "audio/8edo/8EDO-013.wav",
+    "duration_seconds": 1.145737,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-014",
+    "audio_path": "audio/8edo/8EDO-014.wav",
+    "duration_seconds": 1.163968,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-015",
+    "audio_path": "audio/8edo/8EDO-015.wav",
+    "duration_seconds": 1.179592,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-016",
+    "audio_path": "audio/8edo/8EDO-016.wav",
+    "duration_seconds": 1.042086,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "8EDO-017",
+    "audio_path": "audio/8edo/8EDO-017.wav",
+    "duration_seconds": 1.077506,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-001",
+    "audio_path": "audio/9edo/9EDO-001.wav",
+    "duration_seconds": 1.51034,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-002",
+    "audio_path": "audio/9edo/9EDO-002.wav",
+    "duration_seconds": 1.333265,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-003",
+    "audio_path": "audio/9edo/9EDO-003.wav",
+    "duration_seconds": 1.359864,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-004",
+    "audio_path": "audio/9edo/9EDO-004.wav",
+    "duration_seconds": 1.245873,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-005",
+    "audio_path": "audio/9edo/9EDO-005.wav",
+    "duration_seconds": 1.726054,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-006",
+    "audio_path": "audio/9edo/9EDO-006.wav",
+    "duration_seconds": 1.60263,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-007",
+    "audio_path": "audio/9edo/9EDO-007.wav",
+    "duration_seconds": 1.841066,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-008",
+    "audio_path": "audio/9edo/9EDO-008.wav",
+    "duration_seconds": 1.442109,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-009",
+    "audio_path": "audio/9edo/9EDO-009.wav",
+    "duration_seconds": 1.370884,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-010",
+    "audio_path": "audio/9edo/9EDO-010.wav",
+    "duration_seconds": 1.548866,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-011",
+    "audio_path": "audio/9edo/9EDO-011.wav",
+    "duration_seconds": 1.606825,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-012",
+    "audio_path": "audio/9edo/9EDO-012.wav",
+    "duration_seconds": 1.577664,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-013",
+    "audio_path": "audio/9edo/9EDO-013.wav",
+    "duration_seconds": 1.301497,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-014",
+    "audio_path": "audio/9edo/9EDO-014.wav",
+    "duration_seconds": 1.256145,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-015",
+    "audio_path": "audio/9edo/9EDO-015.wav",
+    "duration_seconds": 1.353084,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-016",
+    "audio_path": "audio/9edo/9EDO-016.wav",
+    "duration_seconds": 1.419841,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-017",
+    "audio_path": "audio/9edo/9EDO-017.wav",
+    "duration_seconds": 1.197891,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-018",
+    "audio_path": "audio/9edo/9EDO-018.wav",
+    "duration_seconds": 1.151519,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "9EDO-019",
+    "audio_path": "audio/9edo/9EDO-019.wav",
+    "duration_seconds": 1.275986,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-001",
+    "audio_path": "audio/harmonic/harmonic-001.wav",
+    "duration_seconds": 1.325102,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-002",
+    "audio_path": "audio/harmonic/harmonic-002.wav",
+    "duration_seconds": 1.187098,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-003",
+    "audio_path": "audio/harmonic/harmonic-003.wav",
+    "duration_seconds": 1.577188,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-004",
+    "audio_path": "audio/harmonic/harmonic-004.wav",
+    "duration_seconds": 1.130839,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-005",
+    "audio_path": "audio/harmonic/harmonic-005.wav",
+    "duration_seconds": 1.346961,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-006",
+    "audio_path": "audio/harmonic/harmonic-006.wav",
+    "duration_seconds": 1.304286,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-007",
+    "audio_path": "audio/harmonic/harmonic-007.wav",
+    "duration_seconds": 1.337574,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-008",
+    "audio_path": "audio/harmonic/harmonic-008.wav",
+    "duration_seconds": 1.141247,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-009",
+    "audio_path": "audio/harmonic/harmonic-009.wav",
+    "duration_seconds": 1.157415,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-010",
+    "audio_path": "audio/harmonic/harmonic-010.wav",
+    "duration_seconds": 1.126621,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-011",
+    "audio_path": "audio/harmonic/harmonic-011.wav",
+    "duration_seconds": 1.0522,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-012",
+    "audio_path": "audio/harmonic/harmonic-012.wav",
+    "duration_seconds": 1.04229,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-013",
+    "audio_path": "audio/harmonic/harmonic-013.wav",
+    "duration_seconds": 1.070952,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-014",
+    "audio_path": "audio/harmonic/harmonic-014.wav",
+    "duration_seconds": 1.042268,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-015",
+    "audio_path": "audio/harmonic/harmonic-015.wav",
+    "duration_seconds": 1.066259,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-016",
+    "audio_path": "audio/harmonic/harmonic-016.wav",
+    "duration_seconds": 0.96678,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-017",
+    "audio_path": "audio/harmonic/harmonic-017.wav",
+    "duration_seconds": 1.005329,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-018",
+    "audio_path": "audio/harmonic/harmonic-018.wav",
+    "duration_seconds": 0.996984,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-019",
+    "audio_path": "audio/harmonic/harmonic-019.wav",
+    "duration_seconds": 1.074059,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-020",
+    "audio_path": "audio/harmonic/harmonic-020.wav",
+    "duration_seconds": 0.950635,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-021",
+    "audio_path": "audio/harmonic/harmonic-021.wav",
+    "duration_seconds": 0.936576,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-022",
+    "audio_path": "audio/harmonic/harmonic-022.wav",
+    "duration_seconds": 0.960522,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-023",
+    "audio_path": "audio/harmonic/harmonic-023.wav",
+    "duration_seconds": 0.970952,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-024",
+    "audio_path": "audio/harmonic/harmonic-024.wav",
+    "duration_seconds": 0.880839,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-025",
+    "audio_path": "audio/harmonic/harmonic-025.wav",
+    "duration_seconds": 0.946463,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-026",
+    "audio_path": "audio/harmonic/harmonic-026.wav",
+    "duration_seconds": 0.936576,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-027",
+    "audio_path": "audio/harmonic/harmonic-027.wav",
+    "duration_seconds": 0.988662,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-028",
+    "audio_path": "audio/harmonic/harmonic-028.wav",
+    "duration_seconds": 0.894875,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-029",
+    "audio_path": "audio/harmonic/harmonic-029.wav",
+    "duration_seconds": 0.908413,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-030",
+    "audio_path": "audio/harmonic/harmonic-030.wav",
+    "duration_seconds": 0.925624,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-031",
+    "audio_path": "audio/harmonic/harmonic-031.wav",
+    "duration_seconds": 0.916259,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  {
+    "bar_id": "harmonic-032",
+    "audio_path": "audio/harmonic/harmonic-032.wav",
+    "duration_seconds": 0.887052,
+    "sample_rate_hz": 44100,
+    "channels": 2
+  }
+]

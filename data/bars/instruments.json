@@ -1,0 +1,22 @@
+[
+  {
+    "instrument_id": "5EDO",
+    "label": "5EDO"
+  },
+  {
+    "instrument_id": "8limit",
+    "label": "8limit"
+  },
+  {
+    "instrument_id": "9EDO_MICRORIMBA",
+    "label": "9EDO_MICRORIMBA"
+  },
+  {
+    "instrument_id": "harmonic",
+    "label": "harmonic"
+  },
+  {
+    "instrument_id": "MICRORIMBA_7LIMIT_7EDO",
+    "label": "MICRORIMBA_7LIMIT_7EDO"
+  }
+]
