@@ -1,0 +1,598 @@
+{
+  "bar_id": "harmonic-a3505bce6b42",
+  "edo_interpretation": null,
+  "global_order_index": 10,
+  "instrument_id": "harmonic",
+  "ji": {
+    "ji_candidates": [
+      {
+        "cents_error": 5.175591445299013,
+        "complexity_score": 3.321928094887362,
+        "label": "5/2",
+        "p": 5,
+        "prime_limit": 5,
+        "q": 2
+      },
+      {
+        "cents_error": 5.175591445299013,
+        "complexity_score": 3.321928094887362,
+        "label": "5/2",
+        "p": 5,
+        "prime_limit": 7,
+        "q": 2
+      },
+      {
+        "cents_error": 5.175591445299013,
+        "complexity_score": 3.321928094887362,
+        "label": "5/2",
+        "p": 5,
+        "prime_limit": 11,
+        "q": 2
+      },
+      {
+        "cents_error": 5.175591445299013,
+        "complexity_score": 3.321928094887362,
+        "label": "5/2",
+        "p": 5,
+        "prime_limit": 13,
+        "q": 2
+      },
+      {
+        "cents_error": -2.5359315460207332,
+        "complexity_score": 12.29920801838728,
+        "label": "112/45",
+        "p": 112,
+        "prime_limit": 7,
+        "q": 45
+      },
+      {
+        "cents_error": 18.970358050694195,
+        "complexity_score": 10.621136113274641,
+        "label": "63/25",
+        "p": 63,
+        "prime_limit": 7,
+        "q": 25
+      },
+      {
+        "cents_error": -26.59106218813031,
+        "complexity_score": 8.214319120800766,
+        "label": "27/11",
+        "p": 27,
+        "prime_limit": 11,
+        "q": 11
+      },
+      {
+        "cents_error": -11.391367984737752,
+        "complexity_score": 10.092757140919852,
+        "label": "52/21",
+        "p": 52,
+        "prime_limit": 13,
+        "q": 21
+      },
+      {
+        "cents_error": -2.5359315460207332,
+        "complexity_score": 12.29920801838728,
+        "label": "112/45",
+        "p": 112,
+        "prime_limit": 11,
+        "q": 45
+      },
+      {
+        "cents_error": -21.66578418884641,
+        "complexity_score": 8.700439718141093,
+        "label": "32/13",
+        "p": 32,
+        "prime_limit": 13,
+        "q": 13
+      }
+    ],
+    "ji_primary": {
+      "cents_error": 5.175591445299013,
+      "complexity_score": 3.321928094887362,
+      "label": "5/2",
+      "p": 5,
+      "prime_limit": 5,
+      "q": 2,
+      "why": "closest weighted JI fit with 5/2 at 5.176 cents error, complexity 3.322, prime limit 5"
+    }
+  },
+  "label_index_mod": null,
+  "license": {
+    "audio": "TBD",
+    "metadata": "TBD",
+    "spectrogram": "TBD"
+  },
+  "measurements": {
+    "f0": {
+      "f0_confidence": 0.45732273788596123,
+      "f0_confidence_notes": "short audio; analysis window reduced; derived from natural filename order",
+      "f0_distribution": {
+        "iqr_hz": 3350.8819538670286,
+        "max_hz": 4009.090909090909,
+        "median_hz": 658.2089552238806,
+        "min_hz": 648.5294117647059,
+        "n_frames": 77
+      },
+      "f0_hz": 658.2089552238806,
+      "f0_method": "acf_median_tracker_v1",
+      "f0_window": {
+        "end_s": 1.1266213151927438,
+        "start_s": 0.2
+      }
+    },
+    "partials": {
+      "analysis_window": {
+        "end_s": 1.1266213151927438,
+        "start_s": 0.2
+      },
+      "peaks": [
+        {
+          "harmonic_index_guess": 1,
+          "hz": 656.0897827148438,
+          "peak_confidence": 1.0,
+          "rel_amp_db": 0.0
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 58.54339599609375,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -9.718111834852039
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 35.66436767578125,
+          "peak_confidence": 0.758106430544515,
+          "rel_amp_db": -12.108536081173416
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 119.7784423828125,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -13.559836521704515
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 105.64727783203125,
+          "peak_confidence": 0.6670190116641652,
+          "rel_amp_db": -16.166776207758296
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 82.0953369140625,
+          "peak_confidence": 0.7270555615603815,
+          "rel_amp_db": -18.337280535705453
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 90.84320068359375,
+          "peak_confidence": 0.7114240607174777,
+          "rel_amp_db": -18.551424704485946
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 96.8994140625,
+          "peak_confidence": 0.5878758529092156,
+          "rel_amp_db": -21.05198817626453
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 131.21795654296875,
+          "peak_confidence": 0.8742059949699895,
+          "rel_amp_db": -21.857205200425174
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 635.2294921875,
+          "peak_confidence": 0.6070140758463693,
+          "rel_amp_db": -22.970042997140688
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 199.18212890625,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -23.15680410265486
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 629.84619140625,
+          "peak_confidence": 0.5710957258369744,
+          "rel_amp_db": -24.32440213932587
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 168.2281494140625,
+          "peak_confidence": 0.9267497103012736,
+          "rel_amp_db": -27.486508451910886
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 289.3524169921875,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -27.70870244142328
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 681.6604614257812,
+          "peak_confidence": 0.5518279021424165,
+          "rel_amp_db": -28.58210104742686
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 158.13446044921875,
+          "peak_confidence": 0.7958283072120035,
+          "rel_amp_db": -29.20098763968816
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 149.3865966796875,
+          "peak_confidence": 0.6126102488796055,
+          "rel_amp_db": -29.386827415768394
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 257.72552490234375,
+          "peak_confidence": 0.9135642993587542,
+          "rel_amp_db": -31.408558284248137
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 137.274169921875,
+          "peak_confidence": 0.5001298399727205,
+          "rel_amp_db": -31.46948422143973
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 525.5447387695312,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -31.79325836003939
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 544.3862915039062,
+          "peak_confidence": 0.9133926695834876,
+          "rel_amp_db": -32.20474642566053
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 216.6778564453125,
+          "peak_confidence": 0.6743790164715139,
+          "rel_amp_db": -32.759991604163346
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 699.1561889648438,
+          "peak_confidence": 0.8411914157537942,
+          "rel_amp_db": -33.5669315333075
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 592.1630859375,
+          "peak_confidence": 0.7911274408963666,
+          "rel_amp_db": -33.66455735682953
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 314.923095703125,
+          "peak_confidence": 0.5149209401619445,
+          "rel_amp_db": -34.41911347848708
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 267.8192138671875,
+          "peak_confidence": 0.5100625752254957,
+          "rel_amp_db": -34.49258008620485
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 345.8770751953125,
+          "peak_confidence": 0.7984405154515112,
+          "rel_amp_db": -34.50986707611551
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 243.5943603515625,
+          "peak_confidence": 0.5292555351420988,
+          "rel_amp_db": -34.56479180847405
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 579.3777465820312,
+          "peak_confidence": 0.7153728761817495,
+          "rel_amp_db": -35.171223593096954
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 374.139404296875,
+          "peak_confidence": 0.5988387340810583,
+          "rel_amp_db": -35.60630433761317
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 409.80377197265625,
+          "peak_confidence": 0.9617539993265791,
+          "rel_amp_db": -36.44645980328633
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 397.0184326171875,
+          "peak_confidence": 0.6910067677358894,
+          "rel_amp_db": -36.571184777259774
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 476.422119140625,
+          "peak_confidence": 0.7712303766704801,
+          "rel_amp_db": -36.632291807827514
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 440.0848388671875,
+          "peak_confidence": 0.6960622218388048,
+          "rel_amp_db": -36.642264543225906
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 450.8514404296875,
+          "peak_confidence": 0.5535464256066519,
+          "rel_amp_db": -36.70835211164516
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 386.2518310546875,
+          "peak_confidence": 0.6738524899135332,
+          "rel_amp_db": -37.05066170847779
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 492.572021484375,
+          "peak_confidence": 0.6214974187860113,
+          "rel_amp_db": -37.1565004715078
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 557.8445434570312,
+          "peak_confidence": 0.5933723716163385,
+          "rel_amp_db": -37.28695120215042
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 715.3060913085938,
+          "peak_confidence": 0.6474541041342053,
+          "rel_amp_db": -37.60160895953824
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 420.57037353515625,
+          "peak_confidence": 0.5223444339879427,
+          "rel_amp_db": -37.651929154319504
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 785.9619140625,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -40.021606640949805
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 1754.2831420898438,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -40.43021772217567
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 808.8409423828125,
+          "peak_confidence": 0.9548345048652707,
+          "rel_amp_db": -40.514870515640396
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 585.4339599609375,
+          "peak_confidence": 0.5060685329958537,
+          "rel_amp_db": -40.5763633861821
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 1758.9935302734375,
+          "peak_confidence": 0.634475729648677,
+          "rel_amp_db": -40.750227795223495
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 1158.0825805664062,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -42.61786204529743
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 774.5223999023438,
+          "peak_confidence": 0.8498471384177562,
+          "rel_amp_db": -42.630201507616604
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 933.3297729492188,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -42.70307869726943
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 816.2429809570312,
+          "peak_confidence": 0.5163805169270532,
+          "rel_amp_db": -43.12110354835451
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 841.1407470703125,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -43.350003831442706
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 1131.8389892578125,
+          "peak_confidence": 0.9229857750743782,
+          "rel_amp_db": -43.75939921048723
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 1771.10595703125,
+          "peak_confidence": 0.5547552216540061,
+          "rel_amp_db": -43.89569117972718
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 997.2564697265625,
+          "peak_confidence": 0.7067395704122055,
+          "rel_amp_db": -44.00681970572344
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 1138.568115234375,
+          "peak_confidence": 0.6170215445013373,
+          "rel_amp_db": -44.070156570764695
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 973.7045288085938,
+          "peak_confidence": 0.5239985092008985,
+          "rel_amp_db": -44.577937397721534
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 1104.2495727539062,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -44.6138038012667
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 1617.0089721679688,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -45.06771145650319
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 1114.34326171875,
+          "peak_confidence": 0.812788725586382,
+          "rel_amp_db": -45.077884622492476
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 1084.735107421875,
+          "peak_confidence": 0.6946112797688305,
+          "rel_amp_db": -45.161659183562946
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 1026.1917114257812,
+          "peak_confidence": 0.7377280699093773,
+          "rel_amp_db": -45.215376949249205
+        }
+      ],
+      "summary_peaks": [
+        {
+          "harmonic_index_guess": 1,
+          "hz": 656.0897827148438,
+          "peak_confidence": 1.0,
+          "rel_amp_db": 0.0
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 58.54339599609375,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -9.718111834852039
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 35.66436767578125,
+          "peak_confidence": 0.758106430544515,
+          "rel_amp_db": -12.108536081173416
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 119.7784423828125,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -13.559836521704515
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 105.64727783203125,
+          "peak_confidence": 0.6670190116641652,
+          "rel_amp_db": -16.166776207758296
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 82.0953369140625,
+          "peak_confidence": 0.7270555615603815,
+          "rel_amp_db": -18.337280535705453
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 90.84320068359375,
+          "peak_confidence": 0.7114240607174777,
+          "rel_amp_db": -18.551424704485946
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 96.8994140625,
+          "peak_confidence": 0.5878758529092156,
+          "rel_amp_db": -21.05198817626453
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 131.21795654296875,
+          "peak_confidence": 0.8742059949699895,
+          "rel_amp_db": -21.857205200425174
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 635.2294921875,
+          "peak_confidence": 0.6070140758463693,
+          "rel_amp_db": -22.970042997140688
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 199.18212890625,
+          "peak_confidence": 1.0,
+          "rel_amp_db": -23.15680410265486
+        },
+        {
+          "harmonic_index_guess": null,
+          "hz": 629.84619140625,
+          "peak_confidence": 0.5710957258369744,
+          "rel_amp_db": -24.32440213932587
+        }
+      ]
+    },
+    "sample_rate_hz": 44100
+  },
+  "media": {
+    "audio_path": "audio/harmonic/harmonic-010.wav",
+    "checksums": {
+      "audio_sha256": "f9242a48a8f7e8aa99fe7381b84c18c23d672b5342ef86a1ac61225fc2d2b6ed"
+    },
+    "spectrogram_path": null,
+    "youtube_url": null
+  },
+  "position_index": 10,
+  "provenance": {
+    "mallet": "",
+    "measured_at": "",
+    "measured_by": "",
+    "method_version": "504d0b4",
+    "mic": "",
+    "notes": "",
+    "room": ""
+  },
+  "register": {
+    "octave_abs": 1,
+    "within_octave_ratio": 1.246268656716418
+  },
+  "revision_history": [
+    {
+      "by": "build_dataset.py",
+      "change": "initial record creation",
+      "date": "2026-02-10T05:48:40+00:00"
+    }
+  ],
+  "source_filename": "harmonic-010.wav",
+  "source_path": "audio/harmonic/harmonic-010.wav"
+}
