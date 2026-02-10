@@ -1,5 +1,4 @@
 import { barsSchema, instrumentsSchema, samplesSchema, scalesSchema, type Bar, type Instrument, type Sample, type Scale } from './models';
-import { assetUrl } from './lib/assetUrl';
 
 type DataBundle = {
   bars: Bar[];
@@ -18,10 +17,10 @@ async function fetchJson<T>(url: string): Promise<T> {
 
 export async function loadData(): Promise<DataBundle> {
   const [barsRaw, scalesRaw, instrumentsRaw, samplesRaw] = await Promise.all([
-    fetchJson<unknown[]>(assetUrl('data/bars/bars.json')),
-    fetchJson<unknown[]>(assetUrl('data/bars/scales.json')),
-    fetchJson<unknown[]>(assetUrl('data/bars/instruments.json')),
-    fetchJson<unknown[]>(assetUrl('data/bars/samples.json')),
+    fetchJson<unknown[]>(`${import.meta.env.BASE_URL}data/bars.json`),
+    fetchJson<unknown[]>(`${import.meta.env.BASE_URL}data/scales.json`),
+    fetchJson<unknown[]>(`${import.meta.env.BASE_URL}data/instruments.json`),
+    fetchJson<unknown[]>(`${import.meta.env.BASE_URL}data/pitch_index.json`),
   ]);
 
   return {

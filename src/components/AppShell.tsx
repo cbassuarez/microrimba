@@ -7,7 +7,7 @@ export function AppShell() {
   return (
     <div className="min-h-screen text-text">
       <main className="mx-auto max-w-[1320px] px-4 py-5 pb-32 md:px-8">
-        <div className="mb-6 flex items-center justify-between rounded-3xl border border-rim bg-surface/60 px-4 py-3 shadow-glass backdrop-blur-xl">
+        <div className="sticky top-0 z-30 mb-6 flex items-center justify-between rounded-3xl border border-black/10 border-b bg-white/60 px-4 py-3 shadow-glass backdrop-blur-md dark:border-white/10 dark:bg-black/30">
           <Link to="/" className="font-mono text-sm tracking-wide">microrimba</Link>
           <nav className="flex items-center gap-2">
             <NavLink className={navClass} to="/">Home</NavLink>

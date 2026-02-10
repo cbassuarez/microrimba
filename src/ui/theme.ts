@@ -1,10 +1,11 @@
 export type ThemeMode = 'light' | 'dark';
-const key = 'microrimba-theme';
+const key = 'theme';
 
 export const initTheme = () => {
-  const val = (localStorage.getItem(key) as ThemeMode | null) ?? 'light';
-  document.documentElement.classList.toggle('dark', val === 'dark');
-  return val;
+  const stored = localStorage.getItem(key);
+  const initial: ThemeMode = stored === 'dark' ? 'dark' : 'light';
+  document.documentElement.classList.toggle('dark', initial === 'dark');
+  return initial;
 };
 
 export const setTheme = (mode: ThemeMode) => {

@@ -19,6 +19,54 @@
     "stepsTotal": 11
   },
   {
+    "scaleId": "7edo",
+    "title": "7-EDO",
+    "edo": 7,
+    "bars": [
+      "7EDO-001",
+      "7EDO-002",
+      "7EDO-003",
+      "7EDO-004",
+      "7EDO-005",
+      "7EDO-006",
+      "7EDO-007",
+      "7EDO-008",
+      "7EDO-009",
+      "7EDO-010",
+      "7EDO-011",
+      "7EDO-012",
+      "7EDO-013",
+      "7EDO-014",
+      "7EDO-015"
+    ],
+    "stepsTotal": 15
+  },
+  {
+    "scaleId": "8edo",
+    "title": "8-EDO",
+    "edo": 8,
+    "bars": [
+      "8EDO-001",
+      "8EDO-002",
+      "8EDO-003",
+      "8EDO-004",
+      "8EDO-005",
+      "8EDO-006",
+      "8EDO-007",
+      "8EDO-008",
+      "8EDO-009",
+      "8EDO-010",
+      "8EDO-011",
+      "8EDO-012",
+      "8EDO-013",
+      "8EDO-014",
+      "8EDO-015",
+      "8EDO-016",
+      "8EDO-017"
+    ],
+    "stepsTotal": 17
+  },
+  {
     "scaleId": "9edo",
     "title": "9-EDO",
     "edo": 9,
