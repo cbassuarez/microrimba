@@ -1,99 +1,99 @@
 {
   "bar_id": "harmonic-02a46f067dff",
   "edo_interpretation": null,
-  "global_order_index": 6,
+  "global_order_index": 18,
   "instrument_id": "harmonic",
   "ji": {
     "ji_candidates": [
       {
-        "cents_error": -7.79251450260044,
-        "complexity_score": 4.807354922057604,
-        "label": "7/4",
-        "p": 7,
+        "cents_error": 16.019464390823206,
+        "complexity_score": 4.584962500721156,
+        "label": "8/3",
+        "p": 8,
+        "prime_limit": 5,
+        "q": 3
+      },
+      {
+        "cents_error": 16.019464390823206,
+        "complexity_score": 4.584962500721156,
+        "label": "8/3",
+        "p": 8,
         "prime_limit": 7,
-        "q": 4
+        "q": 3
       },
       {
-        "cents_error": -7.79251450260044,
-        "complexity_score": 4.807354922057604,
-        "label": "7/4",
-        "p": 7,
+        "cents_error": 16.019464390823206,
+        "complexity_score": 4.584962500721156,
+        "label": "8/3",
+        "p": 8,
         "prime_limit": 11,
-        "q": 4
+        "q": 3
       },
       {
-        "cents_error": -7.79251450260044,
-        "complexity_score": 4.807354922057604,
-        "label": "7/4",
-        "p": 7,
+        "cents_error": 16.019464390823206,
+        "complexity_score": 4.584962500721156,
+        "label": "8/3",
+        "p": 8,
         "prime_limit": 13,
-        "q": 4
+        "q": 3
       },
       {
-        "cents_error": 19.471577297499657,
-        "complexity_score": 7.169925001442312,
-        "label": "16/9",
-        "p": 16,
-        "prime_limit": 5,
-        "q": 9
-      },
-      {
-        "cents_error": 19.471577297499657,
-        "complexity_score": 7.169925001442312,
-        "label": "16/9",
-        "p": 16,
+        "cents_error": -11.244627409276815,
+        "complexity_score": 7.392317422778761,
+        "label": "21/8",
+        "p": 21,
         "prime_limit": 7,
-        "q": 9
+        "q": 8
       },
       {
-        "cents_error": 40.9778668942147,
-        "complexity_score": 5.491853096329675,
-        "label": "9/5",
-        "p": 9,
-        "prime_limit": 5,
-        "q": 5
-      },
-      {
-        "cents_error": 19.471577297499657,
-        "complexity_score": 7.169925001442312,
-        "label": "16/9",
-        "p": 16,
+        "cents_error": -11.244627409276815,
+        "complexity_score": 7.392317422778761,
+        "label": "21/8",
+        "p": 21,
         "prime_limit": 11,
-        "q": 9
+        "q": 8
       },
       {
-        "cents_error": 2.072093663361868,
-        "complexity_score": 10.103287808412022,
-        "label": "44/25",
-        "p": 44,
+        "cents_error": -11.244627409276815,
+        "complexity_score": 7.392317422778761,
+        "label": "21/8",
+        "p": 21,
+        "prime_limit": 13,
+        "q": 8
+      },
+      {
+        "cents_error": -1.3800192433145262,
+        "complexity_score": 10.688250309133178,
+        "label": "66/25",
+        "p": 66,
         "prime_limit": 11,
         "q": 25
       },
       {
-        "cents_error": 40.9778668942147,
-        "complexity_score": 5.491853096329675,
-        "label": "9/5",
-        "p": 9,
-        "prime_limit": 7,
+        "cents_error": -27.811586839313378,
+        "complexity_score": 6.022367813028454,
+        "label": "13/5",
+        "p": 13,
+        "prime_limit": 13,
         "q": 5
       },
       {
-        "cents_error": 19.471577297499657,
-        "complexity_score": 7.169925001442312,
-        "label": "16/9",
-        "p": 16,
+        "cents_error": -1.3800192433145262,
+        "complexity_score": 10.688250309133178,
+        "label": "66/25",
+        "p": 66,
         "prime_limit": 13,
-        "q": 9
+        "q": 25
       }
     ],
     "ji_primary": {
-      "cents_error": -7.79251450260044,
-      "complexity_score": 4.807354922057604,
-      "label": "7/4",
-      "p": 7,
-      "prime_limit": 7,
-      "q": 4,
-      "why": "closest weighted JI fit with 7/4 at -7.793 cents error, complexity 4.807, prime limit 7"
+      "cents_error": 16.019464390823206,
+      "complexity_score": 4.584962500721156,
+      "label": "8/3",
+      "p": 8,
+      "prime_limit": 5,
+      "q": 3,
+      "why": "closest weighted JI fit with 8/3 at 16.019 cents error, complexity 4.585, prime limit 5"
     }
   },
   "label_index_mod": null,
@@ -104,21 +104,31 @@
   },
   "measurements": {
     "f0": {
-      "f0_confidence": 0.46895758420449796,
+      "f0_confidence": 0.44672348522173516,
       "f0_confidence_notes": "derived from natural filename order",
+      "f0_corrections": null,
       "f0_distribution": {
-        "iqr_hz": 3549.715909090909,
-        "max_hz": 4009.090909090909,
+        "iqr_hz": 4.83552631578948,
+        "max_hz": 2004.5454545454545,
         "median_hz": 464.2105263157895,
         "min_hz": 459.375,
         "n_frames": 83
       },
       "f0_hz": 464.2105263157895,
       "f0_method": "acf_median_tracker_v1",
+      "f0_search": {
+        "frame_size": 2028,
+        "lmax": 1103,
+        "lmin": 22,
+        "max_hz": 2000.0,
+        "median_lag": 95,
+        "min_hz": 40.0
+      },
       "f0_window": {
         "end_s": 1.3,
         "start_s": 0.3
-      }
+      },
+      "harmonic_grid_fit": 0.08333333333333333
     },
     "partials": {
       "analysis_window": {
@@ -577,20 +587,20 @@
     "mallet": "",
     "measured_at": "",
     "measured_by": "",
-    "method_version": "504d0b4",
+    "method_version": "68bd384",
     "mic": "",
     "notes": "",
     "room": ""
   },
   "register": {
-    "octave_abs": 0,
-    "within_octave_ratio": 1.7578947368421054
+    "octave_abs": 1,
+    "within_octave_ratio": 1.3210526315789475
   },
   "revision_history": [
     {
       "by": "build_dataset.py",
       "change": "initial record creation",
-      "date": "2026-02-10T05:48:40+00:00"
+      "date": "2026-02-09T21:52:34-08:00"
     }
   ],
   "source_filename": "harmonic-007.wav",

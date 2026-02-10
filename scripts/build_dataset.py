@@ -37,6 +37,10 @@ WINDOW_IGNORE_S = 0.20
 RMS_FRAME_S = 0.05
 WINDOW_TARGET_S = 1.00
 WINDOW_MIN_S = 0.40
+# Marimba bars span broad ranges, but fundamentals above ~2 kHz are implausible;
+# constraining the ACF search prevents the classic tiny-lag octave/alias failures.
+MIN_F0_HZ = 40.0
+MAX_F0_HZ = 2000.0
 MAX_FFT = 262144
 PROMINENCE_DB = 15.0
 MAX_PEAKS = 60
@@ -221,17 +225,32 @@ def _pick_stable_window(x: np.ndarray, sr: int) -> tuple[int, int, str]:
     return best_start, best_start + win, note
 
 
-def _estimate_f0_acf(x: np.ndarray, sr: int, min_hz: float = 20.0, max_hz: float = 4000.0) -> tuple[np.ndarray, np.ndarray]:
+def _estimate_f0_acf_with_meta(
+    x: np.ndarray,
+    sr: int,
+    min_hz: float = MIN_F0_HZ,
+    max_hz: float = MAX_F0_HZ,
+    context: str | None = None,
+) -> tuple[np.ndarray, np.ndarray, dict[str, Any]]:
     frame_size = max(1024, int(0.046 * sr))
     hop = max(256, frame_size // 4)
-    lmin = max(1, int(sr / max_hz))
-    lmax = min(frame_size - 1, int(sr / min_hz))
+    lmin = max(1, int(math.floor(sr / max_hz)))
+    lmax = min(frame_size - 1, int(math.ceil(sr / min_hz)))
 
+    if lmax <= lmin:
+        label = f" ({context})" if context else ""
+        raise ValueError(
+            f"invalid f0 lag search window{label}: lmin={lmin}, lmax={lmax}, frame_size={frame_size}, sr={sr}, min_hz={min_hz}, max_hz={max_hz}"
+        )
+
+    notes: list[str] = []
     if x.size < frame_size:
         x = np.pad(x, (0, frame_size - x.size))
+        notes.append("short audio; frame was zero-padded for f0 tracking")
 
     f0s: list[float] = []
     confs: list[float] = []
+    lags: list[int] = []
     window = np.hanning(frame_size)
 
     for s in range(0, x.size - frame_size + 1, hop):
@@ -247,12 +266,71 @@ def _estimate_f0_acf(x: np.ndarray, sr: int, min_hz: float = 20.0, max_hz: float
         lag = int(np.argmax(search)) + lmin
         peak = float(ac[lag])
         f0 = sr / lag
+        lags.append(lag)
         f0s.append(float(f0))
         confs.append(float(np.clip(peak, 0.0, 1.0)))
 
     if not f0s:
-        raise ValueError("unable to estimate f0 from audio")
-    return np.array(f0s, dtype=float), np.array(confs, dtype=float)
+        label = f" ({context})" if context else ""
+        raise ValueError(f"unable to estimate f0 from audio{label}")
+    meta = {
+        "lmin": int(lmin),
+        "lmax": int(lmax),
+        "frame_size": int(frame_size),
+        "hop": int(hop),
+        "median_lag": int(np.median(np.array(lags, dtype=int))),
+        "notes": notes,
+    }
+    return np.array(f0s, dtype=float), np.array(confs, dtype=float), meta
+
+
+def _estimate_f0_acf(x: np.ndarray, sr: int, min_hz: float = MIN_F0_HZ, max_hz: float = MAX_F0_HZ) -> tuple[np.ndarray, np.ndarray]:
+    f0s, confs, _meta = _estimate_f0_acf_with_meta(x, sr, min_hz=min_hz, max_hz=max_hz)
+    return f0s, confs
+
+
+def _harmonic_grid_fit_score(summary_peaks: list[dict[str, Any]], f0_hz: float, tol: float = 0.03, k_max: int = SUMMARY_PEAKS) -> float:
+    if not summary_peaks or f0_hz <= 0:
+        return 0.0
+    k = min(k_max, len(summary_peaks))
+    aligned = 0
+    for peak in summary_peaks[:k]:
+        peak_hz = float(peak.get("hz", 0.0))
+        harmonic_idx = int(round(peak_hz / f0_hz))
+        if harmonic_idx < 1:
+            continue
+        target = harmonic_idx * f0_hz
+        rel_err = abs(peak_hz - target) / max(target, 1e-9)
+        if rel_err <= tol:
+            aligned += 1
+    return aligned / max(k, 1)
+
+
+def _correct_octave_by_harmonic_fit(preliminary_f0_hz: float, summary_peaks: list[dict[str, Any]]) -> tuple[float, float, dict[str, Any] | None, bool]:
+    candidates = [preliminary_f0_hz, preliminary_f0_hz / 2.0, preliminary_f0_hz * 2.0]
+    scored: list[tuple[float, float, float, bool]] = []
+    for cand in candidates:
+        fit = _harmonic_grid_fit_score(summary_peaks, cand)
+        cents_shift = abs(1200.0 * math.log2(max(cand, 1e-9) / max(preliminary_f0_hz, 1e-9)))
+        in_range = MIN_F0_HZ <= cand <= MAX_F0_HZ
+        scored.append((cand, fit, cents_shift, in_range))
+
+    scored.sort(key=lambda x: (x[1], x[3], -x[2]), reverse=True)
+    best_f0, best_fit, _best_shift, _best_in_range = scored[0]
+    before_fit = _harmonic_grid_fit_score(summary_peaks, preliminary_f0_hz)
+    ratio = max(best_f0, 1e-9) / max(preliminary_f0_hz, 1e-9)
+    is_octave = abs(math.log2(ratio)) > 0.9 and abs(math.log2(ratio)) < 1.1
+    improved = best_fit - before_fit
+    accepted = is_octave and improved >= 0.15 and MIN_F0_HZ <= best_f0 <= MAX_F0_HZ
+    correction = None
+    if accepted:
+        correction = {
+            "original_f0_hz": float(preliminary_f0_hz),
+            "corrected_f0_hz": float(best_f0),
+            "harmonic_fit_before": float(before_fit),
+            "harmonic_fit_after": float(best_fit),
+        }
+    return (float(best_f0 if accepted else preliminary_f0_hz), float(best_fit if accepted else before_fit), correction, accepted)
 
 
 def _analyze_partials(x: np.ndarray, sr: int, f0_hz: float) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -494,12 +572,14 @@ def build_dataset() -> None:
             y, sr = _read_audio(audio_abs)
             s_idx, e_idx, window_note = _pick_stable_window(y, sr)
             seg = y[s_idx:e_idx]
-            f0_frames, conf_frames = _estimate_f0_acf(seg, sr)
-            f0_hz = float(np.median(f0_frames))
+            f0_frames, conf_frames, f0_meta = _estimate_f0_acf_with_meta(seg, sr, context=entry.bar_id)
+            f0_prelim_hz = float(np.median(f0_frames))
             q1, q3 = np.quantile(f0_frames, [0.25, 0.75])
             iqr = float(q3 - q1)
-            f0_conf = float(np.clip(0.5 * float(np.mean(conf_frames)) + 0.5 * (1.0 / (1.0 + (np.var(f0_frames) / max(f0_hz, 1e-6)))), 0.0, 1.0))
+            f0_conf = float(np.clip(0.5 * float(np.mean(conf_frames)) + 0.5 * (1.0 / (1.0 + (np.var(f0_frames) / max(f0_prelim_hz, 1e-6)))), 0.0, 1.0))
 
+            _peaks_prelim, summary_prelim = _analyze_partials(seg, sr, f0_prelim_hz)
+            f0_hz, harmonic_fit, f0_correction, corrected = _correct_octave_by_harmonic_fit(f0_prelim_hz, summary_prelim)
             peaks, summary = _analyze_partials(seg, sr, f0_hz)
 
             bar = {
@@ -523,7 +603,33 @@ def build_dataset() -> None:
                         "f0_hz": f0_hz,
                         "f0_method": "acf_median_tracker_v1",
                         "f0_confidence": f0_conf,
-                        "f0_confidence_notes": "; ".join([n for n in [window_note, pos_note] if n]),
+                        "f0_confidence_notes": "; ".join(
+                            [
+                                n
+                                for n in [
+                                    window_note,
+                                    pos_note,
+                                    *f0_meta.get("notes", []),
+                                    (
+                                        f"octave-corrected: {f0_prelim_hz:.3f}->{f0_hz:.3f} "
+                                        f"(harmonic fit {f0_correction['harmonic_fit_before']:.2f}->{f0_correction['harmonic_fit_after']:.2f})"
+                                        if f0_correction
+                                        else ""
+                                    ),
+                                ]
+                                if n
+                            ]
+                        ),
+                        "f0_search": {
+                            "min_hz": MIN_F0_HZ,
+                            "max_hz": MAX_F0_HZ,
+                            "lmin": f0_meta["lmin"],
+                            "lmax": f0_meta["lmax"],
+                            "frame_size": f0_meta["frame_size"],
+                            "median_lag": f0_meta["median_lag"],
+                        },
+                        "f0_corrections": f0_correction,
+                        "harmonic_grid_fit": harmonic_fit,
                         "f0_window": {
                             "start_s": s_idx / sr,
                             "end_s": e_idx / sr,
@@ -628,19 +734,53 @@ def build_dataset() -> None:
         }
 
         f0_conf = bar["measurements"]["f0"]["f0_confidence"]
-        dist = bar["measurements"]["f0"]["f0_distribution"]
+        f0_payload = bar["measurements"]["f0"]
+        dist = f0_payload["f0_distribution"]
         unstable = dist["iqr_hz"] / max(dist["median_hz"], 1e-6) > 0.01
-        too_few = len(bar["measurements"]["partials"]["summary_peaks"]) < 5
-        best_cents = abs(primary["cents_error"])
-        cents_half = abs(1200.0 * math.log2((f0 / 2) / f_ref) - (1200.0 * math.log2(primary["p"] / primary["q"])))
-        cents_double = abs(1200.0 * math.log2((f0 * 2) / f_ref) - (1200.0 * math.log2(primary["p"] / primary["q"])))
-        suspicious = min(cents_half, cents_double) + 20 < best_cents
+        summary_peaks = bar["measurements"]["partials"]["summary_peaks"]
+        too_few = len(summary_peaks) < 5
+
+        fit_now = _harmonic_grid_fit_score(summary_peaks, f0)
+        fit_half = _harmonic_grid_fit_score(summary_peaks, f0 / 2.0)
+        fit_double = _harmonic_grid_fit_score(summary_peaks, f0 * 2.0)
+        suspicious = (
+            (f0_payload.get("f0_corrections") is not None)
+            or (fit_now < 0.45 and max(fit_half, fit_double) - fit_now >= 0.15)
+            or (max(fit_half, fit_double) - fit_now >= 0.20)
+        )
+
+        highest_peak = summary_peaks[0] if summary_peaks else None
+        high_peak_not_near_harmonic = False
+        if highest_peak is not None:
+            hp_hz = float(highest_peak.get("hz", 0.0))
+            k = int(round(hp_hz / max(f0, 1e-9)))
+            if k < 1:
+                high_peak_not_near_harmonic = True
+            else:
+                target = k * f0
+                high_peak_not_near_harmonic = abs(hp_hz - target) / max(target, 1e-9) > 0.03
+
+        search = f0_payload.get("f0_search", {})
+        median_lag = int(search.get("median_lag", -1))
+        lmin = int(search.get("lmin", -1))
+        lmax = int(search.get("lmax", -1))
+        lag_near_boundary = (lmin > 0 and median_lag <= lmin + 1) or (lmax > 0 and median_lag >= lmax - 1)
+        hz_near_boundary = (
+            abs(f0 - MIN_F0_HZ) / MIN_F0_HZ <= 0.02
+            or abs(f0 - MAX_F0_HZ) / MAX_F0_HZ <= 0.02
+        )
+        f0_at_range_boundary = hz_near_boundary or lag_near_boundary
+        harmonic_grid_mismatch = fit_now < 0.45
 
         notes = []
         if unstable:
             notes.append("high relative f0 IQR")
         if too_few:
             notes.append("low partial count")
+        if f0_at_range_boundary:
+            notes.append("f0 near configured range boundary")
+        if harmonic_grid_mismatch:
+            notes.append("weak harmonic grid alignment")
         qc_entries.append(
             {
                 "bar_id": bar["bar_id"],
@@ -648,6 +788,9 @@ def build_dataset() -> None:
                 "unstable_f0": unstable,
                 "suspicious_octave": suspicious,
                 "too_few_peaks": too_few,
+                "f0_at_range_boundary": f0_at_range_boundary,
+                "harmonic_grid_mismatch": harmonic_grid_mismatch,
+                "high_peak_not_near_harmonic": high_peak_not_near_harmonic,
                 "notes": "; ".join(notes),
             }
         )
@@ -693,8 +836,11 @@ def build_dataset() -> None:
         "`reports/qc.json` contains per-bar flags:\n\n"
         "- `low_confidence`: f0 confidence < 0.6\n"
         "- `unstable_f0`: f0 IQR / median > 0.01\n"
-        "- `suspicious_octave`: octave-shift heuristic indicates likely octave error\n"
-        "- `too_few_peaks`: fewer than 5 summary spectral peaks\n\n"
+        "- `suspicious_octave`: harmonic-grid checks suggest likely octave confusion\n"
+        "- `too_few_peaks`: fewer than 5 summary spectral peaks\n"
+        "- `f0_at_range_boundary`: corrected f0 or median ACF lag is near configured bounds\n"
+        "- `harmonic_grid_mismatch`: harmonic-grid fit score for corrected f0 is below 0.45\n"
+        "- `high_peak_not_near_harmonic`: strongest summary peak is not within 3% of a harmonic\n\n"
         "## Re-run\n\n"
         "```bash\npython scripts/build_dataset.py\n```\n",
         encoding="utf-8",

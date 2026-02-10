@@ -1,105 +1,105 @@
 {
   "bar_id": "edo9-f0d6387d1fda",
   "edo_interpretation": {
-    "cents_error_from_target": -15.370844999168623,
+    "cents_error_from_target": 1.3153669284034493,
     "edo": 9,
     "octave": 1,
-    "step": 1,
-    "target_ratio": 1.080059738892306
+    "step": 6,
+    "target_ratio": 1.5874010519681994
   },
-  "global_order_index": 8,
+  "global_order_index": 22,
   "instrument_id": "edo9",
   "ji": {
     "ji_candidates": [
       {
-        "cents_error": 1.480319926932796,
-        "complexity_score": 6.714245517666122,
-        "label": "15/7",
-        "p": 15,
-        "prime_limit": 7,
-        "q": 7
+        "cents_error": 12.370919206762062,
+        "complexity_score": 6.321928094887363,
+        "label": "16/5",
+        "p": 16,
+        "prime_limit": 5,
+        "q": 5
       },
       {
-        "cents_error": 1.480319926932796,
-        "complexity_score": 6.714245517666122,
-        "label": "15/7",
-        "p": 15,
+        "cents_error": 12.370919206762062,
+        "complexity_score": 6.321928094887363,
+        "label": "16/5",
+        "p": 16,
+        "prime_limit": 7,
+        "q": 5
+      },
+      {
+        "cents_error": 12.370919206762062,
+        "complexity_score": 6.321928094887363,
+        "label": "16/5",
+        "p": 16,
+        "prime_limit": 11,
+        "q": 5
+      },
+      {
+        "cents_error": 2.506311040799773,
+        "complexity_score": 8.588714635582264,
+        "label": "35/11",
+        "p": 35,
+        "prime_limit": 11,
+        "q": 11
+      },
+      {
+        "cents_error": 12.370919206762062,
+        "complexity_score": 6.321928094887363,
+        "label": "16/5",
+        "p": 16,
+        "prime_limit": 13,
+        "q": 5
+      },
+      {
+        "cents_error": 2.506311040799773,
+        "complexity_score": 8.588714635582264,
+        "label": "35/11",
+        "p": 35,
+        "prime_limit": 13,
+        "q": 11
+      },
+      {
+        "cents_error": -18.823331032771502,
+        "complexity_score": 7.266786540694901,
+        "label": "22/7",
+        "p": 22,
         "prime_limit": 11,
         "q": 7
       },
       {
-        "cents_error": 1.480319926932796,
-        "complexity_score": 6.714245517666122,
-        "label": "15/7",
-        "p": 15,
+        "cents_error": -28.687939198733613,
+        "complexity_score": 7.643856189774724,
+        "label": "25/8",
+        "p": 25,
+        "prime_limit": 5,
+        "q": 8
+      },
+      {
+        "cents_error": -18.823331032771502,
+        "complexity_score": 7.266786540694901,
+        "label": "22/7",
+        "p": 22,
         "prime_limit": 13,
         "q": 7
       },
       {
-        "cents_error": -6.231203064386866,
-        "complexity_score": 8.906890595608518,
-        "label": "32/15",
-        "p": 32,
-        "prime_limit": 5,
-        "q": 15
-      },
-      {
-        "cents_error": -6.231203064386866,
-        "complexity_score": 8.906890595608518,
-        "label": "32/15",
-        "p": 32,
+        "cents_error": -28.687939198733613,
+        "complexity_score": 7.643856189774724,
+        "label": "25/8",
+        "p": 25,
         "prime_limit": 7,
-        "q": 15
-      },
-      {
-        "cents_error": -6.231203064386866,
-        "complexity_score": 8.906890595608518,
-        "label": "32/15",
-        "p": 32,
-        "prime_limit": 11,
-        "q": 15
-      },
-      {
-        "cents_error": 20.610172569758298,
-        "complexity_score": 6.285402218862249,
-        "label": "13/6",
-        "p": 13,
-        "prime_limit": 13,
-        "q": 6
-      },
-      {
-        "cents_error": -6.231203064386866,
-        "complexity_score": 8.906890595608518,
-        "label": "32/15",
-        "p": 32,
-        "prime_limit": 13,
-        "q": 15
-      },
-      {
-        "cents_error": 10.335756365649567,
-        "complexity_score": 8.507794640198696,
-        "label": "28/13",
-        "p": 28,
-        "prime_limit": 13,
-        "q": 13
-      },
-      {
-        "cents_error": 15.275086532328132,
-        "complexity_score": 10.398743691938193,
-        "label": "54/25",
-        "p": 54,
-        "prime_limit": 5,
-        "q": 25
+        "q": 8
       }
     ],
     "ji_primary": {
-      "cents_error": 1.480319926932796,
-      "complexity_score": 6.714245517666122,
-      "label": "15/7",
-      "p": 15,
-      "prime_limit": 7,
-      "q": 7,
-      "why": "closest weighted JI fit with 15/7 at 1.480 cents error, complexity 6.714, prime limit 7"
+      "cents_error": 12.370919206762062,
+      "complexity_score": 6.321928094887363,
+      "label": "16/5",
+      "p": 16,
+      "prime_limit": 5,
+      "q": 5,
+      "why": "closest weighted JI fit with 16/5 at 12.371 cents error, complexity 6.322, prime limit 5"
     }
   },
   "label_index_mod": null,
@@ -110,21 +110,31 @@
   },
   "measurements": {
     "f0": {
-      "f0_confidence": 0.441704068213377,
+      "f0_confidence": 0.416949707190927,
       "f0_confidence_notes": "derived from natural filename order",
+      "f0_corrections": null,
       "f0_distribution": {
-        "iqr_hz": 3477.7656078860896,
-        "max_hz": 4009.090909090909,
-        "median_hz": 565.3846153846154,
+        "iqr_hz": 1473.220153340635,
+        "max_hz": 2004.5454545454545,
+        "median_hz": 558.2278481012659,
         "min_hz": 176.4,
         "n_frames": 83
       },
-      "f0_hz": 565.3846153846154,
+      "f0_hz": 558.2278481012659,
       "f0_method": "acf_median_tracker_v1",
+      "f0_search": {
+        "frame_size": 2028,
+        "lmax": 1103,
+        "lmin": 22,
+        "max_hz": 2000.0,
+        "median_lag": 79,
+        "min_hz": 40.0
+      },
       "f0_window": {
         "end_s": 1.25,
         "start_s": 0.25
-      }
+      },
+      "harmonic_grid_fit": 0.0
     },
     "partials": {
       "analysis_window": {
@@ -211,7 +221,7 @@
           "rel_amp_db": -24.68620834757315
         },
         {
-          "harmonic_index_guess": 4,
+          "harmonic_index_guess": null,
           "hz": 2300.0152587890625,
           "peak_confidence": 1.0,
           "rel_amp_db": -25.57761505491555
@@ -583,20 +593,20 @@
     "mallet": "",
     "measured_at": "",
     "measured_by": "",
-    "method_version": "504d0b4",
+    "method_version": "68bd384",
     "mic": "",
     "notes": "",
     "room": ""
   },
   "register": {
     "octave_abs": 1,
-    "within_octave_ratio": 1.0705128205128205
+    "within_octave_ratio": 1.588607594936709
   },
   "revision_history": [
     {
       "by": "build_dataset.py",
       "change": "initial record creation",
-      "date": "2026-02-10T05:48:40+00:00"
+      "date": "2026-02-09T21:52:34-08:00"
     }
   ],
   "source_filename": "9EDO-019.wav",
