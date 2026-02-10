@@ -1,0 +1,37 @@
+[
+  {
+    "scale_id": "5edo",
+    "label": "5edo",
+    "source_manifest": "manifest/5edo.csv",
+    "edo": 5,
+    "bar_count": 11
+  },
+  {
+    "scale_id": "7edo",
+    "label": "7edo",
+    "source_manifest": "manifest/7edo.csv",
+    "edo": 7,
+    "bar_count": 15
+  },
+  {
+    "scale_id": "8edo",
+    "label": "8edo",
+    "source_manifest": "manifest/8edo.csv",
+    "edo": 8,
+    "bar_count": 17
+  },
+  {
+    "scale_id": "9edo",
+    "label": "9edo",
+    "source_manifest": "manifest/9edo.csv",
+    "edo": 9,
+    "bar_count": 19
+  },
+  {
+    "scale_id": "harmonic",
+    "label": "harmonic",
+    "source_manifest": "manifest/harmonic.csv",
+    "edo": "harmonic",
+    "bar_count": 32
+  }
+]
