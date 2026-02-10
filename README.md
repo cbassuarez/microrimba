@@ -63,3 +63,18 @@ npm run preview
 - **Tolerance presets**: Unique clustering uses presets of **±5c**, **±15c**, or **±30c** from `pitch_index.json`.
 - **Hz formatting rule**: Hz values are formatted adaptively as `<100 => 3 decimals`, `100-999.999 => 2 decimals`, `>=1000 => 1 decimal`; the prefix `≈` appears only when rounding changed the stored value.
 - **Composite behavior**: In Instrument Pads, selecting **Composite** plays representative bars and shows `×N` for grouped member counts when applicable.
+
+### GitHub Pages SPA fallback verification
+
+After `npm run build`, confirm the generated fallback page exists:
+
+```bash
+test -f dist/404.html
+```
+
+After deploying to GitHub Pages, verify deep-link fallback behavior:
+
+- Open `https://cbassuarez.github.io/microrimba/scale/9edo` directly.
+- Refresh that page.
+- Confirm the app route loads (not a GitHub hard 404).
+- Confirm `view-source:` shows built assets (not `/src/main.tsx`).

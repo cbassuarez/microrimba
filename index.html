@@ -5,6 +5,33 @@
     <link rel="icon" type="image/svg+xml" href="/microrimba/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Microtonal Marimba Sonic Explorer</title>
+    <script>
+      (function () {
+        var BASE = "/microrimba";
+        var url = new URL(window.location.href);
+        var encodedPath = url.searchParams.get("p");
+
+        if (!encodedPath) {
+          return;
+        }
+
+        var decodedPath = decodeURIComponent(encodedPath || "") || "/";
+        var decodedQuery = decodeURIComponent(url.searchParams.get("q") || "");
+        var decodedHash = decodeURIComponent(url.searchParams.get("h") || "");
+
+        if (decodedPath.charAt(0) !== "/") {
+          decodedPath = "/" + decodedPath;
+        }
+
+        var intended =
+          BASE +
+          (decodedPath === "/" ? "" : decodedPath) +
+          (decodedQuery ? "?" + decodedQuery : "") +
+          (decodedHash ? "#" + decodedHash : "");
+
+        window.history.replaceState(null, "", intended);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
