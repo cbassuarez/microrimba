@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   ChevronDown,
+  ChevronUp,
   Filter,
   Moon,
   Play,
@@ -215,9 +216,9 @@ export function PitchListPage() {
     ensureItemVisible(latest.barId);
   }, [voices]);
 
-  const playBarWithPaging = (barId: string) => {
+  const playBarWithPaging = async (barId: string) => {
     ensureItemVisible(barId);
-    void toggleBar(barId);
+    await toggleBar(barId);
   };
 
   const jumpWithDirection = (nextPage: number) => {
@@ -350,62 +351,72 @@ export function PitchListPage() {
             }
           }}
         >
-          <div ref={listHeaderRef} className="sticky top-0 z-10 grid grid-cols-[64px_120px_1fr_84px_100px_90px_90px_110px_72px] gap-2 border-b border-rim bg-white/70 px-3 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70">
-            {['Play', 'Hz', 'Instrument', 'Bar #', 'Scale', 'Degree', 'Index', 'Ratio', 'More'].map((label) => (
-              <div key={label}>{label}</div>
-            ))}
-          </div>
-
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={`page-${paged.pageIndex}`}
-              initial={reduced ? { opacity: 0 } : { opacity: 0, y: pageDirection >= 0 ? 14 : -14 }}
-              animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
-              exit={reduced ? { opacity: 0 } : { opacity: 0, y: pageDirection >= 0 ? -14 : 14 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
-              className="relative z-0"
-            >
-              {paged.pageItems.map((row) => {
-                const hz = formatHz(row.bar.hz);
-                const isOpen = openDetailsKey === row.key;
-                return (
-                  <div
-                    key={row.key}
-                    ref={(element) => {
-                      if (!element) {
-                        rowAnchorRefs.current.delete(row.key);
-                        return;
-                      }
-                      rowAnchorRefs.current.set(row.key, element);
-                    }}
-                    className="my-1 rounded-2xl border border-rim/80 bg-white/40 px-3 dark:bg-slate-900/30"
-                    style={{ borderColor: `hsla(${SCALE_ACCENTS[row.bar.scaleId] ?? '220 10% 50%'}, 0.32)`, minHeight: `${ROW_H}px` }}
-                  >
-                    <div className="grid h-[60px] w-full min-w-0 grid-cols-[64px_120px_1fr_84px_100px_90px_90px_110px_72px] items-center gap-2 text-sm">
-                      <button onClick={() => playBarWithPaging(row.bar.barId)} className={`inline-flex h-9 w-9 items-center justify-center rounded-full border ${playingBarIds.has(row.bar.barId) ? 'border-emerald-400 bg-emerald-500/25' : 'border-rim'}`}>
-                        {playingBarIds.has(row.bar.barId) ? (
-                          <motion.span animate={reduced ? { opacity: [0.55, 1, 0.55] } : { scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }} transition={{ repeat: Infinity, duration: 1.2 }}>
-                            <Volume2 className="h-4 w-4" />
-                          </motion.span>
-                        ) : <Play className="h-4 w-4" />}
-                      </button>
-                      <div>{hz.text}</div>
-                      <div className="truncate">{instrumentLabel(row.bar)}</div>
-                      <div>{barNumber(row.bar.barId)}</div>
-                      <div className="uppercase">{row.bar.scaleId}</div>
-                      <div>{degreeFor(row.bar)}</div>
-                      <div>{row.absoluteIndex + 1}</div>
-                      <div className="min-w-0 font-mono text-xs tabular-nums">
-                        {Math.abs(row.bar.ratioErrorCents) >= 1 ? '≈ ' : ''}
-                        {ratioForDisplay(row.bar)}
-                      </div>
-                      <button className="opacity-60 hover:opacity-100" onClick={() => setOpenDetailsKey((prev) => (prev === row.key ? null : row.key))}>{isOpen ? <ChevronDown className="h-4 w-4 rotate-180" /> : <ChevronDown className="h-4 w-4" />}</button>
-                    </div>
+          <div className="overflow-x-auto overflow-y-hidden overscroll-x-contain">
+            <div className="min-w-[980px] [--pitch-cols:56px_92px_160px_72px_88px_84px_110px_120px_52px] md:[--pitch-cols:64px_120px_220px_84px_96px_96px_140px_130px_56px]">
+              <div ref={listHeaderRef} className="pitch-cols-template sticky top-0 z-10 grid gap-2 border-b border-rim bg-white/70 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70" style={{ gridTemplateColumns: 'var(--pitch-cols)' }}>
+                {['Index', 'Play', 'Hz', 'Instrument', 'Bar #', 'Scale', 'Degree', 'Ratio', 'More'].map((label) => (
+                  <div key={label} className="flex items-center gap-1 px-3">
+                    {label}
                   </div>
-                );
-              })}
-            </motion.div>
-          </AnimatePresence>
+                ))}
+              </div>
+
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={`page-${paged.pageIndex}`}
+                  initial={reduced ? { opacity: 0 } : { opacity: 0, y: pageDirection >= 0 ? 14 : -14 }}
+                  animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                  exit={reduced ? { opacity: 0 } : { opacity: 0, y: pageDirection >= 0 ? -14 : 14 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                  className="relative z-0"
+                >
+                  {paged.pageItems.map((row) => {
+                    const hz = formatHz(row.bar.hz);
+                    const isOpen = openDetailsKey === row.key;
+                    return (
+                      <div
+                        key={row.key}
+                        ref={(element) => {
+                          if (!element) {
+                            rowAnchorRefs.current.delete(row.key);
+                            return;
+                          }
+                          rowAnchorRefs.current.set(row.key, element);
+                        }}
+                        className="my-1 rounded-2xl border border-rim/80 bg-white/40 py-0.5 dark:bg-slate-900/30"
+                        style={{ borderColor: `hsla(${SCALE_ACCENTS[row.bar.scaleId] ?? '220 10% 50%'}, 0.32)`, minHeight: `${ROW_H}px` }}
+                      >
+                        <div className="pitch-cols-template grid h-[60px] whitespace-nowrap text-sm" style={{ gridTemplateColumns: 'var(--pitch-cols)' }}>
+                          <div className="flex items-center px-3 tabular-nums">{row.absoluteIndex + 1}</div>
+                          <div className="flex items-center px-3">
+                            <button onClick={() => void playBarWithPaging(row.bar.barId)} className={`inline-flex h-9 w-9 items-center justify-center rounded-full border ${playingBarIds.has(row.bar.barId) ? 'border-emerald-400 bg-emerald-500/25' : 'border-rim'}`}>
+                              {playingBarIds.has(row.bar.barId) ? (
+                                <motion.span animate={reduced ? { opacity: [0.55, 1, 0.55] } : { scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }} transition={{ repeat: Infinity, duration: 1.2 }}>
+                                  <Volume2 className="h-4 w-4" />
+                                </motion.span>
+                              ) : <Play className="h-4 w-4" />}
+                            </button>
+                          </div>
+                          <div className="flex items-center px-3 tabular-nums">{hz.text}</div>
+                          <div className="flex min-w-0 items-center px-3">{instrumentLabel(row.bar)}</div>
+                          <div className="flex items-center px-3 tabular-nums">{barNumber(row.bar.barId)}</div>
+                          <div className="flex items-center px-3 uppercase">{row.bar.scaleId}</div>
+                          <div className="flex items-center px-3 tabular-nums">{degreeFor(row.bar)}</div>
+                          <div className="flex min-w-0 items-center px-3 font-mono text-xs tabular-nums">
+                            {Math.abs(row.bar.ratioErrorCents) >= 1 ? '≈ ' : ''}
+                            {ratioForDisplay(row.bar)}
+                          </div>
+                          <div className="flex items-center px-3">
+                            <button className="opacity-60 hover:opacity-100" onClick={() => setOpenDetailsKey((prev) => (prev === row.key ? null : row.key))}>{isOpen ? <ChevronDown className="h-4 w-4 rotate-180" /> : <ChevronDown className="h-4 w-4" />}</button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
 
           <PitchRowDetailsOverlay
             openRow={openRow}
@@ -420,14 +431,38 @@ export function PitchListPage() {
             onClose={() => setOpenDetailsKey(null)}
           />
 
-          <PitchListPaginator
-            pageIndex={paged.pageIndex}
-            pageCount={paged.pageCount}
-            rangeLabel={paged.rangeLabel}
-            onPrev={stepPrev}
-            onNext={stepNext}
-            onJump={(page) => jumpWithDirection(page - 1)}
-          />
+          <div className="pointer-events-auto absolute bottom-3 right-3 z-20 rounded-2xl border border-black/10 bg-white/55 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-black/30">
+            <div className="flex items-center gap-2 px-3 py-2">
+              <button
+                type="button"
+                onClick={stepPrev}
+                disabled={paged.pageIndex <= 0}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl hover:bg-black/5 active:scale-[0.98] disabled:opacity-40 dark:hover:bg-white/10"
+                aria-label="Previous page"
+              >
+                <ChevronUp className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={stepNext}
+                disabled={paged.pageIndex >= paged.pageCount - 1}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl hover:bg-black/5 active:scale-[0.98] disabled:opacity-40 dark:hover:bg-white/10"
+                aria-label="Next page"
+              >
+                <ChevronDown className="h-4 w-4" />
+              </button>
+              <div className="text-sm tabular-nums">Page {Math.min(paged.pageIndex + 1, paged.pageCount)}/{paged.pageCount}</div>
+              <div className="text-xs text-slate-600 tabular-nums dark:text-slate-300">{paged.rangeLabel}</div>
+              <PitchListPaginator
+                pageIndex={paged.pageIndex}
+                pageCount={paged.pageCount}
+                rangeLabel={paged.rangeLabel}
+                onPrev={stepPrev}
+                onNext={stepNext}
+                onJump={(page) => jumpWithDirection(page - 1)}
+              />
+            </div>
+          </div>
         </div>
       </motion.section>
 
@@ -465,7 +500,7 @@ export function PitchListPage() {
               return (
                 <button
                   key={bar.barId}
-                  onClick={() => playBarWithPaging(bar.barId)}
+                  onClick={() => void playBarWithPaging(bar.barId)}
                   className="relative rounded-md border border-rim p-3 text-left shadow-sm transition hover:-translate-y-0.5"
                   style={{
                     background: `linear-gradient(180deg, hsla(${SCALE_ACCENTS[bar.scaleId] ?? '220 8% 60%'}, 0.4), hsla(${SCALE_ACCENTS[bar.scaleId] ?? '220 8% 60%'}, 0.18))`,

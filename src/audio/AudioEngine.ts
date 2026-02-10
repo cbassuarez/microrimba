@@ -1,5 +1,14 @@
 import type { BarId } from '../data/types';
 
+let sharedContext: AudioContext | null = null;
+
+function getSharedAudioContext() {
+  if (!sharedContext) {
+    sharedContext = new AudioContext();
+  }
+  return sharedContext;
+}
+
 export type VoiceHandle = {
   id: string;
   barId: BarId;
@@ -8,12 +17,13 @@ export type VoiceHandle = {
 };
 
 export class AudioEngine {
-  readonly context = new AudioContext();
+  readonly context = getSharedAudioContext();
 
   private bufferCache = new Map<string, AudioBuffer>();
   private inflight = new Map<string, Promise<AudioBuffer>>();
   private pathByBar = new Map<BarId, string>();
   private active = new Map<string, { source: AudioBufferSourceNode; gain: GainNode }>();
+  private unlocked = false;
 
   setPathMap(pathMap: Record<string, string>) {
     this.pathByBar = new Map(Object.entries(pathMap));
@@ -21,6 +31,32 @@ export class AudioEngine {
 
   canPlay(barId: BarId) {
     return this.pathByBar.has(barId);
+  }
+
+  onFirstGestureUnlock() {
+    if (typeof window === 'undefined') return;
+    const unlock = () => {
+      void this.ensureUnlocked();
+    };
+    window.addEventListener('pointerdown', unlock, { once: true, capture: true });
+    window.addEventListener('touchstart', unlock, { once: true, capture: true });
+    window.addEventListener('click', unlock, { once: true, capture: true });
+  }
+
+  async ensureUnlocked() {
+    if (this.context.state === 'suspended') {
+      await this.context.resume();
+    }
+    if (!this.unlocked) {
+      const buffer = this.context.createBuffer(1, 1, this.context.sampleRate);
+      const source = this.context.createBufferSource();
+      source.buffer = buffer;
+      source.connect(this.context.destination);
+      source.start(0);
+      source.stop(0);
+      source.disconnect();
+      this.unlocked = true;
+    }
   }
 
   async getBuffer(barId: BarId): Promise<AudioBuffer> {
@@ -45,6 +81,7 @@ export class AudioEngine {
   }
 
   async play(barId: BarId, gain = 1): Promise<VoiceHandle> {
+    await this.ensureUnlocked();
     const buffer = await this.getBuffer(barId);
     const id = this.playBufferAt(barId, buffer, this.context.currentTime, { gain });
     return {
