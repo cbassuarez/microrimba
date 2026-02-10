@@ -1,11 +1,16 @@
 import { Github } from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { MiniPlayer } from './MiniPlayer';
+import { useMicrorimbaData } from '../data/useMicrorimbaData';
+import { getDefaultInstrumentForScale } from '../lib/instruments';
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur transition ${isActive ? 'border-slate-900/40 bg-slate-900/85 text-white dark:border-white/40 dark:bg-white/85 dark:text-slate-900' : 'border-rim/70 bg-surface/70 hover:bg-surface'}`;
 
 export function AppShell() {
+  const { instruments } = useMicrorimbaData();
+  const defaultInstrument = getDefaultInstrumentForScale(instruments, '9edo') ?? instruments[0]?.instrumentId;
+
   return (
     <div className="min-h-screen text-text">
       <main className="mx-auto max-w-[1320px] px-4 py-5 pb-32 md:px-8">
@@ -13,6 +18,7 @@ export function AppShell() {
           <Link to="/" className="font-mono text-sm tracking-wide">Microtonal Marimba Instruments</Link>
           <nav className="flex items-center gap-2">
             <NavLink className={navClass} to="/">Home</NavLink>
+            <NavLink className={navClass} to={defaultInstrument ? `/instrument/${defaultInstrument}` : '/'}>Instruments</NavLink>
             <NavLink className={navClass} to="/about">About</NavLink>
             <a
               href="https://github.com/cbassuarez/microrimba"

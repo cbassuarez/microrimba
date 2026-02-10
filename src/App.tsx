@@ -6,7 +6,7 @@ import { AppShell } from './components/AppShell';
 import { routeVariants } from './ui/motion';
 import { PitchListPage } from './pages/PitchListPage';
 import { GroupsPage } from './pages/GroupsPage';
-import { ScalePage } from './pages/ScalePage';
+import { InstrumentProfilePage, ScaleInstrumentProfilePage } from './pages/InstrumentProfilePage';
 import { BarDetailPage } from './pages/BarDetailPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { AboutPage } from './pages/AboutPage';
@@ -27,7 +27,8 @@ export function App() {
           <Routes location={location}>
             <Route element={<AppShell />}>
               <Route path="/" element={<PitchListPage />} />
-              <Route path="/scale/:scaleId" element={<ScalePage />} />
+              <Route path="/scale/:scaleId" element={<ScaleInstrumentProfilePage />} />
+              <Route path="/instrument/:instrumentId" element={<InstrumentProfilePage />} />
               <Route path="/groups" element={<GroupsPage />} />
               <Route path="/bar/:barId" element={<BarDetailPage />} />
               <Route path="/about" element={<AboutPage />} />

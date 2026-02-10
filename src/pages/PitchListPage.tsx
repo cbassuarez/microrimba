@@ -101,13 +101,14 @@ export function PitchListPage() {
   const { bars, scales, pitchIndex, loading, error } = useMicrorimbaData();
   const { toggleBar, stopAll, playingBarIds, playSequenceByBarIds, voices } = useAudio();
   const [searchParams, setSearchParams] = useSearchParams();
+  const initialInstrument = searchParams.get('instrument');
 
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<ModeKey>((searchParams.get('mode') as ModeKey) === 'all' ? 'all' : 'unique');
   const [tolerance, setTolerance] = useState<TolKey>((['5', '15', '30'] as TolKey[]).includes(searchParams.get('tol') as TolKey) ? (searchParams.get('tol') as TolKey) : '5');
   const [showGroupingMenu, setShowGroupingMenu] = useState(false);
   const [selectedScales, setSelectedScales] = useState<Set<string>>(new Set(SCALE_IDS));
-  const [selectedInstruments, setSelectedInstruments] = useState<Set<string>>(new Set(['composite']));
+  const [selectedInstruments, setSelectedInstruments] = useState<Set<string>>(new Set(initialInstrument ? [initialInstrument] : ['composite']));
   const [theme, setThemeState] = useState<ThemeMode>(() => (document.documentElement.classList.contains('dark') ? 'dark' : 'light'));
   const [openDetailsKey, setOpenDetailsKey] = useState<string | null>(null);
   const [pageDirection, setPageDirection] = useState(0);
@@ -217,7 +218,11 @@ export function PitchListPage() {
     if (modeParam === 'all' || modeParam === 'unique') setMode(modeParam);
     const tolParam = searchParams.get('tol') as TolKey;
     if ((['5', '15', '30'] as TolKey[]).includes(tolParam)) setTolerance(tolParam);
-  }, []);
+    const instrumentParam = searchParams.get('instrument');
+    if (instrumentParam && bars.some((bar) => bar.instrumentId === instrumentParam)) {
+      setSelectedInstruments(new Set([instrumentParam]));
+    }
+  }, [bars, searchParams]);
 
   const ensureItemVisible = (barId: string) => {
     const key = keyByAnyBarId.get(barId);

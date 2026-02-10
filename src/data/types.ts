@@ -35,7 +35,16 @@ export type PitchGroup = {
   stats: { minHz: number; maxHz: number; meanHz: number; maxCentsSpread: number; count: number };
 };
 
-export type InstrumentsJson = { instrumentId: string; label: string; scales: ScaleId[] }[];
+export type InstrumentIndexItem = {
+  instrumentId: string;
+  label: string;
+  scaleId: ScaleId;
+  edo: number | 'harmonic';
+  defaultStep0BarId: string;
+  barIdsInOrder: BarId[];
+};
+
+export type InstrumentsJson = InstrumentIndexItem[];
 export type PitchIndexJson = {
   allBarsSorted: BarId[];
   clustersByTolerance: Record<'5' | '15' | '30', PitchGroup[]>;
