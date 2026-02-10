@@ -11,8 +11,7 @@ export function AppShell() {
           <Link to="/" className="font-mono text-sm tracking-wide">microtonal marimbas</Link>
           <nav className="flex items-center gap-2">
             <NavLink className={navClass} to="/">Home</NavLink>
-            <NavLink className={navClass} to="/groups">Groups</NavLink>
-            <NavLink className={navClass} to="/scale/5edo">Scale</NavLink>
+            <NavLink className={navClass} to="https://github.com/cbassuarez/microrimba">GitHub</NavLink>
           </nav>
         </div>
         <Outlet />
