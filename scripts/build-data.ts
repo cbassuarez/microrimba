@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 const ROOT = path.resolve(path.join(import.meta.dirname, '..'));
 const MANIFEST_DIR = path.join(ROOT, 'manifest');
-const DATA_DIR = path.join(ROOT, 'data');
+const DATA_DIR = path.join(ROOT, 'public', 'data');
 const AUDIO_DIR = path.join(ROOT, 'audio');
 const TOLS = [5, 15, 30] as const;
 
@@ -21,6 +21,7 @@ type Bar = {
   stepName: string;
   centsFromStep0: number;
   ratioToStep0: string;
+  ratioErrorCents: number;
   hz: number;
   audioPath: string;
 };
@@ -34,11 +35,53 @@ const BarSchema = z.object({
   stepName: z.string(),
   centsFromStep0: z.number(),
   ratioToStep0: z.string(),
+  ratioErrorCents: z.number(),
   hz: z.number(),
   audioPath: z.string(),
 });
 
 const centsDiff = (a: number, b: number) => 1200 * Math.log2(a / b);
+
+function gcd(a: number, b: number): number {
+  a = Math.abs(a);
+  b = Math.abs(b);
+  while (b) [a, b] = [b, a % b];
+  return a;
+}
+
+function cents(x: number): number {
+  return 1200 * Math.log2(x);
+}
+
+function bestSimpleFraction(x: number, maxDen = 64) {
+  let best = { p: 1, q: 1, err: Infinity, score: Infinity };
+
+  for (let q = 1; q <= maxDen; q += 1) {
+    const p0 = Math.max(1, Math.round(x * q));
+    for (const pTry of [p0 - 1, p0, p0 + 1]) {
+      if (pTry <= 0) continue;
+
+      let p = pTry;
+      let qq = q;
+      const g = gcd(p, qq);
+      p /= g;
+      qq /= g;
+
+      const approx = p / qq;
+      const err = cents(x / approx);
+      const aerr = Math.abs(err);
+      const score = aerr + 0.08 * qq;
+
+      if (score < best.score) best = { p, q: qq, err, score };
+    }
+  }
+
+  return {
+    frac: `${best.p}/${best.q}`,
+    approx: best.p / best.q,
+    errCents: best.err,
+  };
+}
 
 const normalizeScaleId = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '');
 
@@ -146,6 +189,7 @@ async function main() {
         stepName: row.step_name.trim(),
         centsFromStep0: Number(row.cents_from_step0),
         ratioToStep0: row.ratio_to_step0.trim(),
+        ratioErrorCents: 0,
         hz: Number(row.freq_if_step0_is_C),
         audioPath,
       });
@@ -153,11 +197,58 @@ async function main() {
   }
 
   const validBars = bars.map((b) => BarSchema.parse(b));
+
+  const scaleInstrumentGroups = new Map<string, Bar[]>();
+  for (const bar of validBars) {
+    const key = `${bar.scaleId}::${bar.instrumentId}`;
+    const current = scaleInstrumentGroups.get(key);
+    if (current) current.push(bar);
+    else scaleInstrumentGroups.set(key, [bar]);
+  }
+
+  const barsWithRatios = [...scaleInstrumentGroups.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .flatMap(([, groupBars]) => {
+      const isHarmonic = groupBars[0]?.scaleId === 'harmonic' || groupBars[0]?.edo === 'harmonic';
+      const barsSorted = [...groupBars].sort((a, b) => a.step - b.step || a.barId.localeCompare(b.barId));
+
+      if (isHarmonic) {
+        return barsSorted.map((bar) => {
+          const partial =
+            bar.step === 0
+              ? 1
+              : Number(bar.ratioToStep0.match(/^(\d+)\/1$/)?.[1] ?? bar.stepName.match(/H(\d+)/i)?.[1] ?? Math.max(1, bar.step + 1));
+          return {
+            ...bar,
+            ratioToStep0: `${partial}/1`,
+            ratioErrorCents: 0,
+          };
+        });
+      }
+
+      const stepZero = barsSorted.find((bar) => bar.step === 0);
+      let refHz = stepZero?.hz;
+      if (!refHz) {
+        const fallback = barsSorted[0];
+        refHz = fallback.hz;
+        console.warn(`Missing step=0 for group ${fallback.scaleId}/${fallback.instrumentId}; using ${fallback.barId} as reference`);
+      }
+
+      return barsSorted.map((bar) => {
+        const x = bar.hz / refHz;
+        const quant = bestSimpleFraction(x, 64);
+        return {
+          ...bar,
+          ratioToStep0: quant.frac,
+          ratioErrorCents: quant.errCents,
+        };
+      });
+    });
   const refBarId = 'harmonic-001';
-  const refHz = validBars.find((b) => b.barId === refBarId)?.hz;
+  const refHz = barsWithRatios.find((b) => b.barId === refBarId)?.hz;
   if (!refHz) throw new Error('Missing ref bar harmonic-001 for ratio reference');
 
-  const barsWithRef = validBars.map((bar) => ({
+  const barsWithRef = barsWithRatios.map((bar) => ({
     ...bar,
     ratioToRef: bar.hz / refHz,
   }));
@@ -223,6 +314,12 @@ async function main() {
   };
 
   const repoVersion = (await fs.readFile(path.join(ROOT, '.git', 'HEAD'), 'utf8').catch(() => '')).trim() || undefined;
+
+  for (const bar of allBarsSorted) {
+    if (!bar.ratioToStep0.includes('/')) {
+      throw new Error(`Invalid ratioToStep0 '${bar.ratioToStep0}' for ${bar.barId}`);
+    }
+  }
 
   await fs.writeFile(path.join(DATA_DIR, 'bars.json'), `${JSON.stringify(allBarsSorted, null, 2)}\n`);
   await fs.writeFile(path.join(DATA_DIR, 'scales.json'), `${JSON.stringify(scales, null, 2)}\n`);

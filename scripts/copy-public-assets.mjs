@@ -29,25 +29,3 @@ function ensureCopied(srcRel, dstRel) {
 }
 
 ensureCopied("audio", path.join("public", "audio"));
-
-if (fs.existsSync(path.join(root, "data"))) {
-  const dst = path.join("public", "data");
-  fs.rmSync(path.join(root, dst), { recursive: true, force: true });
-  fs.mkdirSync(path.join(root, dst), { recursive: true });
-
-  const srcData = path.join(root, "data");
-  const dstData = path.join(root, dst);
-
-  const walk = (from, to) => {
-    fs.mkdirSync(to, { recursive: true });
-    for (const ent of fs.readdirSync(from, { withFileTypes: true })) {
-      const a = path.join(from, ent.name);
-      const b = path.join(to, ent.name);
-      if (ent.isDirectory()) walk(a, b);
-      else if (ent.isFile() && ent.name.endsWith(".json")) fs.copyFileSync(a, b);
-    }
-  };
-
-  walk(srcData, dstData);
-  console.log(`[copy-public-assets] copied data/**/*.json -> public/data/**`);
-}
