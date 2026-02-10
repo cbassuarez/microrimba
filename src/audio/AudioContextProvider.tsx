@@ -36,6 +36,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   }, [engine]);
 
   useEffect(() => {
+    engine.onFirstGestureUnlock();
     loadBars().then((bars) => engine.setPathMap(Object.fromEntries(bars.map((b) => [b.barId, b.audioPath]))));
     return () => {
       endTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -60,6 +61,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   }, [stopVoice, voices]);
 
   const playBar = useCallback(async (barId: BarId) => {
+    await engine.ensureUnlocked();
     const buffer = await engine.getBuffer(barId);
     const when = engine.context.currentTime;
     const startedAt = performance.now() + Math.max(0, (when - engine.context.currentTime) * 1000);
@@ -70,6 +72,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   const playSequenceByBarIds = useCallback(async (barIds: BarId[], opts: SequenceOpts) => {
     if (!barIds.length) return;
+    await engine.ensureUnlocked();
     const startAt = engine.context.currentTime + 0.03;
     const startedNow = performance.now();
     const ids = await playSequence(engine, barIds, opts);
