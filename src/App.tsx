@@ -9,6 +9,7 @@ import { GroupsPage } from './pages/GroupsPage';
 import { ScalePage } from './pages/ScalePage';
 import { BarDetailPage } from './pages/BarDetailPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { AboutPage } from './pages/AboutPage';
 import { initTheme } from './ui/theme';
 
 export function App() {
@@ -29,6 +30,7 @@ export function App() {
               <Route path="/scale/:scaleId" element={<ScalePage />} />
               <Route path="/groups" element={<GroupsPage />} />
               <Route path="/bar/:barId" element={<BarDetailPage />} />
+              <Route path="/about" element={<AboutPage />} />
               <Route path="/scale" element={<Navigate to="/" replace />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
