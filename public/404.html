@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting…</title>
+  </head>
+  <body>
+    <script>
+      (function () {
+        var BASE = "/microrimba";
+        var loc = window.location;
+        var path = loc.pathname || "/";
+
+        if (path.indexOf(BASE) === 0) {
+          path = path.slice(BASE.length) || "/";
+        }
+
+        if (path === "/404.html") {
+          path = "/";
+        }
+
+        if (path.charAt(0) !== "/") {
+          path = "/" + path;
+        }
+
+        var params = [
+          "p=" + encodeURIComponent(path),
+          "q=" + encodeURIComponent((loc.search || "").slice(1)),
+          "h=" + encodeURIComponent((loc.hash || "").slice(1)),
+        ].join("&");
+
+        loc.replace(BASE + "/?" + params);
+      })();
+    </script>
+  </body>
+</html>
