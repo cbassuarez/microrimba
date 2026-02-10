@@ -9,7 +9,7 @@ import { prettyInstrumentLabel } from '../lib/labels';
 export function ScalePage() {
   const { scaleId } = useParams();
   const { bars, scales, loading, error } = useDataset();
-  const { playBar, canPlay } = useAudio();
+  const { playBar, canPlay, playSequenceByBarIds } = useAudio();
   const sid = scaleId as ScaleId;
   const scale = scales.find((s) => s.scaleId === sid);
   const rows = useMemo(() => bars.filter((b) => b.scaleId === sid).sort((a, b) => a.step - b.step || a.barId.localeCompare(b.barId)), [bars, sid]);
@@ -17,10 +17,9 @@ export function ScalePage() {
   if (error || !scale) return <p>Scale not found.</p>;
 
   const playScale = async () => {
-    for (const bar of rows) {
-      void playBar(bar.barId);
-      await new Promise((r) => setTimeout(r, 180));
-    }
+    await playSequenceByBarIds(rows.map((bar) => bar.barId), sid === 'harmonic'
+      ? { intervalMs: 220, overlapMs: 0, mode: 'expAccelerando', expFactor: 0.92, minIntervalMs: 25, gain: 0.9 }
+      : { intervalMs: 200, overlapMs: 0, mode: 'constant', gain: 0.9 });
   };
 
   return (

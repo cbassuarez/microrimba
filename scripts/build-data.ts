@@ -153,17 +153,25 @@ async function main() {
   }
 
   const validBars = bars.map((b) => BarSchema.parse(b));
-  const barsById = new Map(validBars.map((b) => [b.barId, b]));
-  const allBarsSorted = [...validBars].sort((a, b) => a.hz - b.hz || a.barId.localeCompare(b.barId));
+  const refBarId = 'harmonic-001';
+  const refHz = validBars.find((b) => b.barId === refBarId)?.hz;
+  if (!refHz) throw new Error('Missing ref bar harmonic-001 for ratio reference');
 
-  const scaleIds = [...new Set(validBars.map((b) => b.scaleId))].sort((a, b) => {
+  const barsWithRef = validBars.map((bar) => ({
+    ...bar,
+    ratioToRef: bar.hz / refHz,
+  }));
+  const barsById = new Map(barsWithRef.map((b) => [b.barId, b]));
+  const allBarsSorted = [...barsWithRef].sort((a, b) => a.hz - b.hz || a.barId.localeCompare(b.barId));
+
+  const scaleIds = [...new Set(barsWithRef.map((b) => b.scaleId))].sort((a, b) => {
     if (a === 'harmonic') return 1;
     if (b === 'harmonic') return -1;
     return a.localeCompare(b, undefined, { numeric: true });
   });
 
   const scales = scaleIds.map((sid) => {
-    const scaleBars = validBars.filter((b) => b.scaleId === sid).sort((a, b) => a.step - b.step || a.barId.localeCompare(b.barId));
+    const scaleBars = barsWithRef.filter((b) => b.scaleId === sid).sort((a, b) => a.step - b.step || a.barId.localeCompare(b.barId));
     const edo = sid === 'harmonic' ? 'harmonic' : Number((sid.match(/^(\d+)edo$/)?.[1] ?? Number.NaN));
     return {
       scaleId: sid,
@@ -174,12 +182,12 @@ async function main() {
     };
   });
 
-  const instruments = [...new Set(validBars.map((b) => b.instrumentId))]
+  const instruments = [...new Set(barsWithRef.map((b) => b.instrumentId))]
     .sort((a, b) => a.localeCompare(b))
     .map((instrumentId) => ({
       instrumentId,
       label: instrumentId,
-      scales: [...new Set(validBars.filter((b) => b.instrumentId === instrumentId).map((b) => b.scaleId))].sort() as ScaleId[],
+      scales: [...new Set(barsWithRef.filter((b) => b.instrumentId === instrumentId).map((b) => b.scaleId))].sort() as ScaleId[],
     }));
 
   const clustersByTolerance = Object.fromEntries(
@@ -220,7 +228,15 @@ async function main() {
   await fs.writeFile(path.join(DATA_DIR, 'scales.json'), `${JSON.stringify(scales, null, 2)}\n`);
   await fs.writeFile(path.join(DATA_DIR, 'instruments.json'), `${JSON.stringify(instruments, null, 2)}\n`);
   await fs.writeFile(path.join(DATA_DIR, 'pitch_index.json'), `${JSON.stringify(pitchIndex, null, 2)}\n`);
-  await fs.writeFile(path.join(DATA_DIR, 'buildInfo.json'), `${JSON.stringify({ generatedAt: new Date().toISOString(), repoVersion, tolerancesCents: [...TOLS], algorithm: 'adjacency-cluster with lexicographic representative revalidation split' }, null, 2)}\n`);
+  await fs.writeFile(path.join(DATA_DIR, 'buildInfo.json'), `${JSON.stringify({
+    generatedAt: new Date().toISOString(),
+    repoVersion,
+    tolerancesCents: [...TOLS],
+    algorithm: 'adjacency-cluster with lexicographic representative revalidation split',
+    refBarId,
+    refPitchHz: refHz,
+    ratioReference: 'all ratios relative to harmonic-001',
+  }, null, 2)}\n`);
 
   if (missingAudio.length) {
     console.warn(`Missing audio (${missingAudio.length}):`);

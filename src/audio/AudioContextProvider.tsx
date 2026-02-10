@@ -1,6 +1,8 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { AudioEngine } from './AudioEngine';
 import { loadBars } from '../data/loaders';
 import type { BarId } from '../data/types';
+import { playSequence, type SequenceOpts } from '../lib/sequencer';
 
 type Voice = { id: string; barId: BarId; startedAt: number; stop: () => void };
 
@@ -9,6 +11,7 @@ type AudioApi = {
   playingBarIds: Set<BarId>;
   canPlay: (barId: BarId) => boolean;
   playBar: (barId: BarId) => Promise<void>;
+  playSequenceByBarIds: (barIds: BarId[], opts: SequenceOpts) => Promise<void>;
   stopBar: (barId: BarId) => void;
   toggleBar: (barId: BarId) => Promise<void>;
   stopVoice: (id: string) => void;
@@ -18,92 +21,94 @@ type AudioApi = {
 const Ctx = createContext<AudioApi | null>(null);
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
+  const engine = useMemo(() => new AudioEngine(), []);
   const [voices, setVoices] = useState<Voice[]>([]);
-  const [pathByBar, setPathByBar] = useState<Record<string, string>>({});
-  const audioByVoiceId = useMemo(() => new Map<string, HTMLAudioElement>(), []);
+  const endTimers = useRef(new Map<string, number>());
+
+  const scheduleCleanup = useCallback((id: string, barId: BarId, startedAt: number, durationS: number) => {
+    const ms = Math.max(0, durationS * 1000 + (startedAt - performance.now()) + 10);
+    const timeout = window.setTimeout(() => {
+      endTimers.current.delete(id);
+      setVoices((v) => v.filter((voice) => voice.id !== id));
+    }, ms);
+    endTimers.current.set(id, timeout);
+    return { id, barId, startedAt, stop: () => engine.stopVoice(id) } as Voice;
+  }, [engine]);
 
   useEffect(() => {
-    loadBars().then((bars) => setPathByBar(Object.fromEntries(bars.map((b) => [b.barId, b.audioPath]))));
-  }, []);
+    loadBars().then((bars) => engine.setPathMap(Object.fromEntries(bars.map((b) => [b.barId, b.audioPath]))));
+    return () => {
+      endTimers.current.forEach((timer) => window.clearTimeout(timer));
+      endTimers.current.clear();
+      engine.stopAll();
+    };
+  }, [engine]);
 
-  const stopVoice = useCallback(
-    (id: string) => {
-      const el = audioByVoiceId.get(id);
-      if (el) {
-        el.pause();
-        el.currentTime = 0;
-        audioByVoiceId.delete(id);
-      }
-      setVoices((v) => v.filter((x) => x.id !== id));
-    },
-    [audioByVoiceId],
-  );
+  const stopVoice = useCallback((id: string) => {
+    const timer = endTimers.current.get(id);
+    if (timer) {
+      window.clearTimeout(timer);
+      endTimers.current.delete(id);
+    }
+    engine.stopVoice(id);
+    setVoices((v) => v.filter((voice) => voice.id !== id));
+  }, [engine]);
 
-  const stopBar = useCallback(
-    (barId: BarId) => {
-      const toStop = voices.filter((v) => v.barId === barId).map((v) => v.id);
-      toStop.forEach(stopVoice);
-    },
-    [stopVoice, voices],
-  );
+  const stopBar = useCallback((barId: BarId) => {
+    const toStop = voices.filter((v) => v.barId === barId).map((v) => v.id);
+    toStop.forEach(stopVoice);
+  }, [stopVoice, voices]);
 
-  const playBar = useCallback(
-    async (barId: BarId) => {
-      const path = pathByBar[barId];
-      if (!path) return;
+  const playBar = useCallback(async (barId: BarId) => {
+    const buffer = await engine.getBuffer(barId);
+    const when = engine.context.currentTime;
+    const startedAt = performance.now() + Math.max(0, (when - engine.context.currentTime) * 1000);
+    const id = engine.playBufferAt(barId, buffer, when, { gain: 1 });
+    const voice = scheduleCleanup(id, barId, startedAt, buffer.duration);
+    setVoices((v) => [...v, voice]);
+  }, [engine, scheduleCleanup]);
 
-      const id = `${barId}-${crypto.randomUUID()}`;
-      const src = `${import.meta.env.BASE_URL}${path}`;
-      const audio = new Audio(src);
-      audio.volume = 1;
-      audioByVoiceId.set(id, audio);
+  const playSequenceByBarIds = useCallback(async (barIds: BarId[], opts: SequenceOpts) => {
+    if (!barIds.length) return;
+    const startAt = engine.context.currentTime + 0.03;
+    const startedNow = performance.now();
+    const ids = await playSequence(engine, barIds, opts);
 
-      const voice: Voice = {
-        id,
-        barId,
-        startedAt: performance.now(),
-        stop: () => {
-          audio.pause();
-          audio.currentTime = 0;
-        },
-      };
-
-      const clear = () => {
-        audioByVoiceId.delete(id);
-        setVoices((v) => v.filter((x) => x.id !== id));
-      };
-
-      audio.onended = clear;
-      audio.onerror = clear;
+    let t = startAt;
+    for (let i = 0; i < barIds.length; i += 1) {
+      const buffer = await engine.getBuffer(barIds[i]);
+      const startedAt = startedNow + (t - engine.context.currentTime) * 1000;
+      const voice = scheduleCleanup(ids[i], barIds[i], startedAt, buffer.duration);
       setVoices((v) => [...v, voice]);
-
-      try {
-        await audio.play();
-      } catch {
-        clear();
-      }
-    },
-    [audioByVoiceId, pathByBar],
-  );
+      const dt = opts.mode === 'expAccelerando'
+        ? Math.max(opts.minIntervalMs ?? 20, opts.intervalMs * Math.pow(opts.expFactor ?? 0.93, i))
+        : opts.intervalMs;
+      t += dt / 1000;
+    }
+  }, [engine, scheduleCleanup]);
 
   const stopAll = useCallback(() => {
-    [...audioByVoiceId.keys()].forEach((id) => stopVoice(id));
-  }, [audioByVoiceId, stopVoice]);
+    endTimers.current.forEach((timer) => window.clearTimeout(timer));
+    endTimers.current.clear();
+    engine.stopAll();
+    setVoices([]);
+  }, [engine]);
 
-  const toggleBar = useCallback(
-    async (barId: BarId) => {
-      const isPlaying = voices.some((v) => v.barId === barId);
-      if (isPlaying) stopBar(barId);
-      else await playBar(barId);
-    },
-    [playBar, stopBar, voices],
-  );
+  const toggleBar = useCallback(async (barId: BarId) => {
+    const isPlaying = voices.some((v) => v.barId === barId);
+    if (isPlaying) {
+      stopBar(barId);
+      return;
+    }
+    await playBar(barId);
+  }, [playBar, stopBar, voices]);
 
   const api: AudioApi = {
     voices,
     playingBarIds: new Set(voices.map((v) => v.barId)),
-    canPlay: (barId) => Boolean(pathByBar[barId]),
+    canPlay: (barId) => engine.canPlay(barId),
     playBar,
+    playSequenceByBarIds,
     stopBar,
     toggleBar,
     stopVoice,
