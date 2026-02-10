@@ -91,6 +91,13 @@ function normalizeFracString(frac: string): string {
   return `${a}/${b}`;
 }
 
+function prettyInstrumentLabel(scaleId: string, edo: number | 'harmonic') {
+  if (scaleId === 'harmonic') return 'C Harmonic Marimba';
+  if (typeof edo === 'number') return `${edo}-EDO Marimba`;
+  const parsed = Number(scaleId.match(/^(\d+)edo$/)?.[1] ?? Number.NaN);
+  return Number.isFinite(parsed) ? `${parsed}-EDO Marimba` : 'Marimba';
+}
+
 const normalizeScaleId = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '');
 
 const scaleIdFromFilename = (fileName: string): string => {
@@ -286,13 +293,30 @@ async function main() {
     };
   });
 
-  const instruments = [...new Set(barsWithRef.map((b) => b.instrumentId))]
-    .sort((a, b) => a.localeCompare(b))
-    .map((instrumentId) => ({
-      instrumentId,
-      label: instrumentId,
-      scales: [...new Set(barsWithRef.filter((b) => b.instrumentId === instrumentId).map((b) => b.scaleId))].sort() as ScaleId[],
-    }));
+  const instrumentGroups = new Map<string, Bar[]>();
+  for (const bar of barsWithRef) {
+    const key = `${bar.scaleId}::${bar.instrumentId}`;
+    const current = instrumentGroups.get(key);
+    if (current) current.push(bar);
+    else instrumentGroups.set(key, [bar]);
+  }
+
+  const instruments = [...instrumentGroups.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, groupBars]) => {
+      const ordered = [...groupBars].sort((a, b) => a.step - b.step || a.barId.localeCompare(b.barId));
+      const stepZero = ordered.find((bar) => bar.step === 0);
+      const defaultBar = stepZero ?? [...ordered].sort((a, b) => a.barId.localeCompare(b.barId))[0];
+      const first = ordered[0];
+      return {
+        instrumentId: first.instrumentId,
+        label: prettyInstrumentLabel(first.scaleId, first.edo),
+        scaleId: first.scaleId,
+        edo: first.edo,
+        defaultStep0BarId: defaultBar.barId,
+        barIdsInOrder: ordered.map((bar) => bar.barId),
+      };
+    });
 
   const clustersByTolerance = Object.fromEntries(
     TOLS.map((tol) => {
