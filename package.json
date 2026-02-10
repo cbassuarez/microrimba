@@ -5,24 +5,32 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:data": "tsx scripts/build-data.ts",
-    "build": "npm run build:data && vite build && tsx scripts/copy-data-to-dist.ts",
+    "data:build": "tsx scripts/build-data.ts",
+    "build": "npm run data:build && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "papaparse": "^5.4.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.554.0",
+    "papaparse": "^5.5.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.1",
-    "zod": "^3.23.8"
+    "tailwind-merge": "^3.3.1",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@types/papaparse": "^5.3.14",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.4",
-    "tsx": "^4.19.2",
-    "typescript": "^5.6.3",
-    "vite": "^5.4.11"
+    "@types/node": "^24.7.2",
+    "@types/papaparse": "^5.3.16",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.0.4",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.18",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.10"
   }
 }

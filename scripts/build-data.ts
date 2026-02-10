@@ -1,299 +1,155 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import Papa from 'papaparse';
-import {
-  barsSchema,
-  instrumentsSchema,
-  samplesSchema,
-  scalesSchema,
-  type Bar,
-  type Instrument,
-  type Sample,
-  type Scale,
-} from '../src/models';
+import { z } from 'zod';
 
-const ROOT = process.cwd();
+const ROOT = path.resolve(path.join(import.meta.dirname, '..'));
 const MANIFEST_DIR = path.join(ROOT, 'manifest');
-const AUDIO_DIR = path.join(ROOT, 'audio');
-const OUT_DIR = path.join(ROOT, 'data', 'bars');
+const DATA_DIR = path.join(ROOT, 'data');
+const TOLS = [5, 15, 30] as const;
 
-type RawRow = Record<string, string>;
+const reqCols = ['bar_id', 'instrument_id', 'edo', 'step', 'step_name', 'cents_from_step0', 'ratio_to_step0', 'freq_if_step0_is_C'] as const;
 
-function parseNumber(raw: string, ctx: string): number {
-  const value = Number(raw);
-  if (!Number.isFinite(value)) {
-    throw new Error(`Invalid number for ${ctx}: ${raw}`);
-  }
-  return value;
-}
+type ScaleId = '5edo' | '9edo' | 'harmonic';
+type Bar = {
+  barId: string; scaleId: ScaleId; instrumentId: string; edo: number | 'harmonic'; step: number; stepName: string; centsFromStep0: number; ratioToStep0: string; hz: number; audioPath: string;
+};
 
-function parseRatio(raw: string, ctx: string): number {
-  const trimmed = raw.trim();
-  if (/^-?\d+(\.\d+)?\/-?\d+(\.\d+)?$/.test(trimmed)) {
-    const [n, d] = trimmed.split('/').map(Number);
-    if (d === 0) {
-      throw new Error(`Invalid ratio denominator for ${ctx}: ${raw}`);
+const BarSchema = z.object({
+  barId: z.string(), scaleId: z.enum(['5edo', '9edo', 'harmonic']), instrumentId: z.string(), edo: z.union([z.number(), z.literal('harmonic')]), step: z.number(), stepName: z.string(), centsFromStep0: z.number(), ratioToStep0: z.string(), hz: z.number(), audioPath: z.string(),
+});
+
+const centsDiff = (a: number, b: number) => 1200 * Math.log2(a / b);
+
+const deriveScaleId = (edoRaw: string, barId: string): ScaleId | null => {
+  const e = edoRaw.toLowerCase();
+  const b = barId.toLowerCase();
+  if (e === 'harmonic' || b.startsWith('harmonic-')) return 'harmonic';
+  if (e === '5' || b.startsWith('5edo-')) return '5edo';
+  if (e === '9' || b.startsWith('9edo-')) return '9edo';
+  return null;
+};
+
+function splitByRep(rows: Bar[], tol: number): Bar[][] {
+  const out: Bar[][] = [];
+  let i = 0;
+  while (i < rows.length) {
+    const seed = rows[i];
+    const tmp = [seed];
+    i++;
+    while (i < rows.length && Math.abs(centsDiff(rows[i].hz, seed.hz)) <= tol) {
+      tmp.push(rows[i]);
+      i++;
     }
-    const value = n / d;
-    if (!(value > 0)) {
-      throw new Error(`Ratio must be positive for ${ctx}: ${raw}`);
-    }
-    return value;
-  }
-  const value = parseNumber(trimmed, ctx);
-  if (!(value > 0)) {
-    throw new Error(`Ratio must be positive for ${ctx}: ${raw}`);
-  }
-  return value;
-}
-
-function inferScaleId(fileBase: string, rows: RawRow[]): string {
-  const lowered = fileBase.toLowerCase();
-  const nonEmptyEdo = rows.map((r) => r.edo?.trim()).find(Boolean);
-  if (nonEmptyEdo && /^\d+$/.test(nonEmptyEdo) && lowered.includes('edo')) {
-    return `${Number(nonEmptyEdo)}edo`;
-  }
-  return lowered;
-}
-
-function getOrdinalFromBarId(barId: string): number {
-  const match = barId.match(/-(\d+)$/);
-  if (!match) {
-    throw new Error(`bar_id missing ordinal suffix: ${barId}`);
-  }
-  return Number(match[1]);
-}
-
-async function listFilesRecursive(dir: string): Promise<string[]> {
-  const entries = await fs.readdir(dir, { withFileTypes: true });
-  const collected: string[] = [];
-  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      collected.push(...(await listFilesRecursive(full)));
-    } else {
-      collected.push(full);
+    const repBarId = [...tmp].map((x) => x.barId).sort((a, b) => a.localeCompare(b))[0];
+    const rep = tmp.find((x) => x.barId === repBarId)!;
+    const good = tmp.filter((x) => Math.abs(centsDiff(x.hz, rep.hz)) <= tol);
+    const bad = tmp.filter((x) => !good.includes(x));
+    out.push(good);
+    if (bad.length) {
+      const rest = splitByRep(bad, tol);
+      out.push(...rest);
     }
   }
-  return collected;
-}
-
-async function readWavMetadata(filePath: string): Promise<Pick<Sample, 'duration_seconds' | 'sample_rate_hz' | 'channels'>> {
-  const data = await fs.readFile(filePath);
-  if (data.toString('ascii', 0, 4) !== 'RIFF' || data.toString('ascii', 8, 12) !== 'WAVE') {
-    throw new Error(`Unsupported WAV format: ${filePath}`);
-  }
-
-  let offset = 12;
-  let sampleRate = 0;
-  let channels = 0;
-  let bitsPerSample = 0;
-  let dataSize = 0;
-
-  while (offset + 8 <= data.length) {
-    const chunkId = data.toString('ascii', offset, offset + 4);
-    const chunkSize = data.readUInt32LE(offset + 4);
-    const chunkStart = offset + 8;
-
-    if (chunkId === 'fmt ') {
-      channels = data.readUInt16LE(chunkStart + 2);
-      sampleRate = data.readUInt32LE(chunkStart + 4);
-      bitsPerSample = data.readUInt16LE(chunkStart + 14);
-    }
-
-    if (chunkId === 'data') {
-      dataSize = chunkSize;
-      break;
-    }
-
-    offset = chunkStart + chunkSize + (chunkSize % 2);
-  }
-
-  if (!sampleRate || !channels || !bitsPerSample || !dataSize) {
-    throw new Error(`Incomplete WAV metadata: ${filePath}`);
-  }
-
-  const bytesPerSample = bitsPerSample / 8;
-  const duration = dataSize / (sampleRate * channels * bytesPerSample);
-  return {
-    duration_seconds: Number(duration.toFixed(6)),
-    sample_rate_hz: sampleRate,
-    channels,
-  };
-}
-
-function parseCsv(csvText: string, fileName: string): RawRow[] {
-  const parsed = Papa.parse<RawRow>(csvText, {
-    header: true,
-    skipEmptyLines: 'greedy',
-  });
-  if (parsed.errors.length) {
-    throw new Error(`CSV parse errors in ${fileName}: ${parsed.errors.map((e) => e.message).join('; ')}`);
-  }
-  return parsed.data;
+  return out;
 }
 
 async function main() {
-  await fs.mkdir(OUT_DIR, { recursive: true });
-
-  const manifestFiles = (await fs.readdir(MANIFEST_DIR))
-    .filter((f) => f.toLowerCase().endsWith('.csv'))
-    .sort((a, b) => a.localeCompare(b));
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  const files = (await fs.readdir(MANIFEST_DIR)).filter((f) => f.endsWith('.csv')).sort((a, b) => a.localeCompare(b));
 
   const bars: Bar[] = [];
-  const scales: Scale[] = [];
-  const instrumentMap = new Map<string, Instrument>();
+  const missingAudio: string[] = [];
 
-  for (const fileName of manifestFiles) {
-    const fullPath = path.join(MANIFEST_DIR, fileName);
-    const csvText = await fs.readFile(fullPath, 'utf8');
-    const rows = parseCsv(csvText, fileName);
-    const fileBase = path.basename(fileName, '.csv');
-    const scale_id = inferScaleId(fileBase, rows);
+  for (const file of files) {
+    const text = await fs.readFile(path.join(MANIFEST_DIR, file), 'utf8');
+    const parsed = Papa.parse<Record<string, string>>(text, { header: true, skipEmptyLines: true });
+    if (parsed.errors.length) throw new Error(`${file}: ${parsed.errors[0].message}`);
+    const headers = parsed.meta.fields ?? [];
+    for (const col of reqCols) if (!headers.includes(col)) throw new Error(`${file}: missing required column '${col}'`);
 
-    for (const row of rows) {
-      const required = [
-        'bar_id',
-        'instrument_id',
-        'step',
-        'step_name',
-        'cents_from_step0',
-        'ratio_to_step0',
-        'freq_if_step0_is_C',
-      ] as const;
-      for (const key of required) {
-        if (!row[key] || !String(row[key]).trim()) {
-          throw new Error(`Missing required field '${key}' in ${fileName}`);
-        }
+    for (const row of parsed.data) {
+      const scaleId = deriveScaleId(row.edo ?? '', row.bar_id ?? '');
+      if (!scaleId) continue;
+      for (const col of reqCols) {
+        if (!(row[col] ?? '').toString().trim()) throw new Error(`${file}:${row.bar_id}: missing '${col}'`);
       }
+      const barId = row.bar_id.trim();
+      const audioPath = `/audio/${scaleId}/${barId}.wav`;
+      const audioFile = path.join(ROOT, audioPath);
+      try { await fs.access(audioFile); } catch { missingAudio.push(audioPath); }
+      bars.push({
+        barId,
+        scaleId,
+        instrumentId: row.instrument_id.trim(),
+        edo: scaleId === 'harmonic' ? 'harmonic' : Number(row.edo),
+        step: Number(row.step),
+        stepName: row.step_name.trim(),
+        centsFromStep0: Number(row.cents_from_step0),
+        ratioToStep0: row.ratio_to_step0.trim(),
+        hz: Number(row.freq_if_step0_is_C),
+        audioPath,
+      });
+    }
+  }
 
-      const hzColumns = Object.keys(row).filter((k) => /^hz/i.test(k) && k !== 'freq_if_step0_is_C');
-      if (hzColumns.length) {
-        // Explicitly ignored: non-canonical hz columns are not propagated.
-      }
+  const validBars = bars.map((b) => BarSchema.parse(b));
+  const barsById = new Map(validBars.map((b) => [b.barId, b]));
+  const allBarsSorted = [...validBars].sort((a, b) => a.hz - b.hz || a.barId.localeCompare(b.barId));
 
-      const bar: Bar = {
-        bar_id: row.bar_id.trim(),
-        instrument_id: row.instrument_id.trim(),
-        scale_id,
-        step: parseNumber(row.step, `${fileName}:${row.bar_id}:step`),
-        step_name: row.step_name.trim(),
-        cents_from_step0: parseNumber(row.cents_from_step0, `${fileName}:${row.bar_id}:cents_from_step0`),
-        ratio_to_step0: parseRatio(row.ratio_to_step0, `${fileName}:${row.bar_id}:ratio_to_step0`),
-        freq_hz: parseNumber(row.freq_if_step0_is_C, `${fileName}:${row.bar_id}:freq_if_step0_is_C`),
-        source_manifest: path.posix.join('manifest', fileName),
-        ordinal_in_scale: getOrdinalFromBarId(row.bar_id.trim()),
+  const scales = (['5edo', '9edo', 'harmonic'] as const).map((sid) => {
+    const scaleBars = validBars.filter((b) => b.scaleId === sid).sort((a, b) => a.step - b.step || a.barId.localeCompare(b.barId));
+    return { scaleId: sid, title: sid === '5edo' ? '5-EDO' : sid === '9edo' ? '9-EDO' : 'Harmonic Series', edo: sid === 'harmonic' ? 'harmonic' : Number(sid[0]), bars: scaleBars.map((b) => b.barId), stepsTotal: scaleBars.length };
+  });
+
+  const instruments = [...new Set(validBars.map((b) => b.instrumentId))].sort((a, b) => a.localeCompare(b)).map((instrumentId) => ({ instrumentId, label: instrumentId, scales: [...new Set(validBars.filter((b) => b.instrumentId === instrumentId).map((b) => b.scaleId))].sort() as ScaleId[] }));
+
+  const clustersByTolerance = Object.fromEntries(TOLS.map((tol) => {
+    const groups = splitByRep(allBarsSorted, tol).map((membersRaw) => {
+      const members = membersRaw.map((m) => m.barId).sort((a, b) => a.localeCompare(b));
+      const repBarId = members[0];
+      const repHz = barsById.get(repBarId)!.hz;
+      const cents = members.map((m) => centsDiff(barsById.get(m)!.hz, repHz));
+      const hzVals = members.map((m) => barsById.get(m)!.hz);
+      return {
+        groupId: `tol${tol}-${repBarId}`,
+        repBarId,
+        repHz,
+        members,
+        stats: {
+          minHz: Math.min(...hzVals),
+          maxHz: Math.max(...hzVals),
+          meanHz: hzVals.reduce((a, b) => a + b, 0) / hzVals.length,
+          maxCentsSpread: Math.max(...cents) - Math.min(...cents),
+          count: members.length,
+        },
       };
-
-      bars.push(bar);
-
-      if (!instrumentMap.has(bar.instrument_id)) {
-        instrumentMap.set(bar.instrument_id, {
-          instrument_id: bar.instrument_id,
-          label: bar.instrument_id,
-        });
-      }
-    }
-
-    const first = rows[0];
-    const edoRaw = first?.edo?.trim() ?? 'unknown';
-    const edo = /^\d+$/.test(edoRaw) ? Number(edoRaw) : edoRaw;
-    scales.push({
-      scale_id,
-      label: scale_id,
-      source_manifest: path.posix.join('manifest', fileName),
-      edo,
-      bar_count: rows.length,
     });
-  }
+    return [String(tol), groups];
+  })) as Record<'5' | '15' | '30', unknown>;
 
-  bars.sort((a, b) => a.scale_id.localeCompare(b.scale_id) || a.ordinal_in_scale - b.ordinal_in_scale || a.bar_id.localeCompare(b.bar_id));
-  scales.sort((a, b) => a.scale_id.localeCompare(b.scale_id));
-  const instruments = [...instrumentMap.values()].sort((a, b) => a.instrument_id.localeCompare(b.instrument_id));
-
-  const barIds = new Set<string>();
-  for (const bar of bars) {
-    if (barIds.has(bar.bar_id)) {
-      throw new Error(`Duplicate bar_id detected: ${bar.bar_id}`);
-    }
-    barIds.add(bar.bar_id);
-  }
-
-  const audioFiles = (await listFilesRecursive(AUDIO_DIR)).filter((f) => f.toLowerCase().endsWith('.wav'));
-  const barIdLookup = new Map<string, string>();
-  for (const id of barIds) {
-    barIdLookup.set(id.toLowerCase(), id);
-  }
-
-  const samples: Sample[] = [];
-  const unmatchedAudioFiles: string[] = [];
-
-  for (const audioFile of audioFiles) {
-    const relative = path.relative(ROOT, audioFile).split(path.sep).join('/');
-    const stem = path.basename(audioFile, path.extname(audioFile)).toLowerCase();
-    const matchedBarId = barIdLookup.get(stem);
-
-    if (!matchedBarId) {
-      unmatchedAudioFiles.push(relative);
-      continue;
-    }
-
-    const wavMeta = await readWavMetadata(audioFile);
-    samples.push({
-      bar_id: matchedBarId,
-      audio_path: relative,
-      ...wavMeta,
-    });
-  }
-
-  samples.sort((a, b) => a.bar_id.localeCompare(b.bar_id) || a.audio_path.localeCompare(b.audio_path));
-
-  const sampleBarCount = new Map<string, number>();
-  for (const sample of samples) {
-    sampleBarCount.set(sample.bar_id, (sampleBarCount.get(sample.bar_id) ?? 0) + 1);
-  }
-
-  const missingAudioBars = bars
-    .filter((bar) => !sampleBarCount.has(bar.bar_id))
-    .map((bar) => bar.bar_id)
-    .sort((a, b) => a.localeCompare(b));
-
-  barsSchema.parse(bars);
-  scalesSchema.parse(scales);
-  instrumentsSchema.parse(instruments);
-  samplesSchema.parse(samples);
-
-  const index = {
-    bars_by_id: Object.fromEntries(bars.map((bar) => [bar.bar_id, bar])),
-    bars_by_scale: Object.fromEntries(scales.map((scale) => [scale.scale_id, bars.filter((bar) => bar.scale_id === scale.scale_id).map((bar) => bar.bar_id)])),
-    samples_by_bar: Object.fromEntries(
-      [...sampleBarCount.keys()].sort((a, b) => a.localeCompare(b)).map((bar_id) => [bar_id, samples.filter((sample) => sample.bar_id === bar_id)]),
-    ),
+  const pitchIndex = {
+    allBarsSorted: allBarsSorted.map((b) => b.barId),
+    clustersByTolerance,
+    toleranceCentsPresets: [...TOLS],
   };
 
-  await fs.writeFile(path.join(OUT_DIR, 'bars.json'), `${JSON.stringify(bars, null, 2)}\n`);
-  await fs.writeFile(path.join(OUT_DIR, 'scales.json'), `${JSON.stringify(scales, null, 2)}\n`);
-  await fs.writeFile(path.join(OUT_DIR, 'instruments.json'), `${JSON.stringify(instruments, null, 2)}\n`);
-  await fs.writeFile(path.join(OUT_DIR, 'samples.json'), `${JSON.stringify(samples, null, 2)}\n`);
-  await fs.writeFile(path.join(OUT_DIR, 'index.json'), `${JSON.stringify(index, null, 2)}\n`);
+  const repoVersion = (await fs.readFile(path.join(ROOT, '.git', 'HEAD'), 'utf8').catch(() => '')).trim() || undefined;
 
-  console.log('Data build completed.');
-  console.log(`- Manifest CSV files: ${manifestFiles.length}`);
-  console.log(`- Bars: ${bars.length}`);
-  console.log(`- Scales: ${scales.length}`);
-  console.log(`- Instruments: ${instruments.length}`);
-  console.log(`- Samples: ${samples.length}`);
-  console.log(`- Bars missing audio: ${missingAudioBars.length}`);
-  if (missingAudioBars.length) {
-    console.log(`  ${missingAudioBars.join(', ')}`);
-  }
-  console.log(`- Unmatched audio files: ${unmatchedAudioFiles.length}`);
-  if (unmatchedAudioFiles.length) {
-    console.log(`  ${unmatchedAudioFiles.join(', ')}`);
+  await fs.writeFile(path.join(DATA_DIR, 'bars.json'), `${JSON.stringify(allBarsSorted, null, 2)}\n`);
+  await fs.writeFile(path.join(DATA_DIR, 'scales.json'), `${JSON.stringify(scales, null, 2)}\n`);
+  await fs.writeFile(path.join(DATA_DIR, 'instruments.json'), `${JSON.stringify(instruments, null, 2)}\n`);
+  await fs.writeFile(path.join(DATA_DIR, 'pitch_index.json'), `${JSON.stringify(pitchIndex, null, 2)}\n`);
+  await fs.writeFile(path.join(DATA_DIR, 'buildInfo.json'), `${JSON.stringify({ generatedAt: new Date().toISOString(), repoVersion, tolerancesCents: [...TOLS], algorithm: 'adjacency-cluster with lexicographic representative revalidation split' }, null, 2)}\n`);
+
+  if (missingAudio.length) {
+    console.warn(`Missing audio (${missingAudio.length}):`);
+    console.warn(missingAudio.join('\n'));
+    if (process.env.STRICT_AUDIO === '1') process.exitCode = 1;
   }
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
-  process.exitCode = 1;
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
 });

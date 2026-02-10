@@ -1,0 +1,10 @@
+{
+  "generatedAt": "2026-02-10T09:27:20.850Z",
+  "repoVersion": "ref: refs/heads/work",
+  "tolerancesCents": [
+    5,
+    15,
+    30
+  ],
+  "algorithm": "adjacency-cluster with lexicographic representative revalidation split"
+}
