@@ -1,18 +1,20 @@
+import { assetUrl } from '../lib/assetUrl';
 import type { Bar, PitchIndexJson, Scale } from './types';
 
 const cache = new Map<string, Promise<unknown>>();
 
 const loadJson = <T,>(path: string): Promise<T> => {
-  if (!cache.has(path)) {
+  const url = assetUrl(path);
+  if (!cache.has(url)) {
     cache.set(
-      path,
-      fetch(path).then(async (res) => {
-        if (!res.ok) throw new Error(`Failed loading ${path}: ${res.status}`);
+      url,
+      fetch(url).then(async (res) => {
+        if (!res.ok) throw new Error(`Failed loading ${url}: ${res.status}`);
         return res.json();
       }),
     );
   }
-  return cache.get(path) as Promise<T>;
+  return cache.get(url) as Promise<T>;
 };
 
 export const loadBars = () => loadJson<Bar[]>('data/bars.json');
