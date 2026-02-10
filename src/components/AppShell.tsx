@@ -2,16 +2,18 @@ import { Github } from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { MiniPlayer } from './MiniPlayer';
 
-const navClass = 'rounded-full border border-rim/70 bg-surface/70 px-3 py-1.5 text-xs font-medium backdrop-blur transition hover:bg-surface';
+const navClass = ({ isActive }: { isActive: boolean }) =>
+  `rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur transition ${isActive ? 'border-slate-900/40 bg-slate-900/85 text-white dark:border-white/40 dark:bg-white/85 dark:text-slate-900' : 'border-rim/70 bg-surface/70 hover:bg-surface'}`;
 
 export function AppShell() {
   return (
     <div className="min-h-screen text-text">
       <main className="mx-auto max-w-[1320px] px-4 py-5 pb-32 md:px-8">
         <div className="sticky top-0 z-30 mb-6 flex items-center justify-between rounded-3xl border border-black/10 border-b bg-white/60 px-4 py-3 shadow-glass backdrop-blur-md dark:border-white/10 dark:bg-black/30">
-          <Link to="/" className="font-mono text-sm tracking-wide">microtonal marimbas</Link>
+          <Link to="/" className="font-mono text-sm tracking-wide">Microtonal Marimba Instruments</Link>
           <nav className="flex items-center gap-2">
             <NavLink className={navClass} to="/">Home</NavLink>
+            <NavLink className={navClass} to="/about">About</NavLink>
             <a
               href="https://github.com/cbassuarez/microrimba"
               target="_blank"
