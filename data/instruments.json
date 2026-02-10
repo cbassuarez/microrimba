@@ -1,0 +1,23 @@
+[
+  {
+    "instrumentId": "5EDO",
+    "label": "5EDO",
+    "scales": [
+      "5edo"
+    ]
+  },
+  {
+    "instrumentId": "9EDO_MICRORIMBA",
+    "label": "9EDO_MICRORIMBA",
+    "scales": [
+      "9edo"
+    ]
+  },
+  {
+    "instrumentId": "harmonic",
+    "label": "harmonic",
+    "scales": [
+      "harmonic"
+    ]
+  }
+]

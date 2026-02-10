@@ -25,3 +25,34 @@ npm run build
 ```
 
 This builds the React/Vite static site and copies generated JSON artifacts into `dist/data/bars` for static hosting.
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+## Build data
+
+The app consumes static JSON in `/data/*.json` generated from `/manifest/*.csv`.
+
+```bash
+npm run data:build
+```
+
+To enforce all audio file paths exist during data generation:
+
+```bash
+STRICT_AUDIO=1 npm run data:build
+```
+
+## Deploy to GitHub Pages
+
+The Vite base path is configured for project pages (`/microrimba/`).
+A production build always regenerates JSON data first:
+
+```bash
+npm run build
+npm run preview
+```
