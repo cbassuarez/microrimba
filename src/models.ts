@@ -20,7 +20,7 @@ export const barSchema = z.object({
   step: z.number().int().nonnegative(),
   step_name: z.string().min(1),
   cents_from_step0: z.number(),
-  ratio_to_step0: z.number().positive(),
+  ratio_to_step0: z.string().min(1),
   freq_hz: z.number().positive(),
   source_manifest: z.string().min(1),
   ordinal_in_scale: z.number().int().positive(),
