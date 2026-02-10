@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { loadBars } from '../data/loaders';
 import type { BarId } from '../data/types';
-import { assetUrl } from '../lib/assetUrl';
 
 type Voice = { id: string; barId: BarId; startedAt: number; stop: () => void };
 
@@ -54,7 +53,8 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       if (!path) return;
 
       const id = `${barId}-${crypto.randomUUID()}`;
-      const audio = new Audio(assetUrl(path));
+      const src = `${import.meta.env.BASE_URL}${path}`;
+      const audio = new Audio(src);
       audio.volume = 1;
       audioByVoiceId.set(id, audio);
 

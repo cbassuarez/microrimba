@@ -4,6 +4,7 @@ import { useDataset } from '../data/useDataset';
 import { useAudio } from '../audio/AudioContextProvider';
 import type { ScaleId } from '../data/types';
 import { formatHz } from '../lib/format';
+import { prettyInstrumentLabel } from '../lib/labels';
 
 export function ScalePage() {
   const { scaleId } = useParams();
@@ -29,7 +30,7 @@ export function ScalePage() {
       {rows.map((bar) => (
         <div key={bar.barId} className="flex justify-between rounded-xl border border-rim bg-surface/60 p-2">
           <Link to={`/bar/${bar.barId}`}>{bar.barId}</Link>
-          <span>{bar.stepName}</span><span>{formatHz(bar.hz).text} Hz</span>
+          <span>{bar.stepName}</span><span>{prettyInstrumentLabel(bar.scaleId, bar.instrumentId, bar.edo)}</span><span>{formatHz(bar.hz).text} Hz</span>
           <button disabled={!canPlay(bar.barId)} onClick={() => playBar(bar.barId)}>Play</button>
         </div>
       ))}

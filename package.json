@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "data:build": "tsx scripts/build-data.ts",
-    "prebuild": "npm run data:build && mkdir -p public/data && cp -f data/bars.json data/scales.json data/pitch_index.json public/data/",
+    "prebuild": "npm run build:data && node scripts/copy-public-assets.mjs",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:data": "tsx scripts/build-data.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",

@@ -2,41 +2,73 @@
   "allBarsSorted": [
     "harmonic-001",
     "5EDO-001",
+    "8EDO-001",
     "harmonic-002",
     "9EDO-001",
+    "7EDO-001",
     "9EDO-002",
     "5EDO-002",
+    "7EDO-002",
+    "8EDO-002",
     "9EDO-003",
+    "7EDO-003",
+    "8EDO-003",
     "9EDO-004",
     "5EDO-003",
+    "8EDO-004",
     "9EDO-005",
+    "7EDO-004",
+    "8EDO-005",
     "9EDO-006",
+    "7EDO-005",
     "harmonic-003",
     "5EDO-004",
+    "8EDO-006",
     "9EDO-007",
+    "7EDO-006",
     "9EDO-008",
     "5EDO-005",
+    "8EDO-007",
+    "7EDO-007",
+    "8EDO-008",
     "9EDO-009",
     "5EDO-006",
+    "7EDO-008",
+    "8EDO-009",
     "harmonic-004",
     "9EDO-010",
     "9EDO-011",
+    "7EDO-009",
+    "8EDO-010",
     "5EDO-007",
     "9EDO-012",
+    "8EDO-011",
+    "7EDO-010",
     "harmonic-005",
     "9EDO-013",
     "5EDO-008",
+    "8EDO-012",
+    "7EDO-011",
     "9EDO-014",
+    "8EDO-013",
     "9EDO-015",
+    "7EDO-012",
     "5EDO-009",
     "harmonic-006",
+    "8EDO-014",
     "9EDO-016",
+    "7EDO-013",
+    "8EDO-015",
     "9EDO-017",
     "5EDO-010",
     "harmonic-007",
+    "7EDO-014",
     "9EDO-018",
+    "8EDO-016",
     "9EDO-019",
     "5EDO-011",
+    "7EDO-015",
+    "8EDO-017",
     "harmonic-008",
     "harmonic-009",
     "harmonic-010",
@@ -86,6 +118,7 @@
         "repHz": 129.199,
         "members": [
           "5EDO-001",
+          "8EDO-001",
           "harmonic-002"
         ],
         "stats": {
@@ -93,7 +126,7 @@
           "maxHz": 129.199,
           "meanHz": 129.199,
           "maxCentsSpread": 0,
-          "count": 2
+          "count": 3
         }
       },
       {
@@ -107,6 +140,21 @@
           "minHz": 130.812782650299,
           "maxHz": 130.812782650299,
           "meanHz": 130.812782650299,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
+        "groupId": "tol5-7EDO-001",
+        "repBarId": "7EDO-001",
+        "repHz": 131.646138,
+        "members": [
+          "7EDO-001"
+        ],
+        "stats": {
+          "minHz": 131.646138,
+          "maxHz": 131.646138,
+          "meanHz": 131.646138,
           "maxCentsSpread": 0,
           "count": 1
         }
@@ -131,14 +179,16 @@
         "repBarId": "5EDO-002",
         "repHz": 150.732,
         "members": [
-          "5EDO-002"
+          "5EDO-002",
+          "7EDO-002",
+          "8EDO-002"
         ],
         "stats": {
           "minHz": 150.732,
           "maxHz": 150.732,
           "meanHz": 150.732,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 3
         }
       },
       {
@@ -154,6 +204,22 @@
           "meanHz": 152.596909709333,
           "maxCentsSpread": 0,
           "count": 1
+        }
+      },
+      {
+        "groupId": "tol5-7EDO-003",
+        "repBarId": "7EDO-003",
+        "repHz": 161.499,
+        "members": [
+          "7EDO-003",
+          "8EDO-003"
+        ],
+        "stats": {
+          "minHz": 161.499,
+          "maxHz": 161.499,
+          "meanHz": 161.499,
+          "maxCentsSpread": 0,
+          "count": 2
         }
       },
       {
@@ -176,14 +242,15 @@
         "repBarId": "5EDO-003",
         "repHz": 172.266,
         "members": [
-          "5EDO-003"
+          "5EDO-003",
+          "8EDO-004"
         ],
         "stats": {
           "minHz": 172.266,
           "maxHz": 172.266,
           "meanHz": 172.266,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 2
         }
       },
       {
@@ -202,6 +269,22 @@
         }
       },
       {
+        "groupId": "tol5-7EDO-004",
+        "repBarId": "7EDO-004",
+        "repHz": 183.032,
+        "members": [
+          "7EDO-004",
+          "8EDO-005"
+        ],
+        "stats": {
+          "minHz": 183.032,
+          "maxHz": 183.032,
+          "meanHz": 183.032,
+          "maxCentsSpread": 0,
+          "count": 2
+        }
+      },
+      {
         "groupId": "tol5-9EDO-006",
         "repBarId": "9EDO-006",
         "repHz": 192.260058691696,
@@ -217,10 +300,11 @@
         }
       },
       {
-        "groupId": "tol5-harmonic-003",
-        "repBarId": "harmonic-003",
+        "groupId": "tol5-7EDO-005",
+        "repBarId": "7EDO-005",
         "repHz": 193.799,
         "members": [
+          "7EDO-005",
           "harmonic-003"
         ],
         "stats": {
@@ -228,7 +312,7 @@
           "maxHz": 193.799,
           "meanHz": 193.799,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 2
         }
       },
       {
@@ -236,14 +320,15 @@
         "repBarId": "5EDO-004",
         "repHz": 204.565,
         "members": [
-          "5EDO-004"
+          "5EDO-004",
+          "8EDO-006"
         ],
         "stats": {
           "minHz": 204.565,
           "maxHz": 204.565,
           "meanHz": 204.565,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 2
         }
       },
       {
@@ -257,6 +342,21 @@
           "minHz": 207.652348789972,
           "maxHz": 207.652348789972,
           "meanHz": 207.652348789972,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
+        "groupId": "tol5-7EDO-006",
+        "repBarId": "7EDO-006",
+        "repHz": 215.332,
+        "members": [
+          "7EDO-006"
+        ],
+        "stats": {
+          "minHz": 215.332,
+          "maxHz": 215.332,
+          "meanHz": 215.332,
           "maxCentsSpread": 0,
           "count": 1
         }
@@ -281,14 +381,31 @@
         "repBarId": "5EDO-005",
         "repHz": 226.099,
         "members": [
-          "5EDO-005"
+          "5EDO-005",
+          "8EDO-007"
         ],
         "stats": {
           "minHz": 226.099,
           "maxHz": 226.099,
           "meanHz": 226.099,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 2
+        }
+      },
+      {
+        "groupId": "tol5-7EDO-007",
+        "repBarId": "7EDO-007",
+        "repHz": 236.865,
+        "members": [
+          "7EDO-007",
+          "8EDO-008"
+        ],
+        "stats": {
+          "minHz": 236.865,
+          "maxHz": 236.865,
+          "meanHz": 236.865,
+          "maxCentsSpread": 0,
+          "count": 2
         }
       },
       {
@@ -312,6 +429,8 @@
         "repHz": 258.398,
         "members": [
           "5EDO-006",
+          "7EDO-008",
+          "8EDO-009",
           "harmonic-004"
         ],
         "stats": {
@@ -319,7 +438,7 @@
           "maxHz": 258.398,
           "meanHz": 258.398,
           "maxCentsSpread": 0,
-          "count": 2
+          "count": 4
         }
       },
       {
@@ -353,6 +472,22 @@
         }
       },
       {
+        "groupId": "tol5-7EDO-009",
+        "repBarId": "7EDO-009",
+        "repHz": 290.698,
+        "members": [
+          "7EDO-009",
+          "8EDO-010"
+        ],
+        "stats": {
+          "minHz": 290.698,
+          "maxHz": 290.698,
+          "meanHz": 290.698,
+          "maxCentsSpread": 0,
+          "count": 2
+        }
+      },
+      {
         "groupId": "tol5-5EDO-007",
         "repBarId": "5EDO-007",
         "repHz": 301.465,
@@ -383,10 +518,26 @@
         }
       },
       {
-        "groupId": "tol5-harmonic-005",
-        "repBarId": "harmonic-005",
+        "groupId": "tol5-8EDO-011",
+        "repBarId": "8EDO-011",
+        "repHz": 312.231,
+        "members": [
+          "8EDO-011"
+        ],
+        "stats": {
+          "minHz": 312.231,
+          "maxHz": 312.231,
+          "meanHz": 312.231,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
+        "groupId": "tol5-7EDO-010",
+        "repBarId": "7EDO-010",
         "repHz": 322.998,
         "members": [
+          "7EDO-010",
           "harmonic-005"
         ],
         "stats": {
@@ -394,7 +545,7 @@
           "maxHz": 322.998,
           "meanHz": 322.998,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 2
         }
       },
       {
@@ -417,27 +568,44 @@
         "repBarId": "5EDO-008",
         "repHz": 344.531,
         "members": [
-          "5EDO-008"
+          "5EDO-008",
+          "8EDO-012"
         ],
         "stats": {
           "minHz": 344.531,
           "maxHz": 344.531,
           "meanHz": 344.531,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 2
         }
       },
       {
-        "groupId": "tol5-9EDO-014",
-        "repBarId": "9EDO-014",
-        "repHz": 356.017453051024,
+        "groupId": "tol5-7EDO-011",
+        "repBarId": "7EDO-011",
+        "repHz": 355.298,
         "members": [
+          "7EDO-011",
           "9EDO-014"
         ],
         "stats": {
-          "minHz": 356.017453051024,
+          "minHz": 355.298,
           "maxHz": 356.017453051024,
-          "meanHz": 356.017453051024,
+          "meanHz": 355.657726525512,
+          "maxCentsSpread": 3.5020806536114337,
+          "count": 2
+        }
+      },
+      {
+        "groupId": "tol5-8EDO-013",
+        "repBarId": "8EDO-013",
+        "repHz": 376.831,
+        "members": [
+          "8EDO-013"
+        ],
+        "stats": {
+          "minHz": 376.831,
+          "maxHz": 376.831,
+          "meanHz": 376.831,
           "maxCentsSpread": 0,
           "count": 1
         }
@@ -453,6 +621,21 @@
           "minHz": 384.520117383392,
           "maxHz": 384.520117383392,
           "meanHz": 384.520117383392,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
+        "groupId": "tol5-7EDO-012",
+        "repBarId": "7EDO-012",
+        "repHz": 387.598,
+        "members": [
+          "7EDO-012"
+        ],
+        "stats": {
+          "minHz": 387.598,
+          "maxHz": 387.598,
+          "meanHz": 387.598,
           "maxCentsSpread": 0,
           "count": 1
         }
@@ -474,6 +657,21 @@
         }
       },
       {
+        "groupId": "tol5-8EDO-014",
+        "repBarId": "8EDO-014",
+        "repHz": 409.131,
+        "members": [
+          "8EDO-014"
+        ],
+        "stats": {
+          "minHz": 409.131,
+          "maxHz": 409.131,
+          "meanHz": 409.131,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
         "groupId": "tol5-9EDO-016",
         "repBarId": "9EDO-016",
         "repHz": 415.304697579945,
@@ -484,6 +682,36 @@
           "minHz": 415.304697579945,
           "maxHz": 415.304697579945,
           "meanHz": 415.304697579945,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
+        "groupId": "tol5-7EDO-013",
+        "repBarId": "7EDO-013",
+        "repHz": 430.664,
+        "members": [
+          "7EDO-013"
+        ],
+        "stats": {
+          "minHz": 430.664,
+          "maxHz": 430.664,
+          "meanHz": 430.664,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
+        "groupId": "tol5-8EDO-015",
+        "repBarId": "8EDO-015",
+        "repHz": 441.431,
+        "members": [
+          "8EDO-015"
+        ],
+        "stats": {
+          "minHz": 441.431,
+          "maxHz": 441.431,
+          "meanHz": 441.431,
           "maxCentsSpread": 0,
           "count": 1
         }
@@ -520,18 +748,34 @@
         }
       },
       {
-        "groupId": "tol5-9EDO-018",
-        "repBarId": "9EDO-018",
-        "repHz": 484.464989999383,
+        "groupId": "tol5-7EDO-014",
+        "repBarId": "7EDO-014",
+        "repHz": 473.73,
         "members": [
+          "7EDO-014"
+        ],
+        "stats": {
+          "minHz": 473.73,
+          "maxHz": 473.73,
+          "meanHz": 473.73,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
+        "groupId": "tol5-8EDO-016",
+        "repBarId": "8EDO-016",
+        "repHz": 484.497,
+        "members": [
+          "8EDO-016",
           "9EDO-018"
         ],
         "stats": {
           "minHz": 484.464989999383,
-          "maxHz": 484.464989999383,
-          "meanHz": 484.464989999383,
-          "maxCentsSpread": 0,
-          "count": 1
+          "maxHz": 484.497,
+          "meanHz": 484.4809949996915,
+          "maxCentsSpread": 0.11438385317665456,
+          "count": 2
         }
       },
       {
@@ -555,6 +799,8 @@
         "repHz": 527.563,
         "members": [
           "5EDO-011",
+          "7EDO-015",
+          "8EDO-017",
           "harmonic-008"
         ],
         "stats": {
@@ -562,7 +808,7 @@
           "maxHz": 527.563,
           "meanHz": 527.563,
           "maxCentsSpread": 0,
-          "count": 2
+          "count": 4
         }
       },
       {
@@ -948,6 +1194,7 @@
         "repHz": 129.199,
         "members": [
           "5EDO-001",
+          "8EDO-001",
           "harmonic-002"
         ],
         "stats": {
@@ -955,22 +1202,23 @@
           "maxHz": 129.199,
           "meanHz": 129.199,
           "maxCentsSpread": 0,
-          "count": 2
+          "count": 3
         }
       },
       {
-        "groupId": "tol15-9EDO-001",
-        "repBarId": "9EDO-001",
-        "repHz": 130.812782650299,
+        "groupId": "tol15-7EDO-001",
+        "repBarId": "7EDO-001",
+        "repHz": 131.646138,
         "members": [
+          "7EDO-001",
           "9EDO-001"
         ],
         "stats": {
           "minHz": 130.812782650299,
-          "maxHz": 130.812782650299,
-          "meanHz": 130.812782650299,
-          "maxCentsSpread": 0,
-          "count": 1
+          "maxHz": 131.646138,
+          "meanHz": 131.2294603251495,
+          "maxCentsSpread": 10.994010043740523,
+          "count": 2
         }
       },
       {
@@ -993,14 +1241,16 @@
         "repBarId": "5EDO-002",
         "repHz": 150.732,
         "members": [
-          "5EDO-002"
+          "5EDO-002",
+          "7EDO-002",
+          "8EDO-002"
         ],
         "stats": {
           "minHz": 150.732,
           "maxHz": 150.732,
           "meanHz": 150.732,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 3
         }
       },
       {
@@ -1016,6 +1266,22 @@
           "meanHz": 152.596909709333,
           "maxCentsSpread": 0,
           "count": 1
+        }
+      },
+      {
+        "groupId": "tol15-7EDO-003",
+        "repBarId": "7EDO-003",
+        "repHz": 161.499,
+        "members": [
+          "7EDO-003",
+          "8EDO-003"
+        ],
+        "stats": {
+          "minHz": 161.499,
+          "maxHz": 161.499,
+          "meanHz": 161.499,
+          "maxCentsSpread": 0,
+          "count": 2
         }
       },
       {
@@ -1038,14 +1304,15 @@
         "repBarId": "5EDO-003",
         "repHz": 172.266,
         "members": [
-          "5EDO-003"
+          "5EDO-003",
+          "8EDO-004"
         ],
         "stats": {
           "minHz": 172.266,
           "maxHz": 172.266,
           "meanHz": 172.266,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 2
         }
       },
       {
@@ -1064,19 +1331,36 @@
         }
       },
       {
-        "groupId": "tol15-9EDO-006",
-        "repBarId": "9EDO-006",
-        "repHz": 192.260058691696,
+        "groupId": "tol15-7EDO-004",
+        "repBarId": "7EDO-004",
+        "repHz": 183.032,
         "members": [
+          "7EDO-004",
+          "8EDO-005"
+        ],
+        "stats": {
+          "minHz": 183.032,
+          "maxHz": 183.032,
+          "meanHz": 183.032,
+          "maxCentsSpread": 0,
+          "count": 2
+        }
+      },
+      {
+        "groupId": "tol15-7EDO-005",
+        "repBarId": "7EDO-005",
+        "repHz": 193.799,
+        "members": [
+          "7EDO-005",
           "9EDO-006",
           "harmonic-003"
         ],
         "stats": {
           "minHz": 192.260058691696,
           "maxHz": 193.799,
-          "meanHz": 193.029529345848,
-          "maxCentsSpread": 13.802456617728016,
-          "count": 2
+          "meanHz": 193.28601956389866,
+          "maxCentsSpread": 13.802456617728039,
+          "count": 3
         }
       },
       {
@@ -1084,14 +1368,15 @@
         "repBarId": "5EDO-004",
         "repHz": 204.565,
         "members": [
-          "5EDO-004"
+          "5EDO-004",
+          "8EDO-006"
         ],
         "stats": {
           "minHz": 204.565,
           "maxHz": 204.565,
           "meanHz": 204.565,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 2
         }
       },
       {
@@ -1110,18 +1395,50 @@
         }
       },
       {
+        "groupId": "tol15-7EDO-006",
+        "repBarId": "7EDO-006",
+        "repHz": 215.332,
+        "members": [
+          "7EDO-006"
+        ],
+        "stats": {
+          "minHz": 215.332,
+          "maxHz": 215.332,
+          "meanHz": 215.332,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
         "groupId": "tol15-5EDO-005",
         "repBarId": "5EDO-005",
         "repHz": 226.099,
         "members": [
           "5EDO-005",
+          "8EDO-007",
           "9EDO-008"
         ],
         "stats": {
           "minHz": 224.276941614472,
           "maxHz": 226.099,
-          "meanHz": 225.187970807236,
+          "meanHz": 225.49164720482398,
           "maxCentsSpread": 14.007971717516968,
+          "count": 3
+        }
+      },
+      {
+        "groupId": "tol15-7EDO-007",
+        "repBarId": "7EDO-007",
+        "repHz": 236.865,
+        "members": [
+          "7EDO-007",
+          "8EDO-008"
+        ],
+        "stats": {
+          "minHz": 236.865,
+          "maxHz": 236.865,
+          "meanHz": 236.865,
+          "maxCentsSpread": 0,
           "count": 2
         }
       },
@@ -1146,6 +1463,8 @@
         "repHz": 258.398,
         "members": [
           "5EDO-006",
+          "7EDO-008",
+          "8EDO-009",
           "harmonic-004"
         ],
         "stats": {
@@ -1153,7 +1472,7 @@
           "maxHz": 258.398,
           "meanHz": 258.398,
           "maxCentsSpread": 0,
-          "count": 2
+          "count": 4
         }
       },
       {
@@ -1187,6 +1506,22 @@
         }
       },
       {
+        "groupId": "tol15-7EDO-009",
+        "repBarId": "7EDO-009",
+        "repHz": 290.698,
+        "members": [
+          "7EDO-009",
+          "8EDO-010"
+        ],
+        "stats": {
+          "minHz": 290.698,
+          "maxHz": 290.698,
+          "meanHz": 290.698,
+          "maxCentsSpread": 0,
+          "count": 2
+        }
+      },
+      {
         "groupId": "tol15-5EDO-007",
         "repBarId": "5EDO-007",
         "repHz": 301.465,
@@ -1217,10 +1552,26 @@
         }
       },
       {
-        "groupId": "tol15-harmonic-005",
-        "repBarId": "harmonic-005",
+        "groupId": "tol15-8EDO-011",
+        "repBarId": "8EDO-011",
+        "repHz": 312.231,
+        "members": [
+          "8EDO-011"
+        ],
+        "stats": {
+          "minHz": 312.231,
+          "maxHz": 312.231,
+          "meanHz": 312.231,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
+        "groupId": "tol15-7EDO-010",
+        "repBarId": "7EDO-010",
         "repHz": 322.998,
         "members": [
+          "7EDO-010",
           "harmonic-005"
         ],
         "stats": {
@@ -1228,7 +1579,7 @@
           "maxHz": 322.998,
           "meanHz": 322.998,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 2
         }
       },
       {
@@ -1251,44 +1602,62 @@
         "repBarId": "5EDO-008",
         "repHz": 344.531,
         "members": [
-          "5EDO-008"
+          "5EDO-008",
+          "8EDO-012"
         ],
         "stats": {
           "minHz": 344.531,
           "maxHz": 344.531,
           "meanHz": 344.531,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 2
         }
       },
       {
-        "groupId": "tol15-9EDO-014",
-        "repBarId": "9EDO-014",
-        "repHz": 356.017453051024,
+        "groupId": "tol15-7EDO-011",
+        "repBarId": "7EDO-011",
+        "repHz": 355.298,
         "members": [
+          "7EDO-011",
           "9EDO-014"
         ],
         "stats": {
-          "minHz": 356.017453051024,
+          "minHz": 355.298,
           "maxHz": 356.017453051024,
-          "meanHz": 356.017453051024,
+          "meanHz": 355.657726525512,
+          "maxCentsSpread": 3.5020806536114337,
+          "count": 2
+        }
+      },
+      {
+        "groupId": "tol15-8EDO-013",
+        "repBarId": "8EDO-013",
+        "repHz": 376.831,
+        "members": [
+          "8EDO-013"
+        ],
+        "stats": {
+          "minHz": 376.831,
+          "maxHz": 376.831,
+          "meanHz": 376.831,
           "maxCentsSpread": 0,
           "count": 1
         }
       },
       {
-        "groupId": "tol15-9EDO-015",
-        "repBarId": "9EDO-015",
-        "repHz": 384.520117383392,
+        "groupId": "tol15-7EDO-012",
+        "repBarId": "7EDO-012",
+        "repHz": 387.598,
         "members": [
+          "7EDO-012",
           "9EDO-015"
         ],
         "stats": {
           "minHz": 384.520117383392,
-          "maxHz": 384.520117383392,
-          "meanHz": 384.520117383392,
-          "maxCentsSpread": 0,
-          "count": 1
+          "maxHz": 387.598,
+          "meanHz": 386.059058691696,
+          "maxCentsSpread": 13.802456617728039,
+          "count": 2
         }
       },
       {
@@ -1308,6 +1677,21 @@
         }
       },
       {
+        "groupId": "tol15-8EDO-014",
+        "repBarId": "8EDO-014",
+        "repHz": 409.131,
+        "members": [
+          "8EDO-014"
+        ],
+        "stats": {
+          "minHz": 409.131,
+          "maxHz": 409.131,
+          "meanHz": 409.131,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
         "groupId": "tol15-9EDO-016",
         "repBarId": "9EDO-016",
         "repHz": 415.304697579945,
@@ -1318,6 +1702,36 @@
           "minHz": 415.304697579945,
           "maxHz": 415.304697579945,
           "meanHz": 415.304697579945,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
+        "groupId": "tol15-7EDO-013",
+        "repBarId": "7EDO-013",
+        "repHz": 430.664,
+        "members": [
+          "7EDO-013"
+        ],
+        "stats": {
+          "minHz": 430.664,
+          "maxHz": 430.664,
+          "meanHz": 430.664,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
+        "groupId": "tol15-8EDO-015",
+        "repBarId": "8EDO-015",
+        "repHz": 441.431,
+        "members": [
+          "8EDO-015"
+        ],
+        "stats": {
+          "minHz": 441.431,
+          "maxHz": 441.431,
+          "meanHz": 441.431,
           "maxCentsSpread": 0,
           "count": 1
         }
@@ -1354,18 +1768,34 @@
         }
       },
       {
-        "groupId": "tol15-9EDO-018",
-        "repBarId": "9EDO-018",
-        "repHz": 484.464989999383,
+        "groupId": "tol15-7EDO-014",
+        "repBarId": "7EDO-014",
+        "repHz": 473.73,
         "members": [
+          "7EDO-014"
+        ],
+        "stats": {
+          "minHz": 473.73,
+          "maxHz": 473.73,
+          "meanHz": 473.73,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
+        "groupId": "tol15-8EDO-016",
+        "repBarId": "8EDO-016",
+        "repHz": 484.497,
+        "members": [
+          "8EDO-016",
           "9EDO-018"
         ],
         "stats": {
           "minHz": 484.464989999383,
-          "maxHz": 484.464989999383,
-          "meanHz": 484.464989999383,
-          "maxCentsSpread": 0,
-          "count": 1
+          "maxHz": 484.497,
+          "meanHz": 484.4809949996915,
+          "maxCentsSpread": 0.11438385317665456,
+          "count": 2
         }
       },
       {
@@ -1374,15 +1804,17 @@
         "repHz": 527.563,
         "members": [
           "5EDO-011",
+          "7EDO-015",
+          "8EDO-017",
           "9EDO-019",
           "harmonic-008"
         ],
         "stats": {
           "minHz": 523.251130601197,
           "maxHz": 527.563,
-          "meanHz": 526.1257102003991,
+          "meanHz": 526.7006261202393,
           "maxCentsSpread": 14.207835235637894,
-          "count": 3
+          "count": 5
         }
       },
       {
@@ -1768,15 +2200,31 @@
         "repHz": 129.199,
         "members": [
           "5EDO-001",
+          "8EDO-001",
           "9EDO-001",
           "harmonic-002"
         ],
         "stats": {
           "minHz": 129.199,
           "maxHz": 130.812782650299,
-          "meanHz": 129.73692755009967,
+          "meanHz": 129.60244566257478,
           "maxCentsSpread": 21.490344157911025,
-          "count": 3
+          "count": 4
+        }
+      },
+      {
+        "groupId": "tol30-7EDO-001",
+        "repBarId": "7EDO-001",
+        "repHz": 131.646138,
+        "members": [
+          "7EDO-001"
+        ],
+        "stats": {
+          "minHz": 131.646138,
+          "maxHz": 131.646138,
+          "meanHz": 131.646138,
+          "maxCentsSpread": 0,
+          "count": 1
         }
       },
       {
@@ -1800,13 +2248,31 @@
         "repHz": 150.732,
         "members": [
           "5EDO-002",
+          "7EDO-002",
+          "8EDO-002",
           "9EDO-003"
         ],
         "stats": {
           "minHz": 150.732,
           "maxHz": 152.596909709333,
-          "meanHz": 151.6644548546665,
+          "meanHz": 151.19822742733325,
           "maxCentsSpread": 21.28801947162597,
+          "count": 4
+        }
+      },
+      {
+        "groupId": "tol30-7EDO-003",
+        "repBarId": "7EDO-003",
+        "repHz": 161.499,
+        "members": [
+          "7EDO-003",
+          "8EDO-003"
+        ],
+        "stats": {
+          "minHz": 161.499,
+          "maxHz": 161.499,
+          "meanHz": 161.499,
+          "maxCentsSpread": 0,
           "count": 2
         }
       },
@@ -1830,14 +2296,15 @@
         "repBarId": "5EDO-003",
         "repHz": 172.266,
         "members": [
-          "5EDO-003"
+          "5EDO-003",
+          "8EDO-004"
         ],
         "stats": {
           "minHz": 172.266,
           "maxHz": 172.266,
           "meanHz": 172.266,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 2
         }
       },
       {
@@ -1856,19 +2323,36 @@
         }
       },
       {
-        "groupId": "tol30-9EDO-006",
-        "repBarId": "9EDO-006",
-        "repHz": 192.260058691696,
+        "groupId": "tol30-7EDO-004",
+        "repBarId": "7EDO-004",
+        "repHz": 183.032,
         "members": [
+          "7EDO-004",
+          "8EDO-005"
+        ],
+        "stats": {
+          "minHz": 183.032,
+          "maxHz": 183.032,
+          "meanHz": 183.032,
+          "maxCentsSpread": 0,
+          "count": 2
+        }
+      },
+      {
+        "groupId": "tol30-7EDO-005",
+        "repBarId": "7EDO-005",
+        "repHz": 193.799,
+        "members": [
+          "7EDO-005",
           "9EDO-006",
           "harmonic-003"
         ],
         "stats": {
           "minHz": 192.260058691696,
           "maxHz": 193.799,
-          "meanHz": 193.029529345848,
-          "maxCentsSpread": 13.802456617728016,
-          "count": 2
+          "meanHz": 193.28601956389866,
+          "maxCentsSpread": 13.802456617728039,
+          "count": 3
         }
       },
       {
@@ -1877,14 +2361,30 @@
         "repHz": 204.565,
         "members": [
           "5EDO-004",
+          "8EDO-006",
           "9EDO-007"
         ],
         "stats": {
           "minHz": 204.565,
           "maxHz": 207.652348789972,
-          "meanHz": 206.108674394986,
+          "meanHz": 205.59411626332403,
           "maxCentsSpread": 25.93303414103703,
-          "count": 2
+          "count": 3
+        }
+      },
+      {
+        "groupId": "tol30-7EDO-006",
+        "repBarId": "7EDO-006",
+        "repHz": 215.332,
+        "members": [
+          "7EDO-006"
+        ],
+        "stats": {
+          "minHz": 215.332,
+          "maxHz": 215.332,
+          "meanHz": 215.332,
+          "maxCentsSpread": 0,
+          "count": 1
         }
       },
       {
@@ -1893,13 +2393,30 @@
         "repHz": 226.099,
         "members": [
           "5EDO-005",
+          "8EDO-007",
           "9EDO-008"
         ],
         "stats": {
           "minHz": 224.276941614472,
           "maxHz": 226.099,
-          "meanHz": 225.187970807236,
+          "meanHz": 225.49164720482398,
           "maxCentsSpread": 14.007971717516968,
+          "count": 3
+        }
+      },
+      {
+        "groupId": "tol30-7EDO-007",
+        "repBarId": "7EDO-007",
+        "repHz": 236.865,
+        "members": [
+          "7EDO-007",
+          "8EDO-008"
+        ],
+        "stats": {
+          "minHz": 236.865,
+          "maxHz": 236.865,
+          "meanHz": 236.865,
+          "maxCentsSpread": 0,
           "count": 2
         }
       },
@@ -1924,15 +2441,17 @@
         "repHz": 258.398,
         "members": [
           "5EDO-006",
+          "7EDO-008",
+          "8EDO-009",
           "9EDO-010",
           "harmonic-004"
         ],
         "stats": {
           "minHz": 258.398,
           "maxHz": 261.625565300599,
-          "meanHz": 259.4738551001997,
+          "meanHz": 259.04351306011984,
           "maxCentsSpread": 21.49034415791786,
-          "count": 3
+          "count": 5
         }
       },
       {
@@ -1948,6 +2467,22 @@
           "meanHz": 282.571239746116,
           "maxCentsSpread": 0,
           "count": 1
+        }
+      },
+      {
+        "groupId": "tol30-7EDO-009",
+        "repBarId": "7EDO-009",
+        "repHz": 290.698,
+        "members": [
+          "7EDO-009",
+          "8EDO-010"
+        ],
+        "stats": {
+          "minHz": 290.698,
+          "maxHz": 290.698,
+          "meanHz": 290.698,
+          "maxCentsSpread": 0,
+          "count": 2
         }
       },
       {
@@ -1967,10 +2502,26 @@
         }
       },
       {
-        "groupId": "tol30-harmonic-005",
-        "repBarId": "harmonic-005",
+        "groupId": "tol30-8EDO-011",
+        "repBarId": "8EDO-011",
+        "repHz": 312.231,
+        "members": [
+          "8EDO-011"
+        ],
+        "stats": {
+          "minHz": 312.231,
+          "maxHz": 312.231,
+          "meanHz": 312.231,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
+        "groupId": "tol30-7EDO-010",
+        "repBarId": "7EDO-010",
         "repHz": 322.998,
         "members": [
+          "7EDO-010",
           "harmonic-005"
         ],
         "stats": {
@@ -1978,7 +2529,7 @@
           "maxHz": 322.998,
           "meanHz": 322.998,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 2
         }
       },
       {
@@ -2001,44 +2552,62 @@
         "repBarId": "5EDO-008",
         "repHz": 344.531,
         "members": [
-          "5EDO-008"
+          "5EDO-008",
+          "8EDO-012"
         ],
         "stats": {
           "minHz": 344.531,
           "maxHz": 344.531,
           "meanHz": 344.531,
           "maxCentsSpread": 0,
-          "count": 1
+          "count": 2
         }
       },
       {
-        "groupId": "tol30-9EDO-014",
-        "repBarId": "9EDO-014",
-        "repHz": 356.017453051024,
+        "groupId": "tol30-7EDO-011",
+        "repBarId": "7EDO-011",
+        "repHz": 355.298,
         "members": [
+          "7EDO-011",
           "9EDO-014"
         ],
         "stats": {
-          "minHz": 356.017453051024,
+          "minHz": 355.298,
           "maxHz": 356.017453051024,
-          "meanHz": 356.017453051024,
+          "meanHz": 355.657726525512,
+          "maxCentsSpread": 3.5020806536114337,
+          "count": 2
+        }
+      },
+      {
+        "groupId": "tol30-8EDO-013",
+        "repBarId": "8EDO-013",
+        "repHz": 376.831,
+        "members": [
+          "8EDO-013"
+        ],
+        "stats": {
+          "minHz": 376.831,
+          "maxHz": 376.831,
+          "meanHz": 376.831,
           "maxCentsSpread": 0,
           "count": 1
         }
       },
       {
-        "groupId": "tol30-9EDO-015",
-        "repBarId": "9EDO-015",
-        "repHz": 384.520117383392,
+        "groupId": "tol30-7EDO-012",
+        "repBarId": "7EDO-012",
+        "repHz": 387.598,
         "members": [
+          "7EDO-012",
           "9EDO-015"
         ],
         "stats": {
           "minHz": 384.520117383392,
-          "maxHz": 384.520117383392,
-          "meanHz": 384.520117383392,
-          "maxCentsSpread": 0,
-          "count": 1
+          "maxHz": 387.598,
+          "meanHz": 386.059058691696,
+          "maxCentsSpread": 13.802456617728039,
+          "count": 2
         }
       },
       {
@@ -2058,33 +2627,50 @@
         }
       },
       {
-        "groupId": "tol30-9EDO-016",
-        "repBarId": "9EDO-016",
-        "repHz": 415.304697579945,
+        "groupId": "tol30-8EDO-014",
+        "repBarId": "8EDO-014",
+        "repHz": 409.131,
         "members": [
+          "8EDO-014",
           "9EDO-016"
         ],
         "stats": {
-          "minHz": 415.304697579945,
+          "minHz": 409.131,
           "maxHz": 415.304697579945,
-          "meanHz": 415.304697579945,
+          "meanHz": 412.2178487899725,
+          "maxCentsSpread": 25.92880264510282,
+          "count": 2
+        }
+      },
+      {
+        "groupId": "tol30-7EDO-013",
+        "repBarId": "7EDO-013",
+        "repHz": 430.664,
+        "members": [
+          "7EDO-013"
+        ],
+        "stats": {
+          "minHz": 430.664,
+          "maxHz": 430.664,
+          "meanHz": 430.664,
           "maxCentsSpread": 0,
           "count": 1
         }
       },
       {
-        "groupId": "tol30-9EDO-017",
-        "repBarId": "9EDO-017",
-        "repHz": 448.553883228944,
+        "groupId": "tol30-8EDO-015",
+        "repBarId": "8EDO-015",
+        "repHz": 441.431,
         "members": [
+          "8EDO-015",
           "9EDO-017"
         ],
         "stats": {
-          "minHz": 448.553883228944,
+          "minHz": 441.431,
           "maxHz": 448.553883228944,
-          "meanHz": 448.553883228944,
-          "maxCentsSpread": 0,
-          "count": 1
+          "meanHz": 444.992441614472,
+          "maxCentsSpread": 27.712024119547525,
+          "count": 2
         }
       },
       {
@@ -2104,18 +2690,34 @@
         }
       },
       {
-        "groupId": "tol30-9EDO-018",
-        "repBarId": "9EDO-018",
-        "repHz": 484.464989999383,
+        "groupId": "tol30-7EDO-014",
+        "repBarId": "7EDO-014",
+        "repHz": 473.73,
         "members": [
+          "7EDO-014"
+        ],
+        "stats": {
+          "minHz": 473.73,
+          "maxHz": 473.73,
+          "meanHz": 473.73,
+          "maxCentsSpread": 0,
+          "count": 1
+        }
+      },
+      {
+        "groupId": "tol30-8EDO-016",
+        "repBarId": "8EDO-016",
+        "repHz": 484.497,
+        "members": [
+          "8EDO-016",
           "9EDO-018"
         ],
         "stats": {
           "minHz": 484.464989999383,
-          "maxHz": 484.464989999383,
-          "meanHz": 484.464989999383,
-          "maxCentsSpread": 0,
-          "count": 1
+          "maxHz": 484.497,
+          "meanHz": 484.4809949996915,
+          "maxCentsSpread": 0.11438385317665456,
+          "count": 2
         }
       },
       {
@@ -2124,15 +2726,17 @@
         "repHz": 527.563,
         "members": [
           "5EDO-011",
+          "7EDO-015",
+          "8EDO-017",
           "9EDO-019",
           "harmonic-008"
         ],
         "stats": {
           "minHz": 523.251130601197,
           "maxHz": 527.563,
-          "meanHz": 526.1257102003991,
+          "meanHz": 526.7006261202393,
           "maxCentsSpread": 14.207835235637894,
-          "count": 3
+          "count": 5
         }
       },
       {

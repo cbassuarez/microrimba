@@ -7,6 +7,13 @@
     ]
   },
   {
+    "instrumentId": "8limit",
+    "label": "8limit",
+    "scales": [
+      "8edo"
+    ]
+  },
+  {
     "instrumentId": "9EDO_MICRORIMBA",
     "label": "9EDO_MICRORIMBA",
     "scales": [
@@ -18,6 +25,13 @@
     "label": "harmonic",
     "scales": [
       "harmonic"
+    ]
+  },
+  {
+    "instrumentId": "MICRORIMBA_7LIMIT_7EDO",
+    "label": "MICRORIMBA_7LIMIT_7EDO",
+    "scales": [
+      "7edo"
     ]
   }
 ]

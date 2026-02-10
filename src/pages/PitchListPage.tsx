@@ -16,6 +16,7 @@ import { useAudio } from '../audio/AudioContextProvider';
 import { useMicrorimbaData } from '../data/useMicrorimbaData';
 import type { Bar, PitchGroup, ScaleId } from '../data/types';
 import { formatHz } from '../lib/format';
+import { prettyInstrumentLabel } from '../lib/labels';
 import { setTheme, type ThemeMode } from '../ui/theme';
 
 type TolKey = '5' | '15' | '30';
@@ -46,6 +47,10 @@ function degreeFor(bar: Bar) {
   return String(((bar.step % bar.edo) + bar.edo) % bar.edo);
 }
 
+function instrumentLabel(bar: Bar) {
+  return prettyInstrumentLabel(bar.scaleId, bar.instrumentId, bar.edo);
+}
+
 export function PitchListPage() {
   const reduced = useReducedMotion();
   const { bars, scales, pitchIndex, loading, error } = useMicrorimbaData();
@@ -62,6 +67,16 @@ export function PitchListPage() {
 
   const barById = useMemo(() => new Map(bars.map((bar) => [bar.barId, bar])), [bars]);
   const instruments = useMemo(() => [...new Set(bars.map((bar) => bar.instrumentId))].sort(), [bars]);
+  const instrumentLabels = useMemo(
+    () =>
+      new Map(
+        instruments.map((instrumentId) => {
+          const bar = bars.find((entry) => entry.instrumentId === instrumentId);
+          return [instrumentId, prettyInstrumentLabel(bar?.scaleId ?? '', instrumentId, bar?.edo)];
+        }),
+      ),
+    [bars, instruments],
+  );
 
   const clusters = useMemo(() => (pitchIndex ? pitchIndex.clustersByTolerance[tolerance] : []), [pitchIndex, tolerance]);
 
@@ -188,7 +203,7 @@ export function PitchListPage() {
 
       <motion.section className="glass-panel glass-rim p-4" {...motionProps}>
         <div className="h-[520px] overflow-auto rounded-2xl border border-rim/70">
-          <div className="sticky top-0 z-10 grid grid-cols-[64px_120px_1fr_84px_100px_90px_90px_110px_72px] gap-2 border-b border-rim bg-white/70 px-3 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70">
+          <div className="sticky top-0 z-20 grid grid-cols-[64px_120px_1fr_84px_100px_90px_90px_110px_72px] gap-2 border-b border-rim bg-white/70 px-3 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70">
             {['Play', 'Hz', 'Instrument', 'Bar #', 'Scale', 'Degree', 'Index', 'Ratio', 'More'].map((label) => <div key={label}>{label}</div>)}
           </div>
           <div className="space-y-2 p-2">
@@ -209,7 +224,7 @@ export function PitchListPage() {
                         ) : <Play className="h-4 w-4" />}
                       </button>
                       <div>{hz.text}</div>
-                      <div>{bar.instrumentId}</div>
+                      <div>{instrumentLabel(bar)}</div>
                       <div>{barNumber(bar.barId)}</div>
                       <div className="uppercase">{bar.scaleId}</div>
                       <div>{degreeFor(bar)}</div>
@@ -241,7 +256,7 @@ export function PitchListPage() {
                                 <div key={member.barId} className="grid grid-cols-[40px_90px_1fr_80px_100px_1fr] items-center gap-2">
                                   <button onClick={() => void toggleBar(member.barId)} className="rounded border border-rim p-1"><Play className="h-3 w-3" /></button>
                                   <span>{formatHz(member.hz).text}</span>
-                                  <span>{member.instrumentId}</span>
+                                  <span>{instrumentLabel(member)}</span>
                                   <span>{barNumber(member.barId)}</span>
                                   <span className="uppercase">{member.scaleId}</span>
                                   <span className="font-mono">{member.ratioToStep0}</span>
@@ -282,7 +297,7 @@ export function PitchListPage() {
                     setSelectedInstruments(next);
                   }}
                 >
-                  {instrument === 'composite' ? 'Composite' : instrument}
+                  {instrument === 'composite' ? 'Composite' : instrumentLabels.get(instrument)}
                 </button>
               );
             })}
@@ -301,7 +316,7 @@ export function PitchListPage() {
                   }}
                 >
                   <div className="text-sm font-semibold">{formatHz(bar.hz).text}</div>
-                  <div className="mt-1 text-xs opacity-80">{selectedInstruments.has('composite') ? `×${count}` : bar.instrumentId}</div>
+                  <div className="mt-1 text-xs opacity-80">{selectedInstruments.has('composite') ? `×${count}` : instrumentLabel(bar)}</div>
                 </button>
               );
             })}
@@ -313,13 +328,14 @@ export function PitchListPage() {
           <div className="space-y-3">
             {SCALE_IDS.map((scaleId) => {
               const scale = scalesById.get(scaleId);
+              const isScaleOnline = Boolean(scale) || bars.some((bar) => bar.scaleId === scaleId);
               return (
                 <div key={scaleId} className="rounded-2xl border border-rim p-3" style={{ backgroundColor: `hsla(${SCALE_ACCENTS[scaleId]}, 0.18)` }}>
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-lg font-semibold uppercase">{scaleId}</div>
                       <div className="text-xs opacity-75">{SCALE_DESCRIPTIONS[scaleId]}</div>
-                      {!scale && <div className="text-xs italic text-amber-700 dark:text-amber-300">coming online</div>}
+                      {!isScaleOnline && <div className="text-xs italic text-amber-700 dark:text-amber-300">coming online</div>}
                     </div>
                     <div className="flex gap-2">
                       <button

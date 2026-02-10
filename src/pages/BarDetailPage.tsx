@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useDataset } from '../data/useDataset';
 import { useAudio } from '../audio/AudioContextProvider';
 import { formatHz } from '../lib/format';
+import { prettyInstrumentLabel } from '../lib/labels';
 
 export function BarDetailPage() {
   const { barId = '' } = useParams();
@@ -22,7 +23,7 @@ export function BarDetailPage() {
   return (
     <div className="space-y-3">
       <h1 className="text-xl font-semibold">{bar.barId}</h1>
-      <div>{formatHz(bar.hz).text} Hz · {bar.instrumentId} · {bar.scaleId}</div>
+      <div>{formatHz(bar.hz).text} Hz · {prettyInstrumentLabel(bar.scaleId, bar.instrumentId, bar.edo)} · {bar.scaleId}</div>
       <button disabled={!canPlay(bar.barId)} onClick={() => playBar(bar.barId)} className="rounded-md border px-3 py-1">Play</button>
       <div className="rounded-xl border border-rim bg-surface/60 p-3 text-sm">
         <div>stepName: {bar.stepName}</div><div>centsFromStep0: {bar.centsFromStep0}</div><div>ratioToStep0: {bar.ratioToStep0}</div>
