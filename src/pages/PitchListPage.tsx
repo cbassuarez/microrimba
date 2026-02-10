@@ -1,7 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   ChevronDown,
-  ChevronUp,
   Filter,
   Moon,
   Play,
@@ -10,17 +9,29 @@ import {
   Sun,
   Volume2,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAudio } from '../audio/AudioContextProvider';
+import { PitchListPaginator } from '../components/PitchListPaginator';
+import { PitchRowDetailsOverlay } from '../components/PitchRowDetailsOverlay';
 import { useMicrorimbaData } from '../data/useMicrorimbaData';
 import type { Bar, PitchGroup, ScaleId } from '../data/types';
+import { usePagedList } from '../hooks/usePagedList';
+import { prettyInstrumentLabel } from '../lib/labels';
 import { formatHz } from '../lib/format';
 import { normalizeFracString } from '../lib/rational';
-import { prettyInstrumentLabel } from '../lib/labels';
 import { setTheme, type ThemeMode } from '../ui/theme';
 
 type TolKey = '5' | '15' | '30';
+type ModeKey = 'unique' | 'all';
+
+type PitchRow = {
+  key: string;
+  bar: Bar;
+  cluster: PitchGroup | null;
+  members: Bar[];
+  absoluteIndex: number;
+};
 
 const SCALE_IDS: ScaleId[] = ['5edo', '7edo', '8edo', '9edo', 'harmonic'];
 const SCALE_DESCRIPTIONS: Record<string, string> = {
@@ -37,6 +48,7 @@ const SCALE_ACCENTS: Record<string, string> = {
   '9edo': '265 87% 69%',
   harmonic: '338 83% 68%',
 };
+const ROW_H = 60;
 
 function barNumber(barId: string) {
   const match = barId.match(/(\d+)$/);
@@ -61,19 +73,31 @@ function formatSignedCents(value: number): string {
   return `${sign}${value.toFixed(2)}c`;
 }
 
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  return target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+}
+
 export function PitchListPage() {
   const reduced = useReducedMotion();
   const { bars, scales, pitchIndex, loading, error } = useMicrorimbaData();
-  const { toggleBar, stopAll, playingBarIds, playSequenceByBarIds } = useAudio();
+  const { toggleBar, stopAll, playingBarIds, playSequenceByBarIds, voices } = useAudio();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [query, setQuery] = useState('');
-  const [mode, setMode] = useState<'unique' | 'all'>('unique');
-  const [tolerance, setTolerance] = useState<TolKey>('5');
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [mode, setMode] = useState<ModeKey>((searchParams.get('mode') as ModeKey) === 'all' ? 'all' : 'unique');
+  const [tolerance, setTolerance] = useState<TolKey>((['5', '15', '30'] as TolKey[]).includes(searchParams.get('tol') as TolKey) ? (searchParams.get('tol') as TolKey) : '5');
   const [showGroupingMenu, setShowGroupingMenu] = useState(false);
   const [selectedScales, setSelectedScales] = useState<Set<string>>(new Set(SCALE_IDS));
   const [selectedInstruments, setSelectedInstruments] = useState<Set<string>>(new Set(['composite']));
   const [theme, setThemeState] = useState<ThemeMode>(() => (document.documentElement.classList.contains('dark') ? 'dark' : 'light'));
+  const [openDetailsKey, setOpenDetailsKey] = useState<string | null>(null);
+  const [pageDirection, setPageDirection] = useState(0);
+
+  const listSurfaceRef = useRef<HTMLDivElement>(null);
+  const listHeaderRef = useRef<HTMLDivElement>(null);
+  const wheelThrottleRef = useRef(0);
+  const rowAnchorRefs = useRef(new Map<string, HTMLDivElement>());
 
   const barById = useMemo(() => new Map(bars.map((bar) => [bar.barId, bar])), [bars]);
   const instruments = useMemo(() => [...new Set(bars.map((bar) => bar.instrumentId))].sort(), [bars]);
@@ -114,6 +138,37 @@ export function PitchListPage() {
       .filter((item): item is { cluster: PitchGroup; rep: Bar; members: Bar[] } => Boolean(item));
   }, [clusters, barById, query, selectedScales]);
 
+  const visibleRows = useMemo<PitchRow[]>(() => {
+    const rows = mode === 'all'
+      ? allVisible.map((bar, absoluteIndex) => ({ key: bar.barId, bar, cluster: null as PitchGroup | null, members: [bar], absoluteIndex }))
+      : uniqueVisible.map((item, absoluteIndex) => ({ key: item.rep.barId, bar: item.rep, cluster: item.cluster, members: item.members, absoluteIndex }));
+    return rows;
+  }, [allVisible, mode, uniqueVisible]);
+
+  const keyByAnyBarId = useMemo(() => {
+    const map = new Map<string, string>();
+    visibleRows.forEach((row) => {
+      map.set(row.bar.barId, row.key);
+      row.members.forEach((member) => map.set(member.barId, row.key));
+    });
+    return map;
+  }, [visibleRows]);
+
+  const initialPage = Math.max(1, Number(searchParams.get('page') ?? '1')) - 1;
+
+  const paged = usePagedList<PitchRow>({
+    items: visibleRows,
+    rowHeightPx: ROW_H,
+    minRows: 6,
+    maxRows: 40,
+    containerRef: listSurfaceRef,
+    stickyHeaderRef: listHeaderRef,
+    getAnchorKey: (item) => item.key,
+    initialPage,
+  });
+
+  const openRow = useMemo(() => paged.pageItems.find((item) => item.key === openDetailsKey) ?? null, [openDetailsKey, paged.pageItems]);
+
   const padBars = useMemo(() => {
     if (mode === 'all') return allVisible;
     return uniqueVisible.map((item) => item.rep);
@@ -130,6 +185,49 @@ export function PitchListPage() {
   const motionProps = reduced
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: 0.2 } }
     : { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.35, ease: 'easeOut' as const } };
+
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    next.set('mode', mode);
+    next.set('tol', tolerance);
+    next.set('page', String(Math.min(paged.pageCount, paged.pageIndex + 1)));
+    setSearchParams(next, { replace: true });
+  }, [mode, tolerance, paged.pageCount, paged.pageIndex, searchParams, setSearchParams]);
+
+  useEffect(() => {
+    const modeParam = searchParams.get('mode');
+    if (modeParam === 'all' || modeParam === 'unique') setMode(modeParam);
+    const tolParam = searchParams.get('tol') as TolKey;
+    if ((['5', '15', '30'] as TolKey[]).includes(tolParam)) setTolerance(tolParam);
+  }, []);
+
+  const ensureItemVisible = (barId: string) => {
+    const key = keyByAnyBarId.get(barId);
+    if (!key) return;
+    const index = visibleRows.findIndex((row) => row.key === key);
+    if (index < 0) return;
+    paged.setPageIndex(Math.floor(index / Math.max(1, paged.rowsPerPage)));
+  };
+
+  useEffect(() => {
+    const latest = voices.reduce((winner, voice) => (voice.startedAt > winner.startedAt ? voice : winner), voices[0]);
+    if (!latest?.barId) return;
+    ensureItemVisible(latest.barId);
+  }, [voices]);
+
+  const playBarWithPaging = (barId: string) => {
+    ensureItemVisible(barId);
+    void toggleBar(barId);
+  };
+
+  const jumpWithDirection = (nextPage: number) => {
+    const clamped = Math.min(Math.max(nextPage, 0), paged.pageCount - 1);
+    setPageDirection(clamped > paged.pageIndex ? 1 : clamped < paged.pageIndex ? -1 : 0);
+    paged.setPageIndex(clamped);
+  };
+
+  const stepPrev = () => jumpWithDirection(paged.pageIndex - 1);
+  const stepNext = () => jumpWithDirection(paged.pageIndex + 1);
 
   if (loading) {
     return <section className="glass-panel glass-rim p-8 text-lg">Loading the resonator library…</section>;
@@ -181,6 +279,7 @@ export function PitchListPage() {
                 className={`rounded-full border px-3 py-1 text-xs uppercase tracking-wide ${active ? 'border-transparent text-white shadow-md' : 'border-rim text-slate-700 dark:text-slate-200'}`}
                 style={active ? { backgroundColor: `hsl(${SCALE_ACCENTS[scaleId] ?? '220 10% 50%'})` } : undefined}
                 onClick={() => {
+                  paged.setAnchorByKey(paged.pageItems[0]?.key ?? '');
                   const next = new Set(selectedScales);
                   if (active) next.delete(scaleId);
                   else next.add(scaleId);
@@ -197,12 +296,21 @@ export function PitchListPage() {
             <motion.div className="mt-4 rounded-2xl border border-rim bg-white/55 p-4 text-sm dark:bg-black/20" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="flex flex-wrap items-center gap-4">
                 <div className="space-x-2">
-                  <button className={`rounded-full border px-3 py-1 ${mode === 'unique' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ''}`} onClick={() => setMode('unique')}>Unique</button>
-                  <button className={`rounded-full border px-3 py-1 ${mode === 'all' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ''}`} onClick={() => setMode('all')}>All bars</button>
+                  <button className={`rounded-full border px-3 py-1 ${mode === 'unique' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ''}`} onClick={() => {
+                    paged.setAnchorByKey(paged.pageItems[0]?.key ?? '');
+                    setMode('unique');
+                  }}>Unique</button>
+                  <button className={`rounded-full border px-3 py-1 ${mode === 'all' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ''}`} onClick={() => {
+                    paged.setAnchorByKey(paged.pageItems[0]?.key ?? '');
+                    setMode('all');
+                  }}>All bars</button>
                 </div>
                 <div className="space-x-2">
                   {(['5', '15', '30'] as TolKey[]).map((tol) => (
-                    <button key={tol} className={`rounded-full border px-3 py-1 ${tolerance === tol ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ''}`} onClick={() => setTolerance(tol)}>±{tol}c</button>
+                    <button key={tol} className={`rounded-full border px-3 py-1 ${tolerance === tol ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ''}`} onClick={() => {
+                      paged.setAnchorByKey(paged.pageItems[0]?.key ?? '');
+                      setTolerance(tol);
+                    }}>±{tol}c</button>
                   ))}
                 </div>
               </div>
@@ -212,91 +320,114 @@ export function PitchListPage() {
       </motion.section>
 
       <motion.section className="glass-panel glass-rim p-4" {...motionProps}>
-        <div className="h-[520px] overflow-auto rounded-2xl border border-rim/70">
-          <table className="w-full table-fixed border-collapse">
-            <thead className="sticky top-0 z-20 bg-white/70 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70">
-              <tr className="border-b border-rim">
-                {['Play', 'Hz', 'Instrument', 'Bar #', 'Scale', 'Degree', 'Index', 'Ratio', 'More'].map((label) => (
-                  <th key={label} className="px-3 py-3 text-left font-normal">{label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {(mode === 'all'
-                ? allVisible.map((bar) => ({ key: bar.barId, bar, cluster: null as PitchGroup | null, members: [bar] }))
-                : uniqueVisible.map((item) => ({ key: item.rep.barId, bar: item.rep, cluster: item.cluster, members: item.members })))
-                .map(({ key, bar, cluster, members }, index) => {
-                  const expandedRow = Boolean(expanded[key]);
-                  const hz = formatHz(bar.hz);
-                  return (
-                    <tr key={key} className="align-top">
-                      <td className="px-3 py-2 align-top" colSpan={9}>
-                        <div className="block w-full min-w-0">
-                          <div className="block w-full min-w-0 rounded-2xl border border-rim/80 bg-white/40 p-2 dark:bg-slate-900/30" style={{ borderColor: `hsla(${SCALE_ACCENTS[bar.scaleId] ?? '220 10% 50%'}, 0.32)` }}>
-                            <div className="grid w-full min-w-0 grid-cols-[64px_120px_1fr_84px_100px_90px_90px_110px_72px] items-center gap-2 text-sm">
-                              <button onClick={() => void toggleBar(bar.barId)} className={`inline-flex h-9 w-9 items-center justify-center rounded-full border ${playingBarIds.has(bar.barId) ? 'border-emerald-400 bg-emerald-500/25' : 'border-rim'}`}>
-                                {playingBarIds.has(bar.barId) ? (
-                                  <motion.span animate={reduced ? { opacity: [0.55, 1, 0.55] } : { scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }} transition={{ repeat: Infinity, duration: 1.2 }}>
-                                    <Volume2 className="h-4 w-4" />
-                                  </motion.span>
-                                ) : <Play className="h-4 w-4" />}
-                              </button>
-                              <div>{hz.text}</div>
-                              <div>{instrumentLabel(bar)}</div>
-                              <div>{barNumber(bar.barId)}</div>
-                              <div className="uppercase">{bar.scaleId}</div>
-                              <div>{degreeFor(bar)}</div>
-                              <div>{index + 1}</div>
-                              <div className="min-w-0 font-mono text-xs tabular-nums">
-                                {Math.abs(bar.ratioErrorCents) >= 1 ? '≈ ' : ''}
-                                {ratioForDisplay(bar)}
-                              </div>
-                              <button className="opacity-60 hover:opacity-100" onClick={() => setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))}>{expandedRow ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</button>
-                            </div>
-                            <AnimatePresence initial={false}>
-                              {expandedRow && (
-                                <motion.div
-                                  className="mt-2 overflow-hidden rounded-xl border border-rim bg-white/50 p-3 text-xs dark:bg-black/25"
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: 'auto' }}
-                                  exit={{ opacity: 0, height: 0 }}
-                                >
-                                  <div className="grid grid-cols-2 gap-2 md:grid-cols-6">
-                                    <div>bar_id: <span className="font-mono">{bar.barId}</span></div>
-                                    <div>step_name: {bar.stepName}</div>
-                                    <div>cents_from_step0: {bar.centsFromStep0}</div>
-                                    <div>ratio_to_step0: <span className="font-mono tabular-nums">{ratioForDisplay(bar)}</span></div>
-                                    <div>Ratio error: <span className="font-mono">{formatSignedCents(bar.ratioErrorCents)}</span></div>
-                                    <div title={`raw: ${bar.hz}`}>raw Hz: <span className="font-mono">{bar.hz}</span></div>
-                                  </div>
-                                  {cluster && (
-                                    <div className="mt-2 border-t border-rim pt-2">Tolerance ±{tolerance}c · members {cluster.stats.count} · max spread {cluster.stats.maxCentsSpread.toFixed(2)} cents</div>
-                                  )}
-                                  {cluster && (
-                                    <div className="mt-2 space-y-1 pl-4">
-                                      {members.map((member) => (
-                                        <div key={member.barId} className="grid min-w-0 grid-cols-[40px_90px_1fr_80px_100px_1fr] items-center gap-2">
-                                          <button onClick={() => void toggleBar(member.barId)} className="rounded border border-rim p-1"><Play className="h-3 w-3" /></button>
-                                          <span>{formatHz(member.hz).text}</span>
-                                          <span>{instrumentLabel(member)}</span>
-                                          <span>{barNumber(member.barId)}</span>
-                                          <span className="uppercase">{member.scaleId}</span>
-                                          <span className="font-mono tabular-nums">{Math.abs(member.ratioErrorCents) >= 1 ? '≈ ' : ''}{ratioForDisplay(member)}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table>
+        <div
+          ref={listSurfaceRef}
+          tabIndex={0}
+          className="relative h-[calc(100vh-18rem)] min-h-[420px] overflow-hidden rounded-2xl border border-rim/70 bg-white/45 p-2 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 dark:bg-slate-900/25"
+          onWheel={(event) => {
+            const now = performance.now();
+            if (now - wheelThrottleRef.current < 300) return;
+            if (Math.abs(event.deltaY) < 40) return;
+            event.preventDefault();
+            wheelThrottleRef.current = now;
+            if (event.deltaY > 0) stepNext();
+            else stepPrev();
+          }}
+          onKeyDown={(event) => {
+            if (isEditableTarget(event.target)) return;
+            if (event.key === 'PageDown' || (event.key === ' ' && !event.shiftKey)) {
+              event.preventDefault();
+              stepNext();
+            } else if (event.key === 'PageUp' || (event.key === ' ' && event.shiftKey)) {
+              event.preventDefault();
+              stepPrev();
+            } else if (event.key === 'Home') {
+              event.preventDefault();
+              jumpWithDirection(0);
+            } else if (event.key === 'End') {
+              event.preventDefault();
+              jumpWithDirection(paged.pageCount - 1);
+            }
+          }}
+        >
+          <div ref={listHeaderRef} className="sticky top-0 z-10 grid grid-cols-[64px_120px_1fr_84px_100px_90px_90px_110px_72px] gap-2 border-b border-rim bg-white/70 px-3 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70">
+            {['Play', 'Hz', 'Instrument', 'Bar #', 'Scale', 'Degree', 'Index', 'Ratio', 'More'].map((label) => (
+              <div key={label}>{label}</div>
+            ))}
+          </div>
+
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={`page-${paged.pageIndex}`}
+              initial={reduced ? { opacity: 0 } : { opacity: 0, y: pageDirection >= 0 ? 14 : -14 }}
+              animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              exit={reduced ? { opacity: 0 } : { opacity: 0, y: pageDirection >= 0 ? -14 : 14 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              className="relative z-0"
+            >
+              {paged.pageItems.map((row) => {
+                const hz = formatHz(row.bar.hz);
+                const isOpen = openDetailsKey === row.key;
+                return (
+                  <div
+                    key={row.key}
+                    ref={(element) => {
+                      if (!element) {
+                        rowAnchorRefs.current.delete(row.key);
+                        return;
+                      }
+                      rowAnchorRefs.current.set(row.key, element);
+                    }}
+                    className="my-1 rounded-2xl border border-rim/80 bg-white/40 px-3 dark:bg-slate-900/30"
+                    style={{ borderColor: `hsla(${SCALE_ACCENTS[row.bar.scaleId] ?? '220 10% 50%'}, 0.32)`, minHeight: `${ROW_H}px` }}
+                  >
+                    <div className="grid h-[60px] w-full min-w-0 grid-cols-[64px_120px_1fr_84px_100px_90px_90px_110px_72px] items-center gap-2 text-sm">
+                      <button onClick={() => playBarWithPaging(row.bar.barId)} className={`inline-flex h-9 w-9 items-center justify-center rounded-full border ${playingBarIds.has(row.bar.barId) ? 'border-emerald-400 bg-emerald-500/25' : 'border-rim'}`}>
+                        {playingBarIds.has(row.bar.barId) ? (
+                          <motion.span animate={reduced ? { opacity: [0.55, 1, 0.55] } : { scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }} transition={{ repeat: Infinity, duration: 1.2 }}>
+                            <Volume2 className="h-4 w-4" />
+                          </motion.span>
+                        ) : <Play className="h-4 w-4" />}
+                      </button>
+                      <div>{hz.text}</div>
+                      <div className="truncate">{instrumentLabel(row.bar)}</div>
+                      <div>{barNumber(row.bar.barId)}</div>
+                      <div className="uppercase">{row.bar.scaleId}</div>
+                      <div>{degreeFor(row.bar)}</div>
+                      <div>{row.absoluteIndex + 1}</div>
+                      <div className="min-w-0 font-mono text-xs tabular-nums">
+                        {Math.abs(row.bar.ratioErrorCents) >= 1 ? '≈ ' : ''}
+                        {ratioForDisplay(row.bar)}
+                      </div>
+                      <button className="opacity-60 hover:opacity-100" onClick={() => setOpenDetailsKey((prev) => (prev === row.key ? null : row.key))}>{isOpen ? <ChevronDown className="h-4 w-4 rotate-180" /> : <ChevronDown className="h-4 w-4" />}</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </motion.div>
+          </AnimatePresence>
+
+          <PitchRowDetailsOverlay
+            openRow={openRow}
+            containerRef={listSurfaceRef}
+            anchorEl={openDetailsKey ? (rowAnchorRefs.current.get(openDetailsKey) ?? null) : null}
+            tolerance={tolerance}
+            ratioForDisplay={ratioForDisplay}
+            formatSignedCents={formatSignedCents}
+            instrumentLabel={instrumentLabel}
+            barNumber={barNumber}
+            onPlayBar={playBarWithPaging}
+            onClose={() => setOpenDetailsKey(null)}
+          />
+
+          <PitchListPaginator
+            pageIndex={paged.pageIndex}
+            pageCount={paged.pageCount}
+            rangeLabel={paged.rangeLabel}
+            onPrev={stepPrev}
+            onNext={stepNext}
+            onJump={(page) => jumpWithDirection(page - 1)}
+          />
         </div>
       </motion.section>
 
@@ -334,7 +465,7 @@ export function PitchListPage() {
               return (
                 <button
                   key={bar.barId}
-                  onClick={() => void toggleBar(bar.barId)}
+                  onClick={() => playBarWithPaging(bar.barId)}
                   className="relative rounded-md border border-rim p-3 text-left shadow-sm transition hover:-translate-y-0.5"
                   style={{
                     background: `linear-gradient(180deg, hsla(${SCALE_ACCENTS[bar.scaleId] ?? '220 8% 60%'}, 0.4), hsla(${SCALE_ACCENTS[bar.scaleId] ?? '220 8% 60%'}, 0.18))`,
