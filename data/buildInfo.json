@@ -1,10 +1,13 @@
 {
-  "generatedAt": "2026-02-10T10:48:30.789Z",
+  "generatedAt": "2026-02-10T11:15:10.023Z",
   "repoVersion": "ref: refs/heads/work",
   "tolerancesCents": [
     5,
     15,
     30
   ],
-  "algorithm": "adjacency-cluster with lexicographic representative revalidation split"
+  "algorithm": "adjacency-cluster with lexicographic representative revalidation split",
+  "refBarId": "harmonic-001",
+  "refPitchHz": 64.6,
+  "ratioReference": "all ratios relative to harmonic-001"
 }

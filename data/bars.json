@@ -9,7 +9,8 @@
     "centsFromStep0": 0,
     "ratioToStep0": "1/1",
     "hz": 64.6,
-    "audioPath": "audio/harmonic/harmonic-001.wav"
+    "audioPath": "audio/harmonic/harmonic-001.wav",
+    "ratioToRef": 1
   },
   {
     "barId": "5EDO-001",
@@ -21,7 +22,8 @@
     "centsFromStep0": 0,
     "ratioToStep0": "1.0",
     "hz": 129.199,
-    "audioPath": "audio/5edo/5EDO-001.wav"
+    "audioPath": "audio/5edo/5EDO-001.wav",
+    "ratioToRef": 1.9999845201238393
   },
   {
     "barId": "8EDO-001",
@@ -33,7 +35,8 @@
     "centsFromStep0": 0,
     "ratioToStep0": "1.000000000",
     "hz": 129.199,
-    "audioPath": "audio/8edo/8EDO-001.wav"
+    "audioPath": "audio/8edo/8EDO-001.wav",
+    "ratioToRef": 1.9999845201238393
   },
   {
     "barId": "harmonic-002",
@@ -45,7 +48,8 @@
     "centsFromStep0": 1200,
     "ratioToStep0": "2/1",
     "hz": 129.199,
-    "audioPath": "audio/harmonic/harmonic-002.wav"
+    "audioPath": "audio/harmonic/harmonic-002.wav",
+    "ratioToRef": 1.9999845201238393
   },
   {
     "barId": "9EDO-001",
@@ -57,7 +61,8 @@
     "centsFromStep0": 0,
     "ratioToStep0": "1.000000000000",
     "hz": 130.812782650299,
-    "audioPath": "audio/9edo/9EDO-001.wav"
+    "audioPath": "audio/9edo/9EDO-001.wav",
+    "ratioToRef": 2.024965675701223
   },
   {
     "barId": "7EDO-001",
@@ -69,7 +74,8 @@
     "centsFromStep0": 0,
     "ratioToStep0": "1.0",
     "hz": 131.646138,
-    "audioPath": "audio/7edo/7EDO-001.wav"
+    "audioPath": "audio/7edo/7EDO-001.wav",
+    "ratioToRef": 2.037865913312694
   },
   {
     "barId": "9EDO-002",
@@ -81,7 +87,8 @@
     "centsFromStep0": 133.333333,
     "ratioToStep0": "1.080059738892",
     "hz": 141.285619873058,
-    "audioPath": "audio/9edo/9EDO-002.wav"
+    "audioPath": "audio/9edo/9EDO-002.wav",
+    "ratioToRef": 2.1870838989637464
   },
   {
     "barId": "5EDO-002",
@@ -93,7 +100,8 @@
     "centsFromStep0": 240,
     "ratioToStep0": "1.148698355",
     "hz": 150.732,
-    "audioPath": "audio/5edo/5EDO-002.wav"
+    "audioPath": "audio/5edo/5EDO-002.wav",
+    "ratioToRef": 2.3333126934984523
   },
   {
     "barId": "7EDO-002",
@@ -105,7 +113,8 @@
     "centsFromStep0": 171.428571,
     "ratioToStep0": "1.104089513674",
     "hz": 150.732,
-    "audioPath": "audio/7edo/7EDO-002.wav"
+    "audioPath": "audio/7edo/7EDO-002.wav",
+    "ratioToRef": 2.3333126934984523
   },
   {
     "barId": "8EDO-002",
@@ -117,7 +126,8 @@
     "centsFromStep0": 150,
     "ratioToStep0": "1.090507733",
     "hz": 150.732,
-    "audioPath": "audio/8edo/8EDO-002.wav"
+    "audioPath": "audio/8edo/8EDO-002.wav",
+    "ratioToRef": 2.3333126934984523
   },
   {
     "barId": "9EDO-003",
@@ -129,7 +139,8 @@
     "centsFromStep0": 266.666667,
     "ratioToStep0": "1.166529039576",
     "hz": 152.596909709333,
-    "audioPath": "audio/9edo/9EDO-003.wav"
+    "audioPath": "audio/9edo/9EDO-003.wav",
+    "ratioToRef": 2.3621812648503564
   },
   {
     "barId": "7EDO-003",
@@ -141,7 +152,8 @@
     "centsFromStep0": 342.857143,
     "ratioToStep0": "1.219013654204",
     "hz": 161.499,
-    "audioPath": "audio/7edo/7EDO-003.wav"
+    "audioPath": "audio/7edo/7EDO-003.wav",
+    "ratioToRef": 2.499984520123839
   },
   {
     "barId": "8EDO-003",
@@ -153,7 +165,8 @@
     "centsFromStep0": 300,
     "ratioToStep0": "1.189207115",
     "hz": 161.499,
-    "audioPath": "audio/8edo/8EDO-003.wav"
+    "audioPath": "audio/8edo/8EDO-003.wav",
+    "ratioToRef": 2.499984520123839
   },
   {
     "barId": "9EDO-004",
@@ -165,7 +178,8 @@
     "centsFromStep0": 400,
     "ratioToStep0": "1.259921049895",
     "hz": 164.813778456435,
-    "audioPath": "audio/9edo/9EDO-004.wav"
+    "audioPath": "audio/9edo/9EDO-004.wav",
+    "ratioToRef": 2.5512968801305727
   },
   {
     "barId": "5EDO-003",
@@ -177,7 +191,8 @@
     "centsFromStep0": 480,
     "ratioToStep0": "1.319507911",
     "hz": 172.266,
-    "audioPath": "audio/5edo/5EDO-003.wav"
+    "audioPath": "audio/5edo/5EDO-003.wav",
+    "ratioToRef": 2.666656346749226
   },
   {
     "barId": "8EDO-004",
@@ -189,7 +204,8 @@
     "centsFromStep0": 450,
     "ratioToStep0": "1.296839555",
     "hz": 172.266,
-    "audioPath": "audio/8edo/8EDO-004.wav"
+    "audioPath": "audio/8edo/8EDO-004.wav",
+    "ratioToRef": 2.666656346749226
   },
   {
     "barId": "9EDO-005",
@@ -201,7 +217,8 @@
     "centsFromStep0": 533.333333,
     "ratioToStep0": "1.360790000174",
     "hz": 178.008726525512,
-    "audioPath": "audio/9edo/9EDO-005.wav"
+    "audioPath": "audio/9edo/9EDO-005.wav",
+    "ratioToRef": 2.7555530421905887
   },
   {
     "barId": "7EDO-004",
@@ -213,7 +230,8 @@
     "centsFromStep0": 514.285714,
     "ratioToStep0": "1.345900192633",
     "hz": 183.032,
-    "audioPath": "audio/7edo/7EDO-004.wav"
+    "audioPath": "audio/7edo/7EDO-004.wav",
+    "ratioToRef": 2.8333126934984523
   },
   {
     "barId": "8EDO-005",
@@ -225,7 +243,8 @@
     "centsFromStep0": 600,
     "ratioToStep0": "1.414213562",
     "hz": 183.032,
-    "audioPath": "audio/8edo/8EDO-005.wav"
+    "audioPath": "audio/8edo/8EDO-005.wav",
+    "ratioToRef": 2.8333126934984523
   },
   {
     "barId": "9EDO-006",
@@ -237,7 +256,8 @@
     "centsFromStep0": 666.666667,
     "ratioToStep0": "1.469734492275",
     "hz": 192.260058691696,
-    "audioPath": "audio/9edo/9EDO-006.wav"
+    "audioPath": "audio/9edo/9EDO-006.wav",
+    "ratioToRef": 2.9761618992522605
   },
   {
     "barId": "7EDO-005",
@@ -249,7 +269,8 @@
     "centsFromStep0": 685.714286,
     "ratioToStep0": "1.485994289137",
     "hz": 193.799,
-    "audioPath": "audio/7edo/7EDO-005.wav"
+    "audioPath": "audio/7edo/7EDO-005.wav",
+    "ratioToRef": 2.9999845201238395
   },
   {
     "barId": "harmonic-003",
@@ -261,7 +282,8 @@
     "centsFromStep0": 1901.955001,
     "ratioToStep0": "3/1",
     "hz": 193.799,
-    "audioPath": "audio/harmonic/harmonic-003.wav"
+    "audioPath": "audio/harmonic/harmonic-003.wav",
+    "ratioToRef": 2.9999845201238395
   },
   {
     "barId": "5EDO-004",
@@ -273,7 +295,8 @@
     "centsFromStep0": 720,
     "ratioToStep0": "1.515716567",
     "hz": 204.565,
-    "audioPath": "audio/5edo/5EDO-004.wav"
+    "audioPath": "audio/5edo/5EDO-004.wav",
+    "ratioToRef": 3.1666408668730655
   },
   {
     "barId": "8EDO-006",
@@ -285,7 +308,8 @@
     "centsFromStep0": 750,
     "ratioToStep0": "1.542210825",
     "hz": 204.565,
-    "audioPath": "audio/8edo/8EDO-006.wav"
+    "audioPath": "audio/8edo/8EDO-006.wav",
+    "ratioToRef": 3.1666408668730655
   },
   {
     "barId": "9EDO-007",
@@ -297,7 +321,8 @@
     "centsFromStep0": 800,
     "ratioToStep0": "1.587401051968",
     "hz": 207.652348789972,
-    "audioPath": "audio/9edo/9EDO-007.wav"
+    "audioPath": "audio/9edo/9EDO-007.wav",
+    "ratioToRef": 3.2144326438076165
   },
   {
     "barId": "7EDO-006",
@@ -309,7 +334,8 @@
     "centsFromStep0": 857.142857,
     "ratioToStep0": "1.640670712016",
     "hz": 215.332,
-    "audioPath": "audio/7edo/7EDO-006.wav"
+    "audioPath": "audio/7edo/7EDO-006.wav",
+    "ratioToRef": 3.3333126934984523
   },
   {
     "barId": "9EDO-008",
@@ -321,7 +347,8 @@
     "centsFromStep0": 933.333333,
     "ratioToStep0": "1.714487965706",
     "hz": 224.276941614472,
-    "audioPath": "audio/9edo/9EDO-008.wav"
+    "audioPath": "audio/9edo/9EDO-008.wav",
+    "ratioToRef": 3.4717792819577715
   },
   {
     "barId": "5EDO-005",
@@ -333,7 +360,8 @@
     "centsFromStep0": 960,
     "ratioToStep0": "1.741101127",
     "hz": 226.099,
-    "audioPath": "audio/5edo/5EDO-005.wav"
+    "audioPath": "audio/5edo/5EDO-005.wav",
+    "ratioToRef": 3.499984520123839
   },
   {
     "barId": "8EDO-007",
@@ -345,7 +373,8 @@
     "centsFromStep0": 900,
     "ratioToStep0": "1.681792831",
     "hz": 226.099,
-    "audioPath": "audio/8edo/8EDO-007.wav"
+    "audioPath": "audio/8edo/8EDO-007.wav",
+    "ratioToRef": 3.499984520123839
   },
   {
     "barId": "7EDO-007",
@@ -357,7 +386,8 @@
     "centsFromStep0": 1028.571429,
     "ratioToStep0": "1.811447328528",
     "hz": 236.865,
-    "audioPath": "audio/7edo/7EDO-007.wav"
+    "audioPath": "audio/7edo/7EDO-007.wav",
+    "ratioToRef": 3.6666408668730655
   },
   {
     "barId": "8EDO-008",
@@ -369,7 +399,8 @@
     "centsFromStep0": 1050,
     "ratioToStep0": "1.834008086",
     "hz": 236.865,
-    "audioPath": "audio/8edo/8EDO-008.wav"
+    "audioPath": "audio/8edo/8EDO-008.wav",
+    "ratioToRef": 3.6666408668730655
   },
   {
     "barId": "9EDO-009",
@@ -381,7 +412,8 @@
     "centsFromStep0": 1066.666667,
     "ratioToStep0": "1.851749424575",
     "hz": 242.232494999692,
-    "audioPath": "audio/9edo/9EDO-009.wav"
+    "audioPath": "audio/9edo/9EDO-009.wav",
+    "ratioToRef": 3.749729024763034
   },
   {
     "barId": "5EDO-006",
@@ -393,7 +425,8 @@
     "centsFromStep0": 1200,
     "ratioToStep0": "2.0",
     "hz": 258.398,
-    "audioPath": "audio/5edo/5EDO-006.wav"
+    "audioPath": "audio/5edo/5EDO-006.wav",
+    "ratioToRef": 3.9999690402476786
   },
   {
     "barId": "7EDO-008",
@@ -405,7 +438,8 @@
     "centsFromStep0": 1200,
     "ratioToStep0": "2.0",
     "hz": 258.398,
-    "audioPath": "audio/7edo/7EDO-008.wav"
+    "audioPath": "audio/7edo/7EDO-008.wav",
+    "ratioToRef": 3.9999690402476786
   },
   {
     "barId": "8EDO-009",
@@ -417,7 +451,8 @@
     "centsFromStep0": 1200,
     "ratioToStep0": "2.000000000",
     "hz": 258.398,
-    "audioPath": "audio/8edo/8EDO-009.wav"
+    "audioPath": "audio/8edo/8EDO-009.wav",
+    "ratioToRef": 3.9999690402476786
   },
   {
     "barId": "harmonic-004",
@@ -429,7 +464,8 @@
     "centsFromStep0": 2400,
     "ratioToStep0": "4/1",
     "hz": 258.398,
-    "audioPath": "audio/harmonic/harmonic-004.wav"
+    "audioPath": "audio/harmonic/harmonic-004.wav",
+    "ratioToRef": 3.9999690402476786
   },
   {
     "barId": "9EDO-010",
@@ -441,7 +477,8 @@
     "centsFromStep0": 1200,
     "ratioToStep0": "2.000000000000",
     "hz": 261.625565300599,
-    "audioPath": "audio/9edo/9EDO-010.wav"
+    "audioPath": "audio/9edo/9EDO-010.wav",
+    "ratioToRef": 4.049931351402462
   },
   {
     "barId": "9EDO-011",
@@ -453,7 +490,8 @@
     "centsFromStep0": 1333.333333,
     "ratioToStep0": "2.160119477784",
     "hz": 282.571239746116,
-    "audioPath": "audio/9edo/9EDO-011.wav"
+    "audioPath": "audio/9edo/9EDO-011.wav",
+    "ratioToRef": 4.374167797927493
   },
   {
     "barId": "7EDO-009",
@@ -465,7 +503,8 @@
     "centsFromStep0": 1371.428571,
     "ratioToStep0": "2.208179027349",
     "hz": 290.698,
-    "audioPath": "audio/7edo/7EDO-009.wav"
+    "audioPath": "audio/7edo/7EDO-009.wav",
+    "ratioToRef": 4.499969040247678
   },
   {
     "barId": "8EDO-010",
@@ -477,7 +516,8 @@
     "centsFromStep0": 1350,
     "ratioToStep0": "2.181015465",
     "hz": 290.698,
-    "audioPath": "audio/8edo/8EDO-010.wav"
+    "audioPath": "audio/8edo/8EDO-010.wav",
+    "ratioToRef": 4.499969040247678
   },
   {
     "barId": "5EDO-007",
@@ -489,7 +529,8 @@
     "centsFromStep0": 1440,
     "ratioToStep0": "2.29739671",
     "hz": 301.465,
-    "audioPath": "audio/5edo/5EDO-007.wav"
+    "audioPath": "audio/5edo/5EDO-007.wav",
+    "ratioToRef": 4.666640866873065
   },
   {
     "barId": "9EDO-012",
@@ -501,7 +542,8 @@
     "centsFromStep0": 1466.666667,
     "ratioToStep0": "2.333058079153",
     "hz": 305.193819418666,
-    "audioPath": "audio/9edo/9EDO-012.wav"
+    "audioPath": "audio/9edo/9EDO-012.wav",
+    "ratioToRef": 4.724362529700713
   },
   {
     "barId": "8EDO-011",
@@ -513,7 +555,8 @@
     "centsFromStep0": 1500,
     "ratioToStep0": "2.378414230",
     "hz": 312.231,
-    "audioPath": "audio/8edo/8EDO-011.wav"
+    "audioPath": "audio/8edo/8EDO-011.wav",
+    "ratioToRef": 4.833297213622291
   },
   {
     "barId": "7EDO-010",
@@ -525,7 +568,8 @@
     "centsFromStep0": 1542.857143,
     "ratioToStep0": "2.438027308408",
     "hz": 322.998,
-    "audioPath": "audio/7edo/7EDO-010.wav"
+    "audioPath": "audio/7edo/7EDO-010.wav",
+    "ratioToRef": 4.999969040247678
   },
   {
     "barId": "harmonic-005",
@@ -537,7 +581,8 @@
     "centsFromStep0": 2786.313714,
     "ratioToStep0": "5/1",
     "hz": 322.998,
-    "audioPath": "audio/harmonic/harmonic-005.wav"
+    "audioPath": "audio/harmonic/harmonic-005.wav",
+    "ratioToRef": 4.999969040247678
   },
   {
     "barId": "9EDO-013",
@@ -549,7 +594,8 @@
     "centsFromStep0": 1600,
     "ratioToStep0": "2.519842099790",
     "hz": 329.62755691287,
-    "audioPath": "audio/9edo/9EDO-013.wav"
+    "audioPath": "audio/9edo/9EDO-013.wav",
+    "ratioToRef": 5.102593760261145
   },
   {
     "barId": "5EDO-008",
@@ -561,7 +607,8 @@
     "centsFromStep0": 1680,
     "ratioToStep0": "2.639015822",
     "hz": 344.531,
-    "audioPath": "audio/5edo/5EDO-008.wav"
+    "audioPath": "audio/5edo/5EDO-008.wav",
+    "ratioToRef": 5.333297213622291
   },
   {
     "barId": "8EDO-012",
@@ -573,7 +620,8 @@
     "centsFromStep0": 1650,
     "ratioToStep0": "2.593679109",
     "hz": 344.531,
-    "audioPath": "audio/8edo/8EDO-012.wav"
+    "audioPath": "audio/8edo/8EDO-012.wav",
+    "ratioToRef": 5.333297213622291
   },
   {
     "barId": "7EDO-011",
@@ -585,7 +633,8 @@
     "centsFromStep0": 1714.285714,
     "ratioToStep0": "2.691800385266",
     "hz": 355.298,
-    "audioPath": "audio/7edo/7EDO-011.wav"
+    "audioPath": "audio/7edo/7EDO-011.wav",
+    "ratioToRef": 5.499969040247678
   },
   {
     "barId": "9EDO-014",
@@ -597,7 +646,8 @@
     "centsFromStep0": 1733.333333,
     "ratioToStep0": "2.721580000348",
     "hz": 356.017453051024,
-    "audioPath": "audio/9edo/9EDO-014.wav"
+    "audioPath": "audio/9edo/9EDO-014.wav",
+    "ratioToRef": 5.511106084381177
   },
   {
     "barId": "8EDO-013",
@@ -609,7 +659,8 @@
     "centsFromStep0": 1800,
     "ratioToStep0": "2.828427125",
     "hz": 376.831,
-    "audioPath": "audio/8edo/8EDO-013.wav"
+    "audioPath": "audio/8edo/8EDO-013.wav",
+    "ratioToRef": 5.833297213622291
   },
   {
     "barId": "9EDO-015",
@@ -621,7 +672,8 @@
     "centsFromStep0": 1866.666667,
     "ratioToStep0": "2.939468984551",
     "hz": 384.520117383392,
-    "audioPath": "audio/9edo/9EDO-015.wav"
+    "audioPath": "audio/9edo/9EDO-015.wav",
+    "ratioToRef": 5.952323798504521
   },
   {
     "barId": "7EDO-012",
@@ -633,7 +685,8 @@
     "centsFromStep0": 1885.714286,
     "ratioToStep0": "2.971988578275",
     "hz": 387.598,
-    "audioPath": "audio/7edo/7EDO-012.wav"
+    "audioPath": "audio/7edo/7EDO-012.wav",
+    "ratioToRef": 5.999969040247679
   },
   {
     "barId": "5EDO-009",
@@ -645,7 +698,8 @@
     "centsFromStep0": 1920,
     "ratioToStep0": "3.031433133",
     "hz": 398.364,
-    "audioPath": "audio/5edo/5EDO-009.wav"
+    "audioPath": "audio/5edo/5EDO-009.wav",
+    "ratioToRef": 6.1666253869969045
   },
   {
     "barId": "harmonic-006",
@@ -657,7 +711,8 @@
     "centsFromStep0": 3101.955001,
     "ratioToStep0": "6/1",
     "hz": 398.364,
-    "audioPath": "audio/harmonic/harmonic-006.wav"
+    "audioPath": "audio/harmonic/harmonic-006.wav",
+    "ratioToRef": 6.1666253869969045
   },
   {
     "barId": "8EDO-014",
@@ -669,7 +724,8 @@
     "centsFromStep0": 1950,
     "ratioToStep0": "3.084421651",
     "hz": 409.131,
-    "audioPath": "audio/8edo/8EDO-014.wav"
+    "audioPath": "audio/8edo/8EDO-014.wav",
+    "ratioToRef": 6.333297213622291
   },
   {
     "barId": "9EDO-016",
@@ -681,7 +737,8 @@
     "centsFromStep0": 2000,
     "ratioToStep0": "3.174802103936",
     "hz": 415.304697579945,
-    "audioPath": "audio/9edo/9EDO-016.wav"
+    "audioPath": "audio/9edo/9EDO-016.wav",
+    "ratioToRef": 6.428865287615248
   },
   {
     "barId": "7EDO-013",
@@ -693,7 +750,8 @@
     "centsFromStep0": 2057.142857,
     "ratioToStep0": "3.281341424032",
     "hz": 430.664,
-    "audioPath": "audio/7edo/7EDO-013.wav"
+    "audioPath": "audio/7edo/7EDO-013.wav",
+    "ratioToRef": 6.6666253869969045
   },
   {
     "barId": "8EDO-015",
@@ -705,7 +763,8 @@
     "centsFromStep0": 2100,
     "ratioToStep0": "3.363585661",
     "hz": 441.431,
-    "audioPath": "audio/8edo/8EDO-015.wav"
+    "audioPath": "audio/8edo/8EDO-015.wav",
+    "ratioToRef": 6.833297213622291
   },
   {
     "barId": "9EDO-017",
@@ -717,7 +776,8 @@
     "centsFromStep0": 2133.333333,
     "ratioToStep0": "3.428975931412",
     "hz": 448.553883228944,
-    "audioPath": "audio/9edo/9EDO-017.wav"
+    "audioPath": "audio/9edo/9EDO-017.wav",
+    "ratioToRef": 6.943558563915543
   },
   {
     "barId": "5EDO-010",
@@ -729,7 +789,8 @@
     "centsFromStep0": 2160,
     "ratioToStep0": "3.482202253",
     "hz": 462.964,
-    "audioPath": "audio/5edo/5EDO-010.wav"
+    "audioPath": "audio/5edo/5EDO-010.wav",
+    "ratioToRef": 7.1666253869969045
   },
   {
     "barId": "harmonic-007",
@@ -741,7 +802,8 @@
     "centsFromStep0": 3368.825907,
     "ratioToStep0": "7/1",
     "hz": 462.964,
-    "audioPath": "audio/harmonic/harmonic-007.wav"
+    "audioPath": "audio/harmonic/harmonic-007.wav",
+    "ratioToRef": 7.1666253869969045
   },
   {
     "barId": "7EDO-014",
@@ -753,7 +815,8 @@
     "centsFromStep0": 2228.571429,
     "ratioToStep0": "3.622894657056",
     "hz": 473.73,
-    "audioPath": "audio/7edo/7EDO-014.wav"
+    "audioPath": "audio/7edo/7EDO-014.wav",
+    "ratioToRef": 7.333281733746131
   },
   {
     "barId": "9EDO-018",
@@ -765,7 +828,8 @@
     "centsFromStep0": 2266.666667,
     "ratioToStep0": "3.703498849149",
     "hz": 484.464989999383,
-    "audioPath": "audio/9edo/9EDO-018.wav"
+    "audioPath": "audio/9edo/9EDO-018.wav",
+    "ratioToRef": 7.499458049526053
   },
   {
     "barId": "8EDO-016",
@@ -777,7 +841,8 @@
     "centsFromStep0": 2250,
     "ratioToStep0": "3.668016173",
     "hz": 484.497,
-    "audioPath": "audio/8edo/8EDO-016.wav"
+    "audioPath": "audio/8edo/8EDO-016.wav",
+    "ratioToRef": 7.499953560371518
   },
   {
     "barId": "9EDO-019",
@@ -789,7 +854,8 @@
     "centsFromStep0": 2400,
     "ratioToStep0": "4.000000000000",
     "hz": 523.251130601197,
-    "audioPath": "audio/9edo/9EDO-019.wav"
+    "audioPath": "audio/9edo/9EDO-019.wav",
+    "ratioToRef": 8.099862702804907
   },
   {
     "barId": "5EDO-011",
@@ -801,7 +867,8 @@
     "centsFromStep0": 2400,
     "ratioToStep0": "4.0",
     "hz": 527.563,
-    "audioPath": "audio/5edo/5EDO-011.wav"
+    "audioPath": "audio/5edo/5EDO-011.wav",
+    "ratioToRef": 8.166609907120744
   },
   {
     "barId": "7EDO-015",
@@ -813,7 +880,8 @@
     "centsFromStep0": 2400,
     "ratioToStep0": "4.0",
     "hz": 527.563,
-    "audioPath": "audio/7edo/7EDO-015.wav"
+    "audioPath": "audio/7edo/7EDO-015.wav",
+    "ratioToRef": 8.166609907120744
   },
   {
     "barId": "8EDO-017",
@@ -825,7 +893,8 @@
     "centsFromStep0": 2400,
     "ratioToStep0": "4.000000000",
     "hz": 527.563,
-    "audioPath": "audio/8edo/8EDO-017.wav"
+    "audioPath": "audio/8edo/8EDO-017.wav",
+    "ratioToRef": 8.166609907120744
   },
   {
     "barId": "harmonic-008",
@@ -837,7 +906,8 @@
     "centsFromStep0": 3600,
     "ratioToStep0": "8/1",
     "hz": 527.563,
-    "audioPath": "audio/harmonic/harmonic-008.wav"
+    "audioPath": "audio/harmonic/harmonic-008.wav",
+    "ratioToRef": 8.166609907120744
   },
   {
     "barId": "harmonic-009",
@@ -849,7 +919,8 @@
     "centsFromStep0": 3803.910003,
     "ratioToStep0": "9/1",
     "hz": 592.163,
-    "audioPath": "audio/harmonic/harmonic-009.wav"
+    "audioPath": "audio/harmonic/harmonic-009.wav",
+    "ratioToRef": 9.166609907120744
   },
   {
     "barId": "harmonic-010",
@@ -861,7 +932,8 @@
     "centsFromStep0": 3986.313714,
     "ratioToStep0": "10/1",
     "hz": 656.763,
-    "audioPath": "audio/harmonic/harmonic-010.wav"
+    "audioPath": "audio/harmonic/harmonic-010.wav",
+    "ratioToRef": 10.166609907120744
   },
   {
     "barId": "harmonic-011",
@@ -873,7 +945,8 @@
     "centsFromStep0": 4151.317942,
     "ratioToStep0": "11/1",
     "hz": 721.362,
-    "audioPath": "audio/harmonic/harmonic-011.wav"
+    "audioPath": "audio/harmonic/harmonic-011.wav",
+    "ratioToRef": 11.166594427244583
   },
   {
     "barId": "harmonic-012",
@@ -885,7 +958,8 @@
     "centsFromStep0": 4301.955001,
     "ratioToStep0": "12/1",
     "hz": 785.962,
-    "audioPath": "audio/harmonic/harmonic-012.wav"
+    "audioPath": "audio/harmonic/harmonic-012.wav",
+    "ratioToRef": 12.166594427244583
   },
   {
     "barId": "harmonic-013",
@@ -897,7 +971,8 @@
     "centsFromStep0": 4440.527828,
     "ratioToStep0": "13/1",
     "hz": 850.562,
-    "audioPath": "audio/harmonic/harmonic-013.wav"
+    "audioPath": "audio/harmonic/harmonic-013.wav",
+    "ratioToRef": 13.166594427244583
   },
   {
     "barId": "harmonic-014",
@@ -909,7 +984,8 @@
     "centsFromStep0": 4568.825907,
     "ratioToStep0": "14/1",
     "hz": 915.161,
-    "audioPath": "audio/harmonic/harmonic-014.wav"
+    "audioPath": "audio/harmonic/harmonic-014.wav",
+    "ratioToRef": 14.166578947368421
   },
   {
     "barId": "harmonic-015",
@@ -921,7 +997,8 @@
     "centsFromStep0": 4688.268715,
     "ratioToStep0": "15/1",
     "hz": 990.527,
-    "audioPath": "audio/harmonic/harmonic-015.wav"
+    "audioPath": "audio/harmonic/harmonic-015.wav",
+    "ratioToRef": 15.33323529411765
   },
   {
     "barId": "harmonic-016",
@@ -933,7 +1010,8 @@
     "centsFromStep0": 4800,
     "ratioToStep0": "16/1",
     "hz": 1055.127,
-    "audioPath": "audio/harmonic/harmonic-016.wav"
+    "audioPath": "audio/harmonic/harmonic-016.wav",
+    "ratioToRef": 16.33323529411765
   },
   {
     "barId": "harmonic-017",
@@ -945,7 +1023,8 @@
     "centsFromStep0": 4905.903039,
     "ratioToStep0": "17/1",
     "hz": 1119.727,
-    "audioPath": "audio/harmonic/harmonic-017.wav"
+    "audioPath": "audio/harmonic/harmonic-017.wav",
+    "ratioToRef": 17.33323529411765
   },
   {
     "barId": "harmonic-018",
@@ -957,7 +1036,8 @@
     "centsFromStep0": 5005.865004,
     "ratioToStep0": "18/1",
     "hz": 1184.326,
-    "audioPath": "audio/harmonic/harmonic-018.wav"
+    "audioPath": "audio/harmonic/harmonic-018.wav",
+    "ratioToRef": 18.333219814241488
   },
   {
     "barId": "harmonic-019",
@@ -969,7 +1049,8 @@
     "centsFromStep0": 5100,
     "ratioToStep0": "19/1",
     "hz": 1248.926,
-    "audioPath": "audio/harmonic/harmonic-019.wav"
+    "audioPath": "audio/harmonic/harmonic-019.wav",
+    "ratioToRef": 19.333219814241488
   },
   {
     "barId": "harmonic-020",
@@ -981,7 +1062,8 @@
     "centsFromStep0": 5189.736572,
     "ratioToStep0": "20/1",
     "hz": 1313.525,
-    "audioPath": "audio/harmonic/harmonic-020.wav"
+    "audioPath": "audio/harmonic/harmonic-020.wav",
+    "ratioToRef": 20.333204334365327
   },
   {
     "barId": "harmonic-021",
@@ -993,7 +1075,8 @@
     "centsFromStep0": 5272.696813,
     "ratioToStep0": "21/1",
     "hz": 1378.125,
-    "audioPath": "audio/harmonic/harmonic-021.wav"
+    "audioPath": "audio/harmonic/harmonic-021.wav",
+    "ratioToRef": 21.333204334365327
   },
   {
     "barId": "harmonic-022",
@@ -1005,7 +1088,8 @@
     "centsFromStep0": 5350.992186,
     "ratioToStep0": "22/1",
     "hz": 1442.725,
-    "audioPath": "audio/harmonic/harmonic-022.wav"
+    "audioPath": "audio/harmonic/harmonic-022.wav",
+    "ratioToRef": 22.333204334365327
   },
   {
     "barId": "harmonic-023",
@@ -1017,7 +1101,8 @@
     "centsFromStep0": 5425.094614,
     "ratioToStep0": "23/1",
     "hz": 1507.324,
-    "audioPath": "audio/harmonic/harmonic-023.wav"
+    "audioPath": "audio/harmonic/harmonic-023.wav",
+    "ratioToRef": 23.333188854489165
   },
   {
     "barId": "harmonic-024",
@@ -1029,7 +1114,8 @@
     "centsFromStep0": 5494.820005,
     "ratioToStep0": "24/1",
     "hz": 1582.69,
-    "audioPath": "audio/harmonic/harmonic-024.wav"
+    "audioPath": "audio/harmonic/harmonic-024.wav",
+    "ratioToRef": 24.499845201238394
   },
   {
     "barId": "harmonic-025",
@@ -1041,7 +1127,8 @@
     "centsFromStep0": 5560,
     "ratioToStep0": "25/1",
     "hz": 1647.29,
-    "audioPath": "audio/harmonic/harmonic-025.wav"
+    "audioPath": "audio/harmonic/harmonic-025.wav",
+    "ratioToRef": 25.49984520123839
   },
   {
     "barId": "harmonic-026",
@@ -1053,7 +1140,8 @@
     "centsFromStep0": 5622.348978,
     "ratioToStep0": "26/1",
     "hz": 1701.123,
-    "audioPath": "audio/harmonic/harmonic-026.wav"
+    "audioPath": "audio/harmonic/harmonic-026.wav",
+    "ratioToRef": 26.333173374613008
   },
   {
     "barId": "harmonic-027",
@@ -1065,7 +1153,8 @@
     "centsFromStep0": 5681.865004,
     "ratioToStep0": "27/1",
     "hz": 1765.723,
-    "audioPath": "audio/harmonic/harmonic-027.wav"
+    "audioPath": "audio/harmonic/harmonic-027.wav",
+    "ratioToRef": 27.333173374613004
   },
   {
     "barId": "harmonic-028",
@@ -1077,7 +1166,8 @@
     "centsFromStep0": 5738.825907,
     "ratioToStep0": "28/1",
     "hz": 1841.089,
-    "audioPath": "audio/harmonic/harmonic-028.wav"
+    "audioPath": "audio/harmonic/harmonic-028.wav",
+    "ratioToRef": 28.499829721362232
   },
   {
     "barId": "harmonic-029",
@@ -1089,7 +1179,8 @@
     "centsFromStep0": 5793.424698,
     "ratioToStep0": "29/1",
     "hz": 1905.688,
-    "audioPath": "audio/harmonic/harmonic-029.wav"
+    "audioPath": "audio/harmonic/harmonic-029.wav",
+    "ratioToRef": 29.49981424148607
   },
   {
     "barId": "harmonic-030",
@@ -1101,7 +1192,8 @@
     "centsFromStep0": 5845.850722,
     "ratioToStep0": "30/1",
     "hz": 1970.288,
-    "audioPath": "audio/harmonic/harmonic-030.wav"
+    "audioPath": "audio/harmonic/harmonic-030.wav",
+    "ratioToRef": 30.49981424148607
   },
   {
     "barId": "harmonic-031",
@@ -1113,7 +1205,8 @@
     "centsFromStep0": 5895.258438,
     "ratioToStep0": "31/1",
     "hz": 2045.654,
-    "audioPath": "audio/harmonic/harmonic-031.wav"
+    "audioPath": "audio/harmonic/harmonic-031.wav",
+    "ratioToRef": 31.666470588235295
   },
   {
     "barId": "harmonic-032",
@@ -1125,6 +1218,7 @@
     "centsFromStep0": 5943.803498,
     "ratioToStep0": "32/1",
     "hz": 2110.254,
-    "audioPath": "audio/harmonic/harmonic-032.wav"
+    "audioPath": "audio/harmonic/harmonic-032.wav",
+    "ratioToRef": 32.6664705882353
   }
 ]

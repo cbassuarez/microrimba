@@ -16,6 +16,7 @@ import { useAudio } from '../audio/AudioContextProvider';
 import { useMicrorimbaData } from '../data/useMicrorimbaData';
 import type { Bar, PitchGroup, ScaleId } from '../data/types';
 import { formatHz } from '../lib/format';
+import { formatRatioAsFraction } from '../lib/rational';
 import { prettyInstrumentLabel } from '../lib/labels';
 import { setTheme, type ThemeMode } from '../ui/theme';
 
@@ -51,10 +52,28 @@ function instrumentLabel(bar: Bar) {
   return prettyInstrumentLabel(bar.scaleId, bar.instrumentId, bar.edo);
 }
 
+function harmonicPartial(bar: Bar): number | null {
+  const idMatch = bar.barId.match(/harmonic-(\d+)$/i);
+  if (idMatch) return Number(idMatch[1]);
+  const stepMatch = bar.stepName.match(/H(\d+)/i);
+  if (stepMatch) return Number(stepMatch[1]);
+  const ratioMatch = bar.ratioToStep0.match(/^(\d+)\/1$/);
+  if (ratioMatch) return Number(ratioMatch[1]);
+  return null;
+}
+
+function ratioForDisplay(bar: Bar): string {
+  if (bar.scaleId === 'harmonic') {
+    const partial = harmonicPartial(bar) ?? 1;
+    return `${partial}/1`;
+  }
+  return formatRatioAsFraction(bar.ratioToRef);
+}
+
 export function PitchListPage() {
   const reduced = useReducedMotion();
   const { bars, scales, pitchIndex, loading, error } = useMicrorimbaData();
-  const { toggleBar, stopAll, playingBarIds } = useAudio();
+  const { toggleBar, stopAll, playingBarIds, playSequenceByBarIds } = useAudio();
 
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<'unique' | 'all'>('unique');
@@ -143,7 +162,7 @@ export function PitchListPage() {
             <p className="mt-3 max-w-2xl text-base text-slate-700 dark:text-slate-200">Explore microtonal bars as tactile glass surfaces—audition exact frequencies, compare clusters, and sketch harmonic constellations in one flowing panel.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <button className="rounded-full border border-rim bg-white/60 px-4 py-2 text-sm shadow-sm dark:bg-black/20" onClick={() => uniqueVisible.forEach((row) => void toggleBar(row.rep.barId))}> <Play className="mr-1 inline h-4 w-4" /> Play All (Unique)</button>
+            <button className="rounded-full border border-rim bg-white/60 px-4 py-2 text-sm shadow-sm dark:bg-black/20" onClick={() => void playSequenceByBarIds(uniqueVisible.map((row) => row.rep.barId), { intervalMs: 55, overlapMs: 0, mode: 'constant', gain: 0.9 })}> <Play className="mr-1 inline h-4 w-4" /> Play All (Unique)</button>
             <button className="rounded-full border border-rim px-4 py-2 text-sm" onClick={stopAll}><Square className="mr-1 inline h-4 w-4" /> Stop All</button>
             <button className="rounded-full border border-rim px-3 py-2 text-sm" onClick={() => setShowGroupingMenu((v) => !v)}><Filter className="h-4 w-4" /></button>
             <button
@@ -229,7 +248,7 @@ export function PitchListPage() {
                       <div className="uppercase">{bar.scaleId}</div>
                       <div>{degreeFor(bar)}</div>
                       <div>{index + 1}</div>
-                      <div className="font-mono text-xs">{bar.ratioToStep0}</div>
+                      <div className="font-mono text-xs">{ratioForDisplay(bar)}</div>
                       <button className="opacity-60 hover:opacity-100" onClick={() => setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))}>{expandedRow ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}</button>
                     </div>
                     <AnimatePresence initial={false}>
@@ -244,7 +263,7 @@ export function PitchListPage() {
                             <div>bar_id: <span className="font-mono">{bar.barId}</span></div>
                             <div>step_name: {bar.stepName}</div>
                             <div>cents_from_step0: {bar.centsFromStep0}</div>
-                            <div>ratio_to_step0: <span className="font-mono">{bar.ratioToStep0}</span></div>
+                            <div>ratio_to_ref: <span className="font-mono">{ratioForDisplay(bar)}</span></div>
                             <div title={`raw: ${bar.hz}`}>raw Hz: <span className="font-mono">{bar.hz}</span></div>
                           </div>
                           {cluster && (
@@ -259,7 +278,7 @@ export function PitchListPage() {
                                   <span>{instrumentLabel(member)}</span>
                                   <span>{barNumber(member.barId)}</span>
                                   <span className="uppercase">{member.scaleId}</span>
-                                  <span className="font-mono">{member.ratioToStep0}</span>
+                                  <span className="font-mono">{ratioForDisplay(member)}</span>
                                 </div>
                               ))}
                             </div>
@@ -342,7 +361,7 @@ export function PitchListPage() {
                         disabled={!scale}
                         onClick={() => {
                           if (!scale) return;
-                          scale.bars.forEach((barId, i) => setTimeout(() => void toggleBar(barId), i * 200));
+                          void playSequenceByBarIds(scale.bars, scale.scaleId === 'harmonic' ? { intervalMs: 220, overlapMs: 0, mode: 'expAccelerando', expFactor: 0.92, minIntervalMs: 25, gain: 0.9 } : { intervalMs: 200, overlapMs: 0, mode: 'constant', gain: 0.9 });
                         }}
                         className="rounded-full border border-rim px-3 py-1 text-xs disabled:opacity-50"
                       >

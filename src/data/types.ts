@@ -11,6 +11,7 @@ export type Bar = {
   stepName: string;
   centsFromStep0: number;
   ratioToStep0: string;
+  ratioToRef: number;
   hz: number;
   audioPath: string;
 };
@@ -44,4 +45,7 @@ export type BuildInfoJson = {
   repoVersion?: string;
   tolerancesCents: number[];
   algorithm: string;
+  refBarId?: string;
+  refPitchHz?: number;
+  ratioReference?: string;
 };
