@@ -63,7 +63,7 @@ export function AboutPage() {
           transition: { duration: 0.35, delay, ease: 'easeOut' as const },
         };
 
-  const citation = 'Feeney, Tim; Seb. Microtonal Marimba Instruments: recordings, measured pitch analysis, and tuning study set.';
+  const citation = 'Feeney, Tim; Suarez-Solis, Sebastian. Microtonal Marimba Instruments: recordings, measured pitch analysis, and tuning study set.';
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 pb-8 font-condensed">
@@ -83,13 +83,13 @@ export function AboutPage() {
         <h2 className="text-2xl font-semibold">Why this exists</h2>
         <div className="mt-3 space-y-3 text-base leading-relaxed text-slate-700 dark:text-slate-200">
           <p>
-            The goal is to give composers and students a concrete, playable reference for unfamiliar pitch systems on a familiar instrument family.
+            This was originally a class assignment to document pitches of 5 new instruments made available to the percussion studio at CalArts. Now that the data has been compiled, why not share it? The goal for this small reference library is to give composers and students a concrete, playable reference for a set of instruments they might not be able to physically access.
           </p>
           <p>
             Typical use-cases include orchestration tests, ear training, timbral comparison across tuning systems, and fast compositional sketching.
           </p>
           <p>
-            Pitch values are measured or estimated from recordings, then presented with conservative precision so the data stays musical and truthful.
+            Pitch values are measured or estimated from recordings, then presented with conservative precision so the data is musical and truthful.
           </p>
         </div>
       </motion.section>
@@ -130,7 +130,7 @@ export function AboutPage() {
           <h2 className="text-2xl font-semibold">Credits</h2>
           <div className="mt-3 space-y-2 text-base text-slate-700 dark:text-slate-200">
             <p>Recording & performance: Tim Feeney</p>
-            <p>Analysis, code, data & web: Seb</p>
+            <p>Analysis, code, data & web: Seb Suarez</p>
             <p>Class: Matthew H., Jake L., Paul Y.</p>
             <p>Instrument construction: Ron Samuels (pending verification; see LAPR for full details)</p>
           </div>
