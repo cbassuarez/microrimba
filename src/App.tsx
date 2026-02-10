@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AudioProvider } from './audio/AudioContextProvider';
@@ -8,10 +9,15 @@ import { GroupsPage } from './pages/GroupsPage';
 import { ScalePage } from './pages/ScalePage';
 import { BarDetailPage } from './pages/BarDetailPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { initTheme } from './ui/theme';
 
 export function App() {
   const location = useLocation();
   const reduced = useReducedMotion();
+
+  useEffect(() => {
+    initTheme();
+  }, []);
 
   return (
     <AudioProvider>

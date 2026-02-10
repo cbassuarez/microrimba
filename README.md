@@ -56,3 +56,10 @@ A production build always regenerates JSON data first:
 npm run build
 npm run preview
 ```
+
+## Home UX
+
+- **Grouping modes**: The home Pitch Index supports **Unique** (cluster representative rows) and **All bars** (every bar in Hz order). Unique mode can expand to show member bars.
+- **Tolerance presets**: Unique clustering uses presets of **±5c**, **±15c**, or **±30c** from `pitch_index.json`.
+- **Hz formatting rule**: Hz values are formatted adaptively as `<100 => 3 decimals`, `100-999.999 => 2 decimals`, `>=1000 => 1 decimal`; the prefix `≈` appears only when rounding changed the stored value.
+- **Composite behavior**: In Instrument Pads, selecting **Composite** plays representative bars and shows `×N` for grouped member counts when applicable.

@@ -17,7 +17,7 @@ export function GroupsPage() {
         {groups.map((g) => (
           <Link key={g.groupId} to={`/bar/${g.repBarId}?clusterTol=${tol}`} className="rounded-xl border border-rim bg-surface/60 p-3">
             <div className="font-semibold">{g.repBarId}</div>
-            <div>{formatHz(g.repHz)} Hz</div>
+            <div>{formatHz(g.repHz).text} Hz</div>
             <div>{g.stats.count} members</div>
             <div>Spread {g.stats.maxCentsSpread.toFixed(2)}c</div>
           </Link>

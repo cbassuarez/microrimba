@@ -29,7 +29,7 @@ export function ScalePage() {
       {rows.map((bar) => (
         <div key={bar.barId} className="flex justify-between rounded-xl border border-rim bg-surface/60 p-2">
           <Link to={`/bar/${bar.barId}`}>{bar.barId}</Link>
-          <span>{bar.stepName}</span><span>{formatHz(bar.hz)} Hz</span>
+          <span>{bar.stepName}</span><span>{formatHz(bar.hz).text} Hz</span>
           <button disabled={!canPlay(bar.barId)} onClick={() => playBar(bar.barId)}>Play</button>
         </div>
       ))}

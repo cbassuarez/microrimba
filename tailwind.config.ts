@@ -5,13 +5,17 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+        condensed: ['"IBM Plex Sans Condensed"', 'system-ui', 'sans-serif'],
+      },
       colors: {
         surface: 'var(--surface)',
         rim: 'var(--rim)',
         text: 'var(--text)',
       },
       boxShadow: {
-        glass: '0 12px 30px rgba(9,12,18,0.16), inset 0 1px 0 rgba(255,255,255,0.18)',
+        glass: '0 18px 48px rgba(7, 12, 24, 0.22), inset 0 1px 0 rgba(255,255,255,0.28)',
       },
     },
   },

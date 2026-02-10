@@ -1,4 +1,4 @@
-export type ScaleId = '5edo' | '9edo' | 'harmonic';
+export type ScaleId = '5edo' | '7edo' | '8edo' | '9edo' | 'harmonic' | string;
 export type InstrumentId = string;
 export type BarId = string;
 
