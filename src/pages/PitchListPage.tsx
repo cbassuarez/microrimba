@@ -14,6 +14,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAudio } from '../audio/AudioContextProvider';
 import { PitchListPaginator } from '../components/PitchListPaginator';
+import { PitchGridRow } from '../components/pitch/PitchGridRow';
 import { PitchRowDetailsOverlay } from '../components/PitchRowDetailsOverlay';
 import { useMicrorimbaData } from '../data/useMicrorimbaData';
 import type { Bar, PitchGroup, ScaleId } from '../data/types';
@@ -22,6 +23,7 @@ import { prettyInstrumentLabel } from '../lib/labels';
 import { formatHz } from '../lib/format';
 import { normalizeFracString } from '../lib/rational';
 import { setTheme, type ThemeMode } from '../ui/theme';
+import { PITCH_GRID_COLS_DESKTOP, PITCH_GRID_COLS_MOBILE } from '../components/pitch/pitchGridCols';
 
 type TolKey = '5' | '15' | '30';
 type ModeKey = 'unique' | 'all';
@@ -79,8 +81,23 @@ function isEditableTarget(target: EventTarget | null) {
   return target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
 }
 
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
+
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const onChange = () => setMatches(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [query]);
+
+  return matches;
+}
+
 export function PitchListPage() {
   const reduced = useReducedMotion();
+  const isSmOrUp = useMediaQuery('(min-width: 640px)');
+  const cols = isSmOrUp ? PITCH_GRID_COLS_DESKTOP : PITCH_GRID_COLS_MOBILE;
   const { bars, scales, pitchIndex, loading, error } = useMicrorimbaData();
   const { toggleBar, stopAll, playingBarIds, playSequenceByBarIds, voices } = useAudio();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -352,13 +369,24 @@ export function PitchListPage() {
           }}
         >
           <div className="overflow-x-auto overflow-y-hidden overscroll-x-contain">
-            <div className="min-w-[980px] [--pitch-cols:56px_92px_160px_72px_88px_84px_110px_120px_52px] md:[--pitch-cols:64px_120px_220px_84px_96px_96px_140px_130px_56px]">
-              <div ref={listHeaderRef} className="pitch-cols-template sticky top-0 z-10 grid gap-2 border-b border-rim bg-white/70 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70" style={{ gridTemplateColumns: 'var(--pitch-cols)' }}>
-                {['Index', 'Play', 'Hz', 'Instrument', 'Bar #', 'Scale', 'Degree', 'Ratio', 'More'].map((label) => (
-                  <div key={label} className="flex items-center gap-1 px-3">
-                    {label}
-                  </div>
-                ))}
+            <div className="w-max min-w-full">
+              {/* Drift prevention: header and data rows must always use PitchGridRow with shared cols constants. */}
+              <div ref={listHeaderRef}>
+                <PitchGridRow
+                  variant="header"
+                  cols={cols}
+                  className="sticky top-0 z-10 border-b border-rim bg-white/70 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70"
+                >
+                <div className="text-left justify-self-start">Index</div>
+                <div className="text-left justify-self-start">Play</div>
+                <div className="tabular-nums text-right justify-self-end">Hz</div>
+                <div className="text-left justify-self-start">Instrument</div>
+                <div className="tabular-nums text-right justify-self-end">Bar #</div>
+                <div className="text-left justify-self-start">Scale</div>
+                <div className="tabular-nums text-right justify-self-end">Degree</div>
+                <div className="tabular-nums text-right justify-self-end">Ratio</div>
+                <div className="text-left justify-self-start">More</div>
+                </PitchGridRow>
               </div>
 
               <AnimatePresence mode="wait" initial={false}>
@@ -386,9 +414,9 @@ export function PitchListPage() {
                         className="my-1 rounded-2xl border border-rim/80 bg-white/40 py-0.5 dark:bg-slate-900/30"
                         style={{ borderColor: `hsla(${SCALE_ACCENTS[row.bar.scaleId] ?? '220 10% 50%'}, 0.32)`, minHeight: `${ROW_H}px` }}
                       >
-                        <div className="pitch-cols-template grid h-[60px] whitespace-nowrap text-sm" style={{ gridTemplateColumns: 'var(--pitch-cols)' }}>
-                          <div className="flex items-center px-3 tabular-nums">{row.absoluteIndex + 1}</div>
-                          <div className="flex items-center px-3">
+                        <PitchGridRow variant="row" cols={cols} className="h-[60px] text-sm">
+                          <div className="tabular-nums text-right justify-self-end">{row.absoluteIndex + 1}</div>
+                          <div className="justify-self-start">
                             <button onClick={() => void playBarWithPaging(row.bar.barId)} className={`inline-flex h-9 w-9 items-center justify-center rounded-full border ${playingBarIds.has(row.bar.barId) ? 'border-emerald-400 bg-emerald-500/25' : 'border-rim'}`}>
                               {playingBarIds.has(row.bar.barId) ? (
                                 <motion.span animate={reduced ? { opacity: [0.55, 1, 0.55] } : { scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }} transition={{ repeat: Infinity, duration: 1.2 }}>
@@ -397,19 +425,19 @@ export function PitchListPage() {
                               ) : <Play className="h-4 w-4" />}
                             </button>
                           </div>
-                          <div className="flex items-center px-3 tabular-nums">{hz.text}</div>
-                          <div className="flex min-w-0 items-center px-3">{instrumentLabel(row.bar)}</div>
-                          <div className="flex items-center px-3 tabular-nums">{barNumber(row.bar.barId)}</div>
-                          <div className="flex items-center px-3 uppercase">{row.bar.scaleId}</div>
-                          <div className="flex items-center px-3 tabular-nums">{degreeFor(row.bar)}</div>
-                          <div className="flex min-w-0 items-center px-3 font-mono text-xs tabular-nums">
+                          <div className="tabular-nums text-right justify-self-end">{hz.text}</div>
+                          <div className="min-w-0 text-left justify-self-start truncate">{instrumentLabel(row.bar)}</div>
+                          <div className="tabular-nums text-right justify-self-end">{barNumber(row.bar.barId)}</div>
+                          <div className="text-left justify-self-start uppercase">{row.bar.scaleId}</div>
+                          <div className="tabular-nums text-right justify-self-end">{degreeFor(row.bar)}</div>
+                          <div className="min-w-0 font-mono text-xs tabular-nums text-right justify-self-end truncate">
                             {Math.abs(row.bar.ratioErrorCents) >= 1 ? '≈ ' : ''}
                             {ratioForDisplay(row.bar)}
                           </div>
-                          <div className="flex items-center px-3">
+                          <div className="justify-self-start">
                             <button className="opacity-60 hover:opacity-100" onClick={() => setOpenDetailsKey((prev) => (prev === row.key ? null : row.key))}>{isOpen ? <ChevronDown className="h-4 w-4 rotate-180" /> : <ChevronDown className="h-4 w-4" />}</button>
                           </div>
-                        </div>
+                        </PitchGridRow>
                       </div>
                     );
                   })}
