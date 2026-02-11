@@ -42,6 +42,18 @@ type PitchRow = {
   absoluteIndex: number;
 };
 
+let heroPlayAllPrewarmScheduled = false;
+let heroPlayAllCachedBarIds: string[] | null = null;
+
+function scheduleIdle(task: () => void) {
+  if (typeof window === 'undefined') return;
+  if ('requestIdleCallback' in window) {
+    (window as Window & { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(task);
+    return;
+  }
+  window.setTimeout(task, 0);
+}
+
 const SCALE_IDS: ScaleId[] = ['5edo', '7edo', '8edo', '9edo', 'harmonic'];
 const SCALE_DESCRIPTIONS: Record<string, string> = {
   '5edo': 'Wide pentatonic interval lattice with bold spacing.',
@@ -104,7 +116,7 @@ export function PitchListPage() {
   const isSmOrUp = useMediaQuery('(min-width: 640px)');
   const cols = isSmOrUp ? PITCH_GRID_COLS_DESKTOP : PITCH_GRID_COLS_MOBILE;
   const { bars, scales, pitchIndex, loading, error } = useMicrorimbaData();
-  const { toggleBar, stopAll, playingBarIds, playSequenceByBarIds, sequence } = useAudio();
+  const { toggleBar, stopAll, playingBarIds, playSequenceByBarIds, sequence, primeAudio, prewarmBars } = useAudio();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialInstrument = searchParams.get('instrument');
 
@@ -118,6 +130,7 @@ export function PitchListPage() {
   const [openDetailsKey, setOpenDetailsKey] = useState<string | null>(null);
   const [pageDirection, setPageDirection] = useState(0);
   const [followSequence, setFollowSequence] = useState(false);
+  const [isPlayAllStarting, setIsPlayAllStarting] = useState(false);
 
   const listSurfaceRef = useRef<HTMLDivElement>(null);
   const listViewportRef = useRef<HTMLDivElement>(null);
@@ -207,6 +220,8 @@ export function PitchListPage() {
     return uniqueVisible.map((item) => item.rep);
   }, [allVisible, mode, uniqueVisible]);
 
+  const heroPlayAllBarIds = useMemo(() => uniqueVisible.map((row) => row.rep.barId), [uniqueVisible]);
+
   const padsFilteredByInstrument = useMemo(() => {
     const allowComposite = selectedInstruments.has('composite');
     if (allowComposite) return padBars;
@@ -273,6 +288,15 @@ export function PitchListPage() {
     }
   }, [sequence.active]);
 
+  useEffect(() => {
+    if (!heroPlayAllBarIds.length || heroPlayAllPrewarmScheduled) return;
+    heroPlayAllPrewarmScheduled = true;
+    scheduleIdle(() => {
+      heroPlayAllCachedBarIds = [...heroPlayAllBarIds];
+      prewarmBars(heroPlayAllCachedBarIds);
+    });
+  }, [heroPlayAllBarIds, prewarmBars]);
+
   const playBarWithPaging = async (barId: string) => {
     ensureItemVisible(barId);
     await toggleBar(barId);
@@ -321,13 +345,27 @@ export function PitchListPage() {
           <div className="w-full sm:w-auto">
             <HeroGlassCTA
               isActive={sequence.active}
+              isStarting={isPlayAllStarting}
+              onPointerDown={() => {
+                try {
+                  primeAudio();
+                } catch {
+                  // non-blocking warm-up should never break interaction
+                }
+              }}
               onClick={() => {
                 if (sequence.active) {
+                  setIsPlayAllStarting(false);
                   stopAllWithFollowReset();
                   return;
                 }
+                if (isPlayAllStarting) return;
+                setIsPlayAllStarting(true);
                 setSequenceFollow(true);
-                void playSequenceByBarIds(uniqueVisible.map((row) => row.rep.barId), { intervalMs: 55, overlapMs: 0, mode: 'constant', gain: 0.9 }, { name: 'Play All (Unique)' });
+                const barIds = heroPlayAllCachedBarIds?.length ? heroPlayAllCachedBarIds : heroPlayAllBarIds;
+                void playSequenceByBarIds(barIds, { intervalMs: 55, overlapMs: 0, mode: 'constant', gain: 0.9 }, { name: 'Play All (Unique)' })
+                  .catch(() => undefined)
+                  .finally(() => setIsPlayAllStarting(false));
               }}
               className="ml-0"
             />

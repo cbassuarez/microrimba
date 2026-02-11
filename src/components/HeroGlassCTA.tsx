@@ -4,11 +4,15 @@ import { cn } from '../lib/cn';
 
 type HeroGlassCTAProps = {
   isActive: boolean;
+  isStarting?: boolean;
   onClick: () => void;
+  onPointerDown?: () => void;
   label?: string;
   activeLabel?: string;
+  startingLabel?: string;
   subLabel?: string;
   activeSubLabel?: string;
+  startingSubLabel?: string;
   className?: string;
 };
 
@@ -16,11 +20,15 @@ const NUDGE_SESSION_KEY = 'microrimba.heroGlassCta.nudged';
 
 export function HeroGlassCTA({
   isActive,
+  isStarting = false,
   onClick,
+  onPointerDown,
   label = '▶ Play All',
   activeLabel = '■ Stop',
+  startingLabel = 'Starting…',
   subLabel = 'Hear the full set in one sweep',
   activeSubLabel = 'Playing…',
+  startingSubLabel = 'Priming audio…',
   className,
 }: HeroGlassCTAProps) {
   const reducedMotion = useReducedMotion();
@@ -56,10 +64,15 @@ export function HeroGlassCTA({
   return (
     <motion.button
       type="button"
+      disabled={isStarting && !isActive}
+      aria-busy={isStarting}
+      aria-disabled={isStarting && !isActive}
       onClick={() => {
+        if (isStarting && !isActive) return;
         setFlashActive(true);
         onClick();
       }}
+      onPointerDown={onPointerDown}
       onHoverStart={() => {
         if (reducedMotion || isActive) return;
         setBurstKey((value) => value + 1);
@@ -67,6 +80,7 @@ export function HeroGlassCTA({
       className={cn(
         'group relative isolate inline-flex h-[52px] w-full min-w-0 items-center justify-between overflow-hidden rounded-full border border-rim bg-surface px-5 text-left shadow-[0_14px_30px_rgba(7,12,24,0.24),inset_0_1px_0_rgba(255,255,255,0.32)] backdrop-blur-xl',
         'sm:h-[60px] sm:w-auto sm:min-w-[240px] sm:px-6',
+        'disabled:cursor-not-allowed disabled:opacity-90',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white/40 dark:focus-visible:ring-offset-slate-950/40',
         className,
       )}
@@ -142,10 +156,13 @@ export function HeroGlassCTA({
 
       <span className="relative z-10 flex min-w-0 flex-col">
         <span className="inline-block w-fit rounded-full bg-black/10 px-2 py-0.5 text-[1.05rem] font-semibold leading-none text-slate-900 dark:bg-white/10 dark:text-slate-100">
-          {isActive ? activeLabel : label}
+          {isActive ? activeLabel : isStarting ? startingLabel : label}
+          {isStarting && !isActive ? (
+            <span className="ml-2 inline-block h-3 w-3 animate-spin rounded-full border border-current border-r-transparent align-middle" />
+          ) : null}
         </span>
         <span className="mt-1 text-xs leading-tight text-slate-700 dark:text-slate-200">
-          {isActive ? activeSubLabel : subLabel}
+          {isActive ? activeSubLabel : isStarting ? startingSubLabel : subLabel}
         </span>
       </span>
     </motion.button>
