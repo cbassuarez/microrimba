@@ -489,7 +489,7 @@ export function PitchListPage() {
                                 <motion.span animate={reduced ? { opacity: [0.55, 1, 0.55] } : { scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }} transition={{ repeat: Infinity, duration: 1.2 }}>
                                   <Volume2 className="h-4 w-4" />
                                 </motion.span>
-                              ) : <Play className="h-4 w-4" />}
+                              ) : <span aria-hidden className="text-sm leading-none">▶</span>}
                             </button>
                           </div>
                           <div className="min-w-0 text-left justify-self-start">
