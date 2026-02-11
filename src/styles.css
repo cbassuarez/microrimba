@@ -3,17 +3,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'HEJI';
-  src: url('/microrimba/fonts/HEJI2Text-Regular.otf') format('opentype');
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Bravura';
-  src: url('/microrimba/fonts/Bravura.otf') format('opentype');
-  font-display: swap;
-}
-
 :root {
   --surface: rgba(255, 255, 255, 0.67);
   --rim: rgba(255, 255, 255, 0.58);

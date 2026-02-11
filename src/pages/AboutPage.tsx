@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Check, Copy } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getSmuflFontStatus, type SmuflFontStatus } from '../fonts/fontStatus';
 
 type GlossaryTermProps = {
   term: string;
@@ -47,6 +48,7 @@ function GlossaryTerm({ term, definition }: GlossaryTermProps) {
 export function AboutPage() {
   const reduced = useReducedMotion();
   const [copied, setCopied] = useState(false);
+  const [fontStatus, setFontStatus] = useState<SmuflFontStatus>({ bravura: false, heji: false });
 
   const sectionMotion = (delay: number) =>
     reduced
@@ -64,6 +66,36 @@ export function AboutPage() {
         };
 
   const citation = 'Feeney, Tim; Suarez-Solis, Sebastian. Microtonal Marimba Instruments: recordings, measured pitch analysis, and tuning study set.';
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const showDebug = import.meta.env.DEV || params.get('debug') === '1';
+
+    if (!showDebug) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const updateStatus = async () => {
+      const status = await getSmuflFontStatus();
+      if (!cancelled) {
+        setFontStatus(status);
+      }
+    };
+
+    void updateStatus();
+
+    document.fonts?.ready.then(() => {
+      void updateStatus();
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const showFontDebug = import.meta.env.DEV || new URLSearchParams(window.location.search).get('debug') === '1';
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 pb-8 font-condensed">
@@ -140,8 +172,19 @@ export function AboutPage() {
           <p className="mt-3 text-base leading-relaxed text-slate-700 dark:text-slate-200">
             You can use this library to compose, teach, cite, and reuse material where permitted. Licensing details live in the repository LICENSE and README.
           </p>
+          <p className="mt-3 text-sm text-slate-700 dark:text-slate-200">
+            Fonts: Bravura (SMuFL) and HEJI2 are included for notation glyph rendering workflows.
+          </p>
         </article>
       </motion.section>
+
+      {showFontDebug ? (
+        <motion.section className="glass-panel glass-rim p-3" {...sectionMotion(0.18)}>
+          <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+            Fonts: Bravura {fontStatus.bravura ? '✓' : '✕'} / HEJI2 {fontStatus.heji2 ? '✓' : '✕'}
+          </p>
+        </motion.section>
+      ) : null}
 
       <motion.section className="glass-panel glass-rim p-5" {...sectionMotion(0.2)}>
         <h2 className="text-xl font-semibold">Cite this</h2>

@@ -8,6 +8,8 @@ export default {
       fontFamily: {
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
         condensed: ['"IBM Plex Sans Condensed"', 'system-ui', 'sans-serif'],
+        smufl: ['HEJI2', 'Bravura', 'serif'],
+        hejiText: ['HEJI2Text', '"IBM Plex Sans Condensed"', 'system-ui', 'sans-serif'],
       },
       colors: {
         surface: 'var(--surface)',

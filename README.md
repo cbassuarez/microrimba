@@ -78,3 +78,8 @@ After deploying to GitHub Pages, verify deep-link fallback behavior:
 - Refresh that page.
 - Confirm the app route loads (not a GitHub hard 404).
 - Confirm `view-source:` shows built assets (not `/src/main.tsx`).
+
+## Fonts
+
+Bravura (SMuFL) and HEJI2 are included for notation glyph rendering workflows.
+Font binaries are expected under `public/fonts/`, and license scaffolding is tracked under `third_party/`.
