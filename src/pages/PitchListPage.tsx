@@ -24,7 +24,11 @@ import { formatHz } from '../lib/format';
 import { normalizeFracString } from '../lib/rational';
 import { setTheme, type ThemeMode } from '../ui/theme';
 import { glassHoverMotion } from '../ui/glassHoverMotion';
-import { PITCH_GRID_COLS_DESKTOP, PITCH_GRID_COLS_MOBILE } from '../components/pitch/pitchGridCols';
+import {
+  PITCH_GRID_COLS_DESKTOP,
+  PITCH_GRID_COLS_MOBILE,
+  PITCH_TABLE_INNER_CLASS,
+} from '../components/pitch/pitchGridCols';
 import { PitchLabel } from '../components/PitchLabel';
 import { DEFAULT_DESCRIPTION, Meta } from '../components/Meta';
 
@@ -421,7 +425,7 @@ export function PitchListPage() {
           {/* This viewport is what rowsPerPage uses so we fill the visible list region exactly. */}
           <div ref={listViewportRef} className="flex min-h-0 flex-1 flex-col px-2 pt-2">
             <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain">
-              <div className="w-max">
+              <div className={PITCH_TABLE_INNER_CLASS}>
               {/* Drift prevention: header and data rows must always use PitchGridRow with shared cols constants. */}
               <div ref={headerRowRef}>
                 <PitchGridRow
@@ -429,9 +433,9 @@ export function PitchListPage() {
                   cols={cols}
                   className="sticky top-0 z-10 border-b border-rim bg-white/70 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70"
                 >
-                <div className="text-left justify-self-start">Index</div>
-                <div className="text-left justify-self-start">Pitch</div>
+                <div className="text-left justify-self-start tabular-nums">Index</div>
                 <div className="text-left justify-self-center">Play</div>
+                <div className="text-left justify-self-start">Pitch</div>
                 <div className="tabular-nums text-right justify-self-end">Hz</div>
                 <div className="text-left justify-self-start">Instrument</div>
                 <div className="tabular-nums text-right justify-self-end">Bar #</div>
@@ -468,10 +472,7 @@ export function PitchListPage() {
                         style={{ borderColor: `hsla(${SCALE_ACCENTS[row.bar.scaleId] ?? '220 10% 50%'}, 0.32)`, minHeight: `var(--pitch-row-h)` }}
                       >
                         <PitchGridRow variant="row" cols={cols} className="h-[var(--pitch-row-h)] text-sm">
-                          <div className="tabular-nums text-right justify-self-end">{row.absoluteIndex + 1}</div>
-                          <div className="min-w-0 text-left justify-self-start">
-                            <PitchLabel hz={row.bar.hz} ratio={row.bar.ratioToStep0} instrumentId={row.bar.instrumentId} scaleId={row.bar.scaleId} barId={row.bar.barId} variant="list" />
-                          </div>
+                          <div className="tabular-nums text-left justify-self-start">{row.absoluteIndex + 1}</div>
                           <div className="justify-self-center">
                             <button onClick={() => void playBarWithPaging(row.bar.barId)} className={`inline-flex h-9 w-9 items-center justify-center rounded-full border ${playingBarIds.has(row.bar.barId) ? 'border-emerald-400 bg-emerald-500/25' : 'border-rim'}`}>
                               {playingBarIds.has(row.bar.barId) ? (
@@ -480,6 +481,9 @@ export function PitchListPage() {
                                 </motion.span>
                               ) : <Play className="h-4 w-4" />}
                             </button>
+                          </div>
+                          <div className="min-w-0 text-left justify-self-start">
+                            <PitchLabel hz={row.bar.hz} ratio={row.bar.ratioToStep0} instrumentId={row.bar.instrumentId} scaleId={row.bar.scaleId} barId={row.bar.barId} variant="list" />
                           </div>
                           <div className="tabular-nums text-right justify-self-end">{hz.text}</div>
                           <div className="min-w-0 text-left justify-self-start truncate">{instrumentLabel(row.bar)}</div>
@@ -502,8 +506,8 @@ export function PitchListPage() {
             </div>
           </div>
 
-            <div ref={paginatorRef} className="pointer-events-auto mt-2 flex items-center justify-end">
-              <div className="rounded-2xl border border-black/10 bg-white/55 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-black/30">
+            <div ref={paginatorRef} className="pointer-events-auto mt-2 flex justify-center pb-3">
+              <div className="shrink-0 rounded-2xl border border-black/10 bg-white/55 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-black/30">
                 <div className="flex items-center gap-2 px-3 py-2">
                   <button
                     type="button"
