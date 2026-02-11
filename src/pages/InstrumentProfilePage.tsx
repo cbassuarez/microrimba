@@ -16,6 +16,7 @@ import { getBarsForInstrument, getDefaultInstrumentForScale, getInstrumentMeta }
 import { prettyInstrumentLabel } from '../lib/labels';
 import { normalizeFracString } from '../lib/rational';
 import { glassHoverMotion } from '../ui/glassHoverMotion';
+import { Meta } from '../components/Meta';
 
 type ModeKey = 'unique' | 'all';
 type TolKey = '5' | '15' | '30';
@@ -154,7 +155,9 @@ export function InstrumentProfilePage({
       return acc;
     }, {});
     return (
-      <section className="glass-panel glass-rim p-6">
+      <>
+        <Meta title="Instrument" description="Playable profile: measured pitches, range, tuning notes." canonicalPath={instrumentId ? `/instrument/${instrumentId}` : '/instrument'} />
+        <section className="glass-panel glass-rim p-6">
         <h1 className="text-2xl font-semibold">Instrument not found</h1>
         <p className="mt-2 text-sm opacity-80">Try one of the available instrument profiles:</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -170,6 +173,7 @@ export function InstrumentProfilePage({
           ))}
         </div>
       </section>
+      </>
     );
   }
 
@@ -200,7 +204,9 @@ export function InstrumentProfilePage({
   ] as const;
 
   return (
-    <div className="flex min-h-[calc(100vh-8.5rem)] flex-col gap-6 pb-8">
+    <>
+      <Meta title={meta.label} description="Playable profile: measured pitches, range, tuning notes." canonicalPath={`/instrument/${instrumentId}`} />
+      <div className="flex min-h-[calc(100vh-8.5rem)] flex-col gap-6 pb-8">
       <section className="sticky top-20 z-20 rounded-3xl border border-rim bg-surface/90 p-5 shadow-glass backdrop-blur-xl" style={{ boxShadow: `inset 0 1px 0 hsla(${tint}, 0.35)` }}>
         <div className="flex flex-wrap items-center gap-4">
           <div className="min-w-0 flex-1">
@@ -354,7 +360,8 @@ export function InstrumentProfilePage({
           ) : null
         ))}
       </section>
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -362,7 +369,7 @@ export function ScaleInstrumentProfilePage() {
   const { scaleId } = useParams();
   const { instruments } = useMicrorimbaData();
 
-  if (!scaleId) return <InstrumentProfilePage showModeChips={false} forcedMode="all" />;
+  if (!scaleId) return <><Meta title="Scale" description="Playable profile: measured pitches, range, tuning notes." canonicalPath="/scale" /><InstrumentProfilePage showModeChips={false} forcedMode="all" /></>;
   const instrumentId = getDefaultInstrumentForScale(instruments, scaleId);
-  return <InstrumentProfilePage instrumentId={instrumentId ?? undefined} showModeChips={false} forcedMode="all" />;
+  return <><Meta title={scaleId} description="Playable profile: measured pitches, range, tuning notes." canonicalPath={`/scale/${scaleId}`} /><InstrumentProfilePage instrumentId={instrumentId ?? undefined} showModeChips={false} forcedMode="all" /></>;
 }
