@@ -4,9 +4,7 @@ import {
   ChevronUp,
   Filter,
   Moon,
-  Play,
   Search,
-  Square,
   Sun,
   Volume2,
 } from 'lucide-react';
@@ -31,6 +29,7 @@ import {
 } from '../components/pitch/pitchGridCols';
 import { PitchLabel } from '../components/PitchLabel';
 import { DEFAULT_DESCRIPTION, Meta } from '../components/Meta';
+import { HeroGlassCTA } from '../components/HeroGlassCTA';
 
 type TolKey = '5' | '15' | '30';
 type ModeKey = 'unique' | 'all';
@@ -319,29 +318,40 @@ export function PitchListPage() {
             <h1 className="mt-1 text-4xl font-semibold md:text-5xl">Microtonal Marimba Instruments</h1>
             <p className="mt-3 max-w-2xl text-base text-slate-700 dark:text-slate-200">CalArts recently got some microtonal marimbas, and we measured and recorded the bars as a pitch set. View all pitches in a table, hear a whole-set gliss, or listen to the overtone marimba glissando (ooh, ahh).</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <button className="rounded-full border border-rim bg-white/60 px-4 py-2 text-sm shadow-sm dark:bg-black/20" onClick={() => {
-              setSequenceFollow(true);
-              void playSequenceByBarIds(uniqueVisible.map((row) => row.rep.barId), { intervalMs: 55, overlapMs: 0, mode: 'constant', gain: 0.9 }, { name: 'Play All (Unique)' });
-            }}> <Play className="mr-1 inline h-4 w-4" /> Play All </button>
-            <button className="rounded-full border border-rim px-4 py-2 text-sm" onClick={stopAllWithFollowReset}><Square className="mr-1 inline h-4 w-4" /> Stop All</button>
-            <button className="rounded-full border border-rim px-3 py-2 text-sm" onClick={() => setShowGroupingMenu((v) => !v)}><Filter className="h-4 w-4" /></button>
-            <button
-              className="rounded-full border border-rim px-3 py-2 text-sm"
+          <div className="w-full sm:w-auto">
+            <HeroGlassCTA
+              isActive={sequence.active}
               onClick={() => {
-                const next = theme === 'dark' ? 'light' : 'dark';
-                setTheme(next);
-                setThemeState(next);
+                if (sequence.active) {
+                  stopAllWithFollowReset();
+                  return;
+                }
+                setSequenceFollow(true);
+                void playSequenceByBarIds(uniqueVisible.map((row) => row.rep.barId), { intervalMs: 55, overlapMs: 0, mode: 'constant', gain: 0.9 }, { name: 'Play All (Unique)' });
               }}
-            >
-              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
-            <label className="flex items-center gap-2 rounded-full border border-rim px-3 py-2 text-sm">
-              <Search className="h-4 w-4" />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} className="w-52 bg-transparent outline-none" placeholder="Search bar / instrument / scale" />
-            </label>
+              className="ml-0"
+            />
           </div>
         </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-slate-700/90 dark:text-slate-200/85">
+          <button className="rounded-full border border-rim/80 bg-white/35 px-3 py-2 text-sm shadow-sm dark:bg-black/15" onClick={() => setShowGroupingMenu((v) => !v)}><Filter className="h-4 w-4" /></button>
+          <button
+            className="rounded-full border border-rim/80 bg-white/35 px-3 py-2 text-sm shadow-sm dark:bg-black/15"
+            onClick={() => {
+              const next = theme === 'dark' ? 'light' : 'dark';
+              setTheme(next);
+              setThemeState(next);
+            }}
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+          <label className="flex items-center gap-2 rounded-full border border-rim/80 bg-white/35 px-3 py-2 text-sm shadow-sm dark:bg-black/15">
+            <Search className="h-4 w-4" />
+            <input value={query} onChange={(e) => setQuery(e.target.value)} className="w-52 bg-transparent outline-none" placeholder="Search bar / instrument / scale" />
+          </label>
+        </div>
+
         <div className="mt-4 flex flex-wrap gap-2">
           {SCALE_IDS.map((scaleId) => {
             const active = selectedScales.has(scaleId);
@@ -479,7 +489,7 @@ export function PitchListPage() {
                                 <motion.span animate={reduced ? { opacity: [0.55, 1, 0.55] } : { scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }} transition={{ repeat: Infinity, duration: 1.2 }}>
                                   <Volume2 className="h-4 w-4" />
                                 </motion.span>
-                              ) : <Play className="h-4 w-4" />}
+                              ) : <span aria-hidden className="text-sm leading-none">▶</span>}
                             </button>
                           </div>
                           <div className="min-w-0 text-left justify-self-start">
