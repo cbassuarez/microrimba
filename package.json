@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "npm run build:data && node scripts/copy-public-assets.mjs",
+    "prebuild": "npm run build:data && node scripts/copy-public-assets.mjs && node scripts/check-font-assets.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "build:data": "tsx scripts/build-data.ts"
