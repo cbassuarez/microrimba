@@ -1,4 +1,4 @@
-import { factorFrac, parseFracString } from './fraction';
+import { factorFrac } from './fraction';
 import { getDiatonicGlyph, getPrimeGlyph, type DiatonicAccidental, type HejiPrime, type PrimeDirection, type PrimeMagnitude } from './heji2Mapping';
 
 export type PitchLetter = 'C' | 'D' | 'E' | 'F' | 'G' | 'A' | 'B';
@@ -38,19 +38,19 @@ export const MAX_TOTAL_PRIME_GLYPHS = 4;
 
 const SAFE_FALLBACK_NOTE: PitchNote = { letter: 'C', octave: 0, diatonicAccidental: '', midi: 12 };
 const PRIME_ORDER: HejiPrime[] = [5, 7, 11, 13, 17, 19, 23, 29, 31];
-const SHARP_SPELLINGS: Array<{ letter: PitchLetter; diatonicAccidental: DiatonicAccidental }> = [
-  { letter: 'C', diatonicAccidental: '' },
-  { letter: 'C', diatonicAccidental: '#' },
-  { letter: 'D', diatonicAccidental: '' },
-  { letter: 'D', diatonicAccidental: '#' },
-  { letter: 'E', diatonicAccidental: '' },
-  { letter: 'F', diatonicAccidental: '' },
-  { letter: 'F', diatonicAccidental: '#' },
-  { letter: 'G', diatonicAccidental: '' },
-  { letter: 'G', diatonicAccidental: '#' },
-  { letter: 'A', diatonicAccidental: '' },
-  { letter: 'A', diatonicAccidental: '#' },
-  { letter: 'B', diatonicAccidental: '' },
+const PITCH_CLASS_SPELLINGS: Array<{ letter: PitchLetter; accidental: '' | '#' | 'b' }> = [
+  { letter: 'C', accidental: '' },
+  { letter: 'C', accidental: '#' },
+  { letter: 'D', accidental: '' },
+  { letter: 'E', accidental: 'b' },
+  { letter: 'E', accidental: '' },
+  { letter: 'F', accidental: '' },
+  { letter: 'F', accidental: '#' },
+  { letter: 'G', accidental: '' },
+  { letter: 'G', accidental: '#' },
+  { letter: 'A', accidental: '' },
+  { letter: 'B', accidental: 'b' },
+  { letter: 'B', accidental: '' },
 ];
 
 const refHzByInstrument = new Map<string, number>();
@@ -83,6 +83,22 @@ function nearestMidiWithPitchClass(midiFloatExpected: number, pitchClass: number
     }
   }
   return best;
+}
+
+export function parseRatio(ratio: string): { p: number; q: number } | null {
+  if (typeof ratio !== 'string') return null;
+  const trimmed = ratio.trim();
+  if (!trimmed) return null;
+  const parts = trimmed.split('/');
+  if (parts.length !== 2) return null;
+  const p = Number.parseInt(parts[0], 10);
+  const q = Number.parseInt(parts[1], 10);
+  if (!Number.isFinite(p) || !Number.isFinite(q) || q === 0) return null;
+  return { p, q };
+}
+
+function pitchClassToSpelling(pc: number): { letter: PitchLetter; accidental: '' | '#' | 'b' } {
+  return PITCH_CLASS_SPELLINGS[((pc % 12) + 12) % 12];
 }
 
 export function formatSignedCents(x: number): string {
@@ -130,12 +146,18 @@ export function getPitchLabelModel(args: {
     };
   }
 
-  const { p, q } = parseFracString(ratio_to_step0);
+  const parsedRatio = parseRatio(ratio_to_step0);
+  const { p, q } = parsedRatio ?? { p: 1, q: 1 };
   const factors = factorFrac(p, q);
-  const e3 = factors.get(3) ?? 0;
-  const pitchClass = ((7 * e3) % 12 + 12) % 12;
+  const midiFloat = 69 + 12 * Math.log2(hz / 440);
+  const ratioFloat = parsedRatio ? ratioToNumber(parsedRatio.p, parsedRatio.q) : Number.NaN;
+  const semitonesFloat = Number.isFinite(ratioFloat) && ratioFloat > 0 ? 12 * Math.log2(ratioFloat) : Number.NaN;
+  const semitonesRounded = Number.isFinite(semitonesFloat) ? Math.round(semitonesFloat) : Number.NaN;
+  const pitchClass = Number.isFinite(semitonesRounded)
+    ? ((semitonesRounded % 12) + 12) % 12
+    : ((Math.round(midiFloat) % 12) + 12) % 12;
 
-  const baseSpelling = SHARP_SPELLINGS[pitchClass];
+  const spelling = pitchClassToSpelling(pitchClass);
   const ratio = ratioToNumber(p, q);
   let step0Ref = refHzStep0;
 
@@ -152,15 +174,16 @@ export function getPitchLabelModel(args: {
 
   const expectedHz = step0Ref * ratio;
   const midiFloatExpected = 69 + 12 * Math.log2(expectedHz / 440);
-  const midiBase = nearestMidiWithPitchClass(midiFloatExpected, pitchClass);
+  const midiBase = nearestMidiWithPitchClass(midiFloat, pitchClass);
 
   const note: PitchNote = {
-    ...baseSpelling,
+    letter: spelling.letter,
+    diatonicAccidental: spelling.accidental,
     midi: midiBase,
     octave: Math.floor(midiBase / 12) - 1,
   };
 
-  const diatonicGlyph = getDiatonicGlyph(baseSpelling.diatonicAccidental);
+  const diatonicGlyph = getDiatonicGlyph(spelling.accidental);
   const primeGlyphInfo: PrimeGlyphInfo[] = [];
   const primeGlyphs: string[] = [];
   let confidence: HejiConfidence = 'exact';

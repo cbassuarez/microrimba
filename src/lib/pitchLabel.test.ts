@@ -9,7 +9,32 @@ describe('pitchLabel ratio-driven HEJI', () => {
       const rendered = `${model.heji.diatonicGlyph}${model.heji.primeGlyphs.join('')}`;
       expect(rendered).not.toContain('↑');
       expect(rendered).not.toContain('↓');
+      expect(model.display.noteText).not.toContain('↑');
+      expect(model.display.noteText).not.toContain('↓');
     }
+  });
+
+  it('9-EDO 27/25 spells in C#3/Db3 neighborhood and never A2', () => {
+    const model = getPitchLabelModel({ hz: 141.29, ratio_to_step0: '27/25', instrumentId: '9edo' });
+    expect(model.note.octave).toBe(3);
+    expect(model.note.letter).toBe('C');
+    expect(model.note.diatonicAccidental).toBe('#');
+    expect(model.display.noteText.startsWith('A')).toBe(false);
+  });
+
+  it('5-EDO 7/6 maps to Eb3 carrier family with flat policy', () => {
+    const model = getPitchLabelModel({ hz: 150.73, ratio_to_step0: '7/6', instrumentId: '5edo' });
+    expect(model.note.octave).toBe(3);
+    expect(((model.note.midi % 12) + 12) % 12).toBe(3);
+    expect(model.note.letter).toBe('E');
+    expect(model.note.diatonicAccidental).toBe('b');
+  });
+
+  it('step0 sanity keeps C carrier with no diatonic accidental', () => {
+    const model = getPitchLabelModel({ hz: 129.2, ratio_to_step0: '1/1', instrumentId: 'harmonic' });
+    expect(((model.note.midi % 12) + 12) % 12).toBe(0);
+    expect(model.note.letter).toBe('C');
+    expect(model.note.diatonicAccidental).toBe('');
   });
 
   it('ratio 1/1 has no prime glyphs and starts on C', () => {
