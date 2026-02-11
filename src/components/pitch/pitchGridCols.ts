@@ -1,3 +1,3 @@
-export const PITCH_GRID_COLS_MOBILE = '56px 110px 44px 108px minmax(180px,1fr) 74px 86px 78px 110px 44px';
+export const PITCH_GRID_COLS_MOBILE = '48px 96px 38px 88px minmax(160px,1fr) 58px 68px 64px 84px 38px';
 
-export const PITCH_GRID_COLS_DESKTOP = '64px 128px 48px 132px minmax(240px,1fr) 84px 96px 84px 140px 48px';
+export const PITCH_GRID_COLS_DESKTOP = '56px 112px 40px 100px minmax(220px,1fr) 64px 76px 68px 112px 40px';

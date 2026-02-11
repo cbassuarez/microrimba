@@ -1,12 +1,13 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ChevronDown, ChevronUp, Play, Square, Volume2 } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAudio } from '../audio/AudioContextProvider';
 import { PitchListPaginator } from '../components/PitchListPaginator';
 import { PitchRowDetailsOverlay } from '../components/PitchRowDetailsOverlay';
+import { PitchLabel } from '../components/PitchLabel';
 import { PitchGridRow } from '../components/pitch/PitchGridRow';
-import { PITCH_GRID_COLS_DESKTOP } from '../components/pitch/pitchGridCols';
+import { PITCH_GRID_COLS_DESKTOP, PITCH_GRID_COLS_MOBILE } from '../components/pitch/pitchGridCols';
 import { useMicrorimbaData } from '../data/useMicrorimbaData';
 import type { Bar, PitchGroup } from '../data/types';
 import { usePagedList } from '../hooks/usePagedList';
@@ -14,7 +15,7 @@ import { formatHz } from '../lib/format';
 import { getBarsForInstrument, getDefaultInstrumentForScale, getInstrumentMeta } from '../lib/instruments';
 import { prettyInstrumentLabel } from '../lib/labels';
 import { normalizeFracString } from '../lib/rational';
-import { PitchLabel } from '../components/PitchLabel';
+import { glassHoverMotion } from '../ui/glassHoverMotion';
 
 type ModeKey = 'unique' | 'all';
 type TolKey = '5' | '15' | '30';
@@ -29,6 +30,19 @@ const SCALE_ACCENTS: Record<string, string> = {
 };
 
 const ROW_H = 60;
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
+
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const onChange = () => setMatches(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [query]);
+
+  return matches;
+}
 
 function barNumber(barId: string) {
   const match = barId.match(/(\d+)$/);
@@ -56,22 +70,44 @@ function playOpts(scaleId: string) {
     : { intervalMs: 200, overlapMs: 0, mode: 'constant' as const, gain: 0.9 };
 }
 
-export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { instrumentId?: string }) {
+export function InstrumentProfilePage({
+  instrumentId: forcedInstrumentId,
+  showModeChips = true,
+  forcedMode = null,
+}: {
+  instrumentId?: string;
+  showModeChips?: boolean;
+  forcedMode?: ModeKey | null;
+}) {
   const { instrumentId: routeInstrumentId } = useParams();
   const instrumentId = forcedInstrumentId ?? routeInstrumentId;
   const reduced = useReducedMotion();
+  const isSmOrUp = useMediaQuery('(min-width: 640px)');
+  const cols = isSmOrUp ? PITCH_GRID_COLS_DESKTOP : PITCH_GRID_COLS_MOBILE;
   const navigate = useNavigate();
   const { bars, pitchIndex, instruments, loading, error } = useMicrorimbaData();
+  const [searchParams] = useSearchParams();
   const { toggleBar, stopAll, playingBarIds, playSequenceByBarIds } = useAudio();
 
-  const [mode, setMode] = useState<ModeKey>('unique');
+  const [mode, setMode] = useState<ModeKey>(() => {
+    if (forcedMode) return forcedMode;
+    return (searchParams.get('mode') as ModeKey) === 'all' ? 'all' : 'unique';
+  });
   const [tolerance] = useState<TolKey>('5');
   const [openDetailsKey, setOpenDetailsKey] = useState<string | null>(null);
   const [pageDirection, setPageDirection] = useState(0);
+  const [measureDebug, setMeasureDebug] = useState({ viewport: 0, header: 0, pager: 0, row: ROW_H, rowsPerPage: 4 });
 
   const listSurfaceRef = useRef<HTMLDivElement>(null);
+  const listViewportRef = useRef<HTMLDivElement>(null);
   const listHeaderRef = useRef<HTMLDivElement>(null);
+  const paginatorRef = useRef<HTMLDivElement>(null);
   const rowAnchorRefs = useRef(new Map<string, HTMLDivElement>());
+
+  useEffect(() => {
+    if (!forcedMode) return;
+    setMode(forcedMode);
+  }, [forcedMode]);
 
   const barById = useMemo(() => new Map(bars.map((bar) => [bar.barId, bar])), [bars]);
   const meta = useMemo(() => getInstrumentMeta(instruments, instrumentId ?? ''), [instruments, instrumentId]);
@@ -90,13 +126,7 @@ export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { in
       const instrumentMembers = members.filter((entry) => entry.instrumentId === instrumentId);
       if (!instrumentMembers.length) continue;
       const rep = barById.get(cluster.repBarId) ?? instrumentMembers[0];
-      scopedRows.push({
-        key: `u-${cluster.groupId}`,
-        bar: rep,
-        cluster,
-        members: instrumentMembers,
-        absoluteIndex: scopedRows.length,
-      });
+      scopedRows.push({ key: `u-${cluster.groupId}`, bar: rep, cluster, members: instrumentMembers, absoluteIndex: scopedRows.length });
     }
     return scopedRows;
   }, [barById, barsForInstrument, instrumentId, mode, pitchIndex, tolerance]);
@@ -105,10 +135,12 @@ export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { in
     items: rows,
     rowHeightPx: ROW_H,
     minRows: 4,
-    maxRows: 12,
-    viewportRef: listSurfaceRef,
+    maxRows: 40,
+    viewportRef: listViewportRef,
     stickyHeaderRef: listHeaderRef,
+    paginatorRef,
     getAnchorKey: (row) => row.key,
+    onMeasure: setMeasureDebug,
   });
 
   const openRow = useMemo(() => paged.pageItems.find((row) => row.key === openDetailsKey) ?? null, [openDetailsKey, paged.pageItems]);
@@ -168,7 +200,7 @@ export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { in
   ] as const;
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="flex min-h-[calc(100vh-8.5rem)] flex-col gap-6 pb-8">
       <section className="sticky top-20 z-20 rounded-3xl border border-rim bg-surface/90 p-5 shadow-glass backdrop-blur-xl" style={{ boxShadow: `inset 0 1px 0 hsla(${tint}, 0.35)` }}>
         <div className="flex flex-wrap items-center gap-4">
           <div className="min-w-0 flex-1">
@@ -179,8 +211,12 @@ export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { in
           <div className="flex flex-wrap items-center gap-2">
             <button className="rounded-full border border-rim px-3 py-1 text-xs" onClick={() => void playInOrder()}><Play className="mr-1 inline h-3.5 w-3.5" />Play scale in order</button>
             <button className="rounded-full border border-rim px-3 py-1 text-xs" onClick={stopAll}><Square className="mr-1 inline h-3.5 w-3.5" />Stop all</button>
-            <button className={`rounded-full border px-3 py-1 text-xs ${mode === 'unique' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'border-rim'}`} onClick={() => setMode('unique')}>Unique</button>
-            <button className={`rounded-full border px-3 py-1 text-xs ${mode === 'all' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'border-rim'}`} onClick={() => setMode('all')}>All</button>
+            {showModeChips && (
+              <>
+                <button className={`rounded-full border px-3 py-1 text-xs ${mode === 'unique' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'border-rim'}`} onClick={() => setMode('unique')}>Unique</button>
+                <button className={`rounded-full border px-3 py-1 text-xs ${mode === 'all' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'border-rim'}`} onClick={() => setMode('all')}>All</button>
+              </>
+            )}
             <Link className="rounded-full border border-rim px-3 py-1 text-xs" to={`/?instrument=${encodeURIComponent(instrumentId)}&mode=${mode}`}>Open global pitch list</Link>
           </div>
         </div>
@@ -193,53 +229,78 @@ export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { in
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
           {(mode === 'all' ? barsForInstrument : rows.map((row) => row.members[0])).map((bar) => (
-            <button
+            <motion.button
               key={bar.barId}
               onClick={() => void toggleBar(bar.barId)}
-              className="relative rounded-md border border-rim p-3 text-left shadow-sm transition hover:-translate-y-0.5"
+              className="group relative will-change-transform rounded-md border border-rim p-3 text-left shadow-sm"
               style={{ background: `linear-gradient(180deg, hsla(${SCALE_ACCENTS[bar.scaleId] ?? '220 8% 60%'}, 0.38), hsla(${SCALE_ACCENTS[bar.scaleId] ?? '220 8% 60%'}, 0.16))` }}
+              whileHover={reduced ? undefined : glassHoverMotion.whileHover}
+              whileTap={reduced ? undefined : glassHoverMotion.whileTap}
+              transition={reduced ? undefined : glassHoverMotion.transition}
             >
-              <PitchLabel hz={bar.hz} ratio={bar.ratioToStep0} instrumentId={bar.instrumentId} scaleId={bar.scaleId} barId={bar.barId} variant="pad" />
-              <div className="text-xs font-medium opacity-90">{formatHz(bar.hz).text} Hz</div>
-              <div className="mt-1 text-xs opacity-80">{degreeFor(bar)}</div>
-              {playingBarIds.has(bar.barId) && <Volume2 className="absolute right-2 top-2 h-4 w-4 text-emerald-500" />}
-            </button>
+              <span className="pointer-events-none absolute inset-0 -z-10 rounded-2xl bg-white/10 opacity-0 blur-xl transition-opacity duration-200 group-hover:opacity-100 dark:bg-white/5" />
+              <div className="relative z-10">
+                <PitchLabel hz={bar.hz} ratio={bar.ratioToStep0} instrumentId={bar.instrumentId} scaleId={bar.scaleId} barId={bar.barId} variant="pad" />
+                <div className="text-xs font-medium opacity-90">{formatHz(bar.hz).text} Hz</div>
+                <div className="mt-1 text-xs opacity-80">{degreeFor(bar)}</div>
+                {playingBarIds.has(bar.barId) && <Volume2 className="absolute right-2 top-2 h-4 w-4 text-emerald-500" />}
+              </div>
+            </motion.button>
           ))}
         </div>
       </section>
 
-      <section className="glass-panel glass-rim p-4">
+      <section className="glass-panel glass-rim flex min-h-0 flex-1 flex-col p-4">
         <h2 className="mb-3 text-xl font-semibold">In this instrument</h2>
-        <div ref={listSurfaceRef} className="relative h-[calc(100vh-18rem)] min-h-[420px] overflow-hidden rounded-2xl border border-rim/70 bg-white/45 p-2 dark:bg-slate-900/25">
-          <div className="overflow-x-auto overflow-y-hidden">
-            <div className="w-max min-w-full">
-              <div ref={listHeaderRef}>
-                <PitchGridRow variant="header" cols={PITCH_GRID_COLS_DESKTOP} className="sticky top-0 z-10 border-b border-rim bg-white/70 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70">
-                  <div className="text-left justify-self-start">Index</div><div className="text-left justify-self-start">Pitch</div><div className="text-left justify-self-start">Play</div><div className="tabular-nums text-right justify-self-end">Hz</div><div className="text-left justify-self-start">Instrument</div><div className="tabular-nums text-right justify-self-end">Bar #</div><div className="text-left justify-self-start">Scale</div><div className="tabular-nums text-right justify-self-end">Degree</div><div className="tabular-nums text-right justify-self-end">Ratio</div><div className="text-left justify-self-start">More</div>
-                </PitchGridRow>
+        <div ref={listSurfaceRef} className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-rim/70 bg-white/45 dark:bg-slate-900/25">
+          <div ref={listViewportRef} className="flex min-h-0 flex-1 flex-col px-2 pt-2">
+            <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain">
+              <div className="w-max">
+                <div ref={listHeaderRef}>
+                  <PitchGridRow variant="header" cols={cols} className="sticky top-0 z-10 border-b border-rim bg-white/70 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70">
+                    <div className="text-left justify-self-start">Index</div><div className="text-left justify-self-start">Pitch</div><div className="text-left justify-self-center">Play</div><div className="tabular-nums text-right justify-self-end">Hz</div><div className="text-left justify-self-start">Instrument</div><div className="tabular-nums text-right justify-self-end">Bar #</div><div className="text-left justify-self-start">Scale</div><div className="tabular-nums text-right justify-self-end">Degree</div><div className="tabular-nums text-right justify-self-end">Ratio</div><div className="text-left justify-self-center">More</div>
+                  </PitchGridRow>
+                </div>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div key={`instrument-page-${paged.pageIndex}`} initial={reduced ? { opacity: 0 } : { opacity: 0, y: pageDirection >= 0 ? 14 : -14 }} animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }} exit={reduced ? { opacity: 0 } : { opacity: 0, y: pageDirection >= 0 ? -14 : 14 }} transition={{ duration: 0.2 }}>
+                    {paged.pageItems.map((row) => (
+                      <div key={row.key} ref={(element) => { if (!element) rowAnchorRefs.current.delete(row.key); else rowAnchorRefs.current.set(row.key, element); }} className="my-1 rounded-2xl border border-rim/80 bg-white/40 py-0.5 dark:bg-slate-900/30" style={{ borderColor: `hsla(${SCALE_ACCENTS[row.bar.scaleId] ?? '220 10% 50%'}, 0.32)`, minHeight: `${ROW_H}px` }}>
+                        <PitchGridRow variant="row" cols={cols} className="h-[60px] text-sm">
+                          <div className="tabular-nums text-right justify-self-end">{row.absoluteIndex + 1}</div>
+                          <div className="min-w-0 text-left justify-self-start"><PitchLabel hz={row.bar.hz} ratio={row.bar.ratioToStep0} instrumentId={row.bar.instrumentId} scaleId={row.bar.scaleId} barId={row.bar.barId} variant="list" /></div>
+                          <div className="justify-self-center"><button onClick={() => void toggleBar(row.members[0].barId)} className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-rim">{playingBarIds.has(row.members[0].barId) ? <Volume2 className="h-4 w-4" /> : <Play className="h-4 w-4" />}</button></div>
+                          <div className="tabular-nums text-right justify-self-end">{formatHz(row.bar.hz).text}</div>
+                          <div className="min-w-0 truncate text-left justify-self-start">{meta.label}</div>
+                          <div className="tabular-nums text-right justify-self-end">{barNumber(row.members[0].barId)}</div>
+                          <div className="text-left justify-self-start uppercase">{row.bar.scaleId}</div>
+                          <div className="tabular-nums text-right justify-self-end">{degreeFor(row.members[0])}</div>
+                          <div className="min-w-0 truncate font-mono text-xs tabular-nums text-right justify-self-end">{Math.abs(row.members[0].ratioErrorCents) >= 1 ? '≈ ' : ''}{ratioForDisplay(row.members[0])}</div>
+                          <div className="justify-self-center"><button className="opacity-70" onClick={() => setOpenDetailsKey((prev) => (prev === row.key ? null : row.key))}><ChevronDown className={`h-4 w-4 ${openDetailsKey === row.key ? 'rotate-180' : ''}`} /></button></div>
+                        </PitchGridRow>
+                      </div>
+                    ))}
+                  </motion.div>
+                </AnimatePresence>
               </div>
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div key={`instrument-page-${paged.pageIndex}`} initial={reduced ? { opacity: 0 } : { opacity: 0, y: pageDirection >= 0 ? 14 : -14 }} animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }} exit={reduced ? { opacity: 0 } : { opacity: 0, y: pageDirection >= 0 ? -14 : 14 }} transition={{ duration: 0.2 }}>
-                  {paged.pageItems.map((row) => (
-                    <div key={row.key} ref={(element) => { if (!element) rowAnchorRefs.current.delete(row.key); else rowAnchorRefs.current.set(row.key, element); }} className="my-1 rounded-2xl border border-rim/80 bg-white/40 py-0.5 dark:bg-slate-900/30" style={{ borderColor: `hsla(${SCALE_ACCENTS[row.bar.scaleId] ?? '220 10% 50%'}, 0.32)`, minHeight: `${ROW_H}px` }}>
-                      <PitchGridRow variant="row" cols={PITCH_GRID_COLS_DESKTOP} className="h-[60px] text-sm">
-                        <div className="tabular-nums text-right justify-self-end">{row.absoluteIndex + 1}</div>
-                        <div className="min-w-0 text-left justify-self-start"><PitchLabel hz={row.bar.hz} ratio={row.bar.ratioToStep0} instrumentId={row.bar.instrumentId} scaleId={row.bar.scaleId} barId={row.bar.barId} variant="list" /></div>
-                        <div className="justify-self-start"><button onClick={() => void toggleBar(row.members[0].barId)} className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-rim">{playingBarIds.has(row.members[0].barId) ? <Volume2 className="h-4 w-4" /> : <Play className="h-4 w-4" />}</button></div>
-                        <div className="tabular-nums text-right justify-self-end">{formatHz(row.bar.hz).text}</div>
-                        <div className="min-w-0 text-left justify-self-start truncate">{meta.label}</div>
-                        <div className="tabular-nums text-right justify-self-end">{barNumber(row.members[0].barId)}</div>
-                        <div className="text-left justify-self-start uppercase">{row.bar.scaleId}</div>
-                        <div className="tabular-nums text-right justify-self-end">{degreeFor(row.members[0])}</div>
-                        <div className="min-w-0 font-mono text-xs tabular-nums text-right justify-self-end truncate">{Math.abs(row.members[0].ratioErrorCents) >= 1 ? '≈ ' : ''}{ratioForDisplay(row.members[0])}</div>
-                        <div className="justify-self-start"><button className="opacity-70" onClick={() => setOpenDetailsKey((prev) => (prev === row.key ? null : row.key))}><ChevronDown className={`h-4 w-4 ${openDetailsKey === row.key ? 'rotate-180' : ''}`} /></button></div>
-                      </PitchGridRow>
-                    </div>
-                  ))}
-                </motion.div>
-              </AnimatePresence>
+            </div>
+
+            <div ref={paginatorRef} className="pointer-events-auto mt-2 flex items-center justify-end">
+              <div className="rounded-2xl border border-black/10 bg-white/55 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-black/30">
+                <div className="flex items-center gap-2 px-3 py-2">
+                  <button onClick={stepPrev} disabled={paged.pageIndex <= 0} className="inline-flex h-9 w-9 items-center justify-center rounded-xl disabled:opacity-40" aria-label="Previous page"><ChevronUp className="h-4 w-4" /></button>
+                  <button onClick={stepNext} disabled={paged.pageIndex >= paged.pageCount - 1} className="inline-flex h-9 w-9 items-center justify-center rounded-xl disabled:opacity-40" aria-label="Next page"><ChevronDown className="h-4 w-4" /></button>
+                  <div className="text-sm tabular-nums">Page {Math.min(paged.pageIndex + 1, paged.pageCount)}/{paged.pageCount}</div>
+                  <PitchListPaginator pageIndex={paged.pageIndex} pageCount={paged.pageCount} rangeLabel={paged.rangeLabel} onPrev={stepPrev} onNext={stepNext} onJump={(page) => paged.setPageIndex(page - 1)} />
+                </div>
+              </div>
             </div>
           </div>
+
+          {import.meta.env.DEV && (
+            <div className="pointer-events-none absolute right-3 top-3 z-30 rounded bg-black/70 px-2 py-1 font-mono text-[10px] text-white">
+              viewport:{Math.round(measureDebug.viewport)} header:{Math.round(measureDebug.header)} pager:{Math.round(measureDebug.pager)} row:{Math.round(measureDebug.row)} rowsPerPage:{measureDebug.rowsPerPage}
+            </div>
+          )}
 
           <PitchRowDetailsOverlay
             openRow={openRow}
@@ -253,15 +314,6 @@ export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { in
             onPlayBar={async (barId) => void toggleBar(barId)}
             onClose={() => setOpenDetailsKey(null)}
           />
-
-          <div className="absolute bottom-3 right-3 z-20 rounded-2xl border border-black/10 bg-white/55 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-black/30">
-            <div className="flex items-center gap-2 px-3 py-2">
-              <button onClick={stepPrev} disabled={paged.pageIndex <= 0} className="inline-flex h-9 w-9 items-center justify-center rounded-xl disabled:opacity-40" aria-label="Previous page"><ChevronUp className="h-4 w-4" /></button>
-              <button onClick={stepNext} disabled={paged.pageIndex >= paged.pageCount - 1} className="inline-flex h-9 w-9 items-center justify-center rounded-xl disabled:opacity-40" aria-label="Next page"><ChevronDown className="h-4 w-4" /></button>
-              <div className="text-sm tabular-nums">Page {Math.min(paged.pageIndex + 1, paged.pageCount)}/{paged.pageCount}</div>
-              <PitchListPaginator pageIndex={paged.pageIndex} pageCount={paged.pageCount} rangeLabel={paged.rangeLabel} onPrev={stepPrev} onNext={stepNext} onJump={(page) => paged.setPageIndex(page - 1)} />
-            </div>
-          </div>
         </div>
       </section>
 
@@ -277,15 +329,25 @@ export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { in
           items.length ? (
             <div key={groupName} className="space-y-2">
               <h3 className="text-sm uppercase opacity-70">{groupName}</h3>
-              <div className="grid gap-3 sm:gap-4 items-stretch [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+              <div className="grid items-stretch gap-3 sm:gap-4 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
                 {items.map((item) => (
-                  <article key={item.instrumentId} className="glass-panel glass-rim h-full p-4" style={{ borderColor: `hsla(${SCALE_ACCENTS[item.scaleId] ?? '220 10% 50%'}, 0.5)` }}>
-                    <button className="w-full text-left" onClick={() => navigate(`/instrument/${item.instrumentId}`)}>
-                      <div className="font-semibold">{item.label}</div>
-                      <div className="mt-1 text-xs opacity-75">{item.barIdsInOrder.length} bars</div>
-                    </button>
-                    <button className="mt-3 rounded-full border border-rim px-3 py-1 text-xs" onClick={() => void playSequenceByBarIds(item.barIdsInOrder, playOpts(item.scaleId))}>Play</button>
-                  </article>
+                  <motion.article
+                    key={item.instrumentId}
+                    className="glass-panel glass-rim group relative h-full p-4 will-change-transform"
+                    style={{ borderColor: `hsla(${SCALE_ACCENTS[item.scaleId] ?? '220 10% 50%'}, 0.5)` }}
+                    whileHover={reduced ? undefined : glassHoverMotion.whileHover}
+                    whileTap={reduced ? undefined : glassHoverMotion.whileTap}
+                    transition={reduced ? undefined : glassHoverMotion.transition}
+                  >
+                    <span className="pointer-events-none absolute inset-0 -z-10 rounded-2xl bg-white/10 opacity-0 blur-xl transition-opacity duration-200 group-hover:opacity-100 dark:bg-white/5" />
+                    <div className="relative z-10">
+                      <button className="w-full text-left" onClick={() => navigate(`/instrument/${item.instrumentId}`)}>
+                        <div className="font-semibold">{item.label}</div>
+                        <div className="mt-1 text-xs opacity-75">{item.barIdsInOrder.length} bars</div>
+                      </button>
+                      <button className="mt-3 rounded-full border border-rim px-3 py-1 text-xs" onClick={() => void playSequenceByBarIds(item.barIdsInOrder, playOpts(item.scaleId))}>Play</button>
+                    </div>
+                  </motion.article>
                 ))}
               </div>
             </div>
@@ -300,7 +362,7 @@ export function ScaleInstrumentProfilePage() {
   const { scaleId } = useParams();
   const { instruments } = useMicrorimbaData();
 
-  if (!scaleId) return <InstrumentProfilePage />;
+  if (!scaleId) return <InstrumentProfilePage showModeChips={false} forcedMode="all" />;
   const instrumentId = getDefaultInstrumentForScale(instruments, scaleId);
-  return <InstrumentProfilePage instrumentId={instrumentId ?? undefined} />;
+  return <InstrumentProfilePage instrumentId={instrumentId ?? undefined} showModeChips={false} forcedMode="all" />;
 }
