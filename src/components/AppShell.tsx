@@ -10,7 +10,7 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
 
 export function AppShell() {
   const { instruments } = useMicrorimbaData();
-  const { showUnlockHint, unlockToast } = useAudio();
+  const { showUnlockHint, unlockToast, requestAudioUnlock } = useAudio();
   const defaultInstrument = getDefaultInstrumentForScale(instruments, '9edo') ?? instruments[0]?.instrumentId;
 
   return (
@@ -22,6 +22,17 @@ export function AppShell() {
             <NavLink className={navClass} to="/">Home</NavLink>
             <NavLink className={navClass} to={defaultInstrument ? `/instrument/${defaultInstrument}` : '/'}>Instruments</NavLink>
             <NavLink className={navClass} to="/about">About</NavLink>
+            {showUnlockHint && (
+              <button
+                type="button"
+                onClick={() => {
+                  void requestAudioUnlock();
+                }}
+                className="rounded-full border border-rim/70 bg-surface/70 px-3 py-1.5 text-xs font-medium backdrop-blur transition hover:bg-surface"
+              >
+                Enable sound
+              </button>
+            )}
             <a
               href="https://github.com/cbassuarez/microrimba"
               target="_blank"
@@ -36,7 +47,7 @@ export function AppShell() {
         </div>
         {showUnlockHint && (
           <div className="mb-4 inline-flex items-center rounded-full border border-rim/70 bg-surface/80 px-3 py-1.5 text-xs shadow-glass backdrop-blur">
-            Tap any Play button to enable sound on iPhone/iPad
+            Tap any Play button to enable sound
           </div>
         )}
         {unlockToast && (

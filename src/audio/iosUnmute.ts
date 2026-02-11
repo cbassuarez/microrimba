@@ -1,10 +1,11 @@
-const STORAGE_KEY = 'microrimba:audioUnlocked';
+const STORAGE_KEY = 'mmi:audioUnlocked';
+const SILENCE_DATA_URI = 'data:audio/wav;base64,UklGRrQBAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YZABAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA';
 
 let unlocked = false;
 let unlockingPromise: Promise<void> | null = null;
 let unlockInfoLogged = false;
-let silentAudioSourcePromise: Promise<string> | null = null;
 let primed = false;
+let keepAliveEl: HTMLAudioElement | null = null;
 
 function getStoredUnlocked() {
   if (typeof window === 'undefined') return false;
@@ -24,22 +25,24 @@ function setStoredUnlocked() {
   }
 }
 
-function getSilenceAssetUrl() {
-  return `${import.meta.env.BASE_URL}audio/_silence.mp3`;
+function getKeepAliveEl() {
+  if (!keepAliveEl) {
+    const a = new Audio(SILENCE_DATA_URI);
+    a.preload = 'auto';
+    a.playsInline = true;
+    a.loop = true;
+    a.muted = false;
+    a.volume = 0.001;
+    keepAliveEl = a;
+  }
+  return keepAliveEl;
 }
 
-async function getSilentAudioSource() {
-  if (!silentAudioSourcePromise) {
-    const assetUrl = getSilenceAssetUrl();
-    silentAudioSourcePromise = fetch(assetUrl)
-      .then((res) => (res.ok ? res.text() : ''))
-      .then((text) => {
-        const trimmed = text.trim();
-        return trimmed.startsWith('data:audio/') ? trimmed : assetUrl;
-      })
-      .catch(() => assetUrl);
-  }
-  return silentAudioSourcePromise;
+export function getAudioDiagnostics() {
+  return {
+    keepAliveExists: keepAliveEl !== null,
+    keepAlivePaused: keepAliveEl ? keepAliveEl.paused : null,
+  };
 }
 
 export function isIosSafari() {
@@ -66,46 +69,36 @@ function markUnlocked() {
   }
 }
 
-async function playSilentElement() {
-  const src = await getSilentAudioSource();
-  const audio = new Audio(src);
-  audio.preload = 'auto';
-  audio.playsInline = true;
-  audio.loop = false;
-  audio.muted = false;
-  audio.volume = 0.001;
-  audio.currentTime = 0;
-  await audio.play();
-  audio.pause();
-  audio.currentTime = 0;
-}
-
 export async function ensureAudioReady(ctx: AudioContext): Promise<void> {
   if (isAudioUnlocked()) {
     if (ctx.state === 'suspended') {
-      try {
-        await ctx.resume();
-      } catch {
-        // ignore
-      }
+      ctx.resume().catch(() => {});
     }
     return;
   }
 
   if (!unlockingPromise) {
     unlockingPromise = (async () => {
-      if (ctx.state === 'suspended') {
+      let playPromise: Promise<void> | null = null;
+
+      if (isIosSafari()) {
+        const el = getKeepAliveEl();
         try {
-          await ctx.resume();
+          playPromise = el.play();
         } catch {
-          // ignore
+          playPromise = null;
         }
       }
-      if (!isIosSafari()) {
-        markUnlocked();
-        return;
+
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
       }
-      await playSilentElement();
+
+      if (isIosSafari()) {
+        if (!playPromise) throw new Error('keepalive play did not start');
+        await playPromise;
+      }
+
       markUnlocked();
     })().finally(() => {
       unlockingPromise = null;
@@ -119,7 +112,7 @@ export function primeOnFirstUserGesture(ctx: AudioContext): void {
   if (typeof window === 'undefined' || primed) return;
   primed = true;
 
-  const events: Array<keyof WindowEventMap> = ['pointerdown', 'touchend', 'keydown'];
+  const events: Array<keyof WindowEventMap> = ['touchend', 'pointerup', 'keydown'];
 
   const handler = () => {
     void ensureAudioReady(ctx)
@@ -131,5 +124,5 @@ export function primeOnFirstUserGesture(ctx: AudioContext): void {
       });
   };
 
-  events.forEach((event) => window.addEventListener(event, handler, { passive: true, capture: true }));
+  events.forEach((event) => window.addEventListener(event, handler, { capture: true }));
 }
