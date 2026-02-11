@@ -14,6 +14,7 @@ import { formatHz } from '../lib/format';
 import { getBarsForInstrument, getDefaultInstrumentForScale, getInstrumentMeta } from '../lib/instruments';
 import { prettyInstrumentLabel } from '../lib/labels';
 import { normalizeFracString } from '../lib/rational';
+import { PitchLabel } from '../components/PitchLabel';
 
 type ModeKey = 'unique' | 'all';
 type TolKey = '5' | '15' | '30';
@@ -193,7 +194,8 @@ export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { in
               className="relative rounded-md border border-rim p-3 text-left shadow-sm transition hover:-translate-y-0.5"
               style={{ background: `linear-gradient(180deg, hsla(${SCALE_ACCENTS[bar.scaleId] ?? '220 8% 60%'}, 0.38), hsla(${SCALE_ACCENTS[bar.scaleId] ?? '220 8% 60%'}, 0.16))` }}
             >
-              <div className="text-sm font-semibold">{formatHz(bar.hz).text}</div>
+              <PitchLabel hz={bar.hz} scaleId={bar.scaleId} barId={bar.barId} variant="pad" />
+              <div className="text-xs font-medium opacity-90">{formatHz(bar.hz).text} Hz</div>
               <div className="mt-1 text-xs opacity-80">{degreeFor(bar)}</div>
               {playingBarIds.has(bar.barId) && <Volume2 className="absolute right-2 top-2 h-4 w-4 text-emerald-500" />}
             </button>
@@ -208,7 +210,7 @@ export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { in
             <div className="w-max min-w-full">
               <div ref={listHeaderRef}>
                 <PitchGridRow variant="header" cols={PITCH_GRID_COLS_DESKTOP} className="sticky top-0 z-10 border-b border-rim bg-white/70 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70">
-                  <div className="text-left justify-self-start">Index</div><div className="text-left justify-self-start">Play</div><div className="tabular-nums text-right justify-self-end">Hz</div><div className="text-left justify-self-start">Instrument</div><div className="tabular-nums text-right justify-self-end">Bar #</div><div className="text-left justify-self-start">Scale</div><div className="tabular-nums text-right justify-self-end">Degree</div><div className="tabular-nums text-right justify-self-end">Ratio</div><div className="text-left justify-self-start">More</div>
+                  <div className="text-left justify-self-start">Index</div><div className="text-left justify-self-start">Pitch</div><div className="text-left justify-self-start">Play</div><div className="tabular-nums text-right justify-self-end">Hz</div><div className="text-left justify-self-start">Instrument</div><div className="tabular-nums text-right justify-self-end">Bar #</div><div className="text-left justify-self-start">Scale</div><div className="tabular-nums text-right justify-self-end">Degree</div><div className="tabular-nums text-right justify-self-end">Ratio</div><div className="text-left justify-self-start">More</div>
                 </PitchGridRow>
               </div>
               <AnimatePresence mode="wait" initial={false}>
@@ -217,6 +219,7 @@ export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { in
                     <div key={row.key} ref={(element) => { if (!element) rowAnchorRefs.current.delete(row.key); else rowAnchorRefs.current.set(row.key, element); }} className="my-1 rounded-2xl border border-rim/80 bg-white/40 py-0.5 dark:bg-slate-900/30" style={{ borderColor: `hsla(${SCALE_ACCENTS[row.bar.scaleId] ?? '220 10% 50%'}, 0.32)`, minHeight: `${ROW_H}px` }}>
                       <PitchGridRow variant="row" cols={PITCH_GRID_COLS_DESKTOP} className="h-[60px] text-sm">
                         <div className="tabular-nums text-right justify-self-end">{row.absoluteIndex + 1}</div>
+                        <div className="min-w-0 text-left justify-self-start"><PitchLabel hz={row.bar.hz} scaleId={row.bar.scaleId} barId={row.bar.barId} variant="list" /></div>
                         <div className="justify-self-start"><button onClick={() => void toggleBar(row.members[0].barId)} className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-rim">{playingBarIds.has(row.members[0].barId) ? <Volume2 className="h-4 w-4" /> : <Play className="h-4 w-4" />}</button></div>
                         <div className="tabular-nums text-right justify-self-end">{formatHz(row.bar.hz).text}</div>
                         <div className="min-w-0 text-left justify-self-start truncate">{meta.label}</div>

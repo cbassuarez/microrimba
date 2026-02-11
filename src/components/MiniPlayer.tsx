@@ -5,6 +5,7 @@ import { useAudio } from '../audio/AudioContextProvider';
 import { useMicrorimbaData } from '../data/useMicrorimbaData';
 import { formatHz } from '../lib/format';
 import { prettyInstrumentLabel } from '../lib/labels';
+import { getPitchDisplayStrings } from './PitchLabel';
 
 const SCALE_ACCENT: Record<string, string> = {
   '5edo': 'border-amber-400 bg-amber-400/20 text-amber-200',
@@ -24,6 +25,11 @@ const SCALE_BORDER: Record<string, string> = {
 
 const COMPACT_HEIGHT = 52;
 const EXPANDED_MAX_HEIGHT = 220;
+
+function mergePitchText(notePrimary: string, hejiGlyph: string): string {
+  if (!hejiGlyph) return notePrimary;
+  return notePrimary.replace(/(-?\d+)$/, `${hejiGlyph}$1`);
+}
 
 export function MiniPlayer() {
   const { voices, stopAll, stopVoice, sequence, stopSequence } = useAudio();
@@ -81,9 +87,15 @@ export function MiniPlayer() {
   const summaryText = useMemo(() => {
     if (!sortedVoices.length) return 'No active voices';
     if (sortedVoices.length === 1 && latestBar) {
-      return `${formatHz(latestBar.hz).text} Hz • ${prettyInstrumentLabel(latestBar.scaleId, latestBar.instrumentId, latestBar.edo)}`;
+      const pitch = getPitchDisplayStrings(latestBar.hz, latestBar.scaleId, latestBar.barId);
+      const pitchText = mergePitchText(pitch.notePrimary, pitch.hejiGlyph);
+      return `${pitchText}${pitch.centsText ? ` ${pitch.centsText}` : ''} • ${formatHz(latestBar.hz).text} Hz • ${prettyInstrumentLabel(latestBar.scaleId, latestBar.instrumentId, latestBar.edo)}`;
     }
-    if (latestBar) return `${sortedVoices.length} voices • Polyphonic • ${formatHz(latestBar.hz).text} Hz`;
+    if (latestBar) {
+      const pitch = getPitchDisplayStrings(latestBar.hz, latestBar.scaleId, latestBar.barId);
+      const pitchText = mergePitchText(pitch.notePrimary, pitch.hejiGlyph);
+      return `${sortedVoices.length} voices • Polyphonic • ${pitchText}`;
+    }
     return `${sortedVoices.length} voices • Polyphonic`;
   }, [latestBar, sortedVoices]);
 
@@ -167,7 +179,11 @@ export function MiniPlayer() {
                 </div>
               )}
 
-              {groupedVoices.map(({ voice, bar, showDivider }) => (
+              {groupedVoices.map(({ voice, bar, showDivider }) => {
+                const pitch = bar ? getPitchDisplayStrings(bar.hz, bar.scaleId, bar.barId) : null;
+                const pitchText = pitch ? mergePitchText(pitch.notePrimary, pitch.hejiGlyph) : null;
+
+                return (
                 <motion.div
                   key={voice.id}
                   className="space-y-1"
@@ -179,7 +195,7 @@ export function MiniPlayer() {
                   {showDivider && <div className="my-1 border-t border-rim/40" />}
                   <div className={`flex items-center justify-between gap-2 rounded-xl border p-2 text-xs ${SCALE_BORDER[bar?.scaleId ?? ''] ?? 'border-rim'}`}>
                     <div className="min-w-0">
-                      <div className="truncate font-mono">{bar ? `${formatHz(bar.hz).text} Hz` : voice.barId}</div>
+                      <div className="truncate font-mono">{bar && pitchText ? `${pitchText}${pitch?.centsText ? ` ${pitch.centsText}` : ''} • ${formatHz(bar.hz).text} Hz` : voice.barId}</div>
                       <div className="truncate text-zinc-300">{bar ? prettyInstrumentLabel(bar.scaleId, bar.instrumentId, bar.edo) : 'Unknown instrument'}</div>
                     </div>
                     <button
@@ -193,7 +209,7 @@ export function MiniPlayer() {
                     </button>
                   </div>
                 </motion.div>
-              ))}
+              );})}
             </div>
           </motion.div>
         )}
