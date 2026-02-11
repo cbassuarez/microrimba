@@ -5,6 +5,7 @@ import type { BarId } from '../data/types';
 import type { SequenceOpts } from '../lib/sequencer';
 import { ensureAudioReady, getAudioDiagnostics, isAudioUnlocked, isIosSafari, primeOnFirstUserGesture } from './iosUnmute';
 import { clampScheduleTime } from './playAllScheduler';
+import { buildPlan } from './buildPlan';
 
 type Voice = { id: string; barId: BarId; startedAt: number; stop: () => void };
 
@@ -24,8 +25,6 @@ type PlayAllPlan = {
   durationsByIndex: number[];
   bufferPromises: Promise<AudioBuffer>[];
 };
-
-let playAllPrepPromise: Promise<PlayAllPlan> | null = null;
 
 const PLAYALL_PREROLL_S = 0.18;
 const PLAYALL_LOOKAHEAD_S = 1.25;
@@ -101,10 +100,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     performance.clearMarks();
   }, []);
 
-  const clearPlayAllPrepCache = useCallback(() => {
-    playAllPrepPromise = null;
-  }, []);
-
   const clearSequenceStepTimers = useCallback(() => {
     sequenceStepTimers.current.forEach((timer) => window.clearTimeout(timer));
     sequenceStepTimers.current = [];
@@ -177,54 +172,35 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   }, [engine, mark, measure]);
 
   const preparePlayAll = useCallback(async (barIds: BarId[], opts: SequenceOpts) => {
-    if (!barIds.length) {
-      return {
-        barIds: [],
-        durationsByIndex: [],
-        bufferPromises: [],
-      } satisfies PlayAllPlan;
+    if (import.meta.env.DEV) {
+      performance.mark('playall_prepare_start');
     }
-    if (!playAllPrepPromise) {
-      playAllPrepPromise = (async () => {
-        if (import.meta.env.DEV) {
-          performance.mark('playall_prepare_start');
-        }
-        const durationsByIndex: number[] = [];
-        for (let i = 0; i < barIds.length; i += 1) {
-          const dt = opts.mode === 'expAccelerando'
-            ? Math.max(opts.minIntervalMs ?? 20, opts.intervalMs * Math.pow(opts.expFactor ?? 0.93, i))
-            : opts.intervalMs;
-          durationsByIndex.push(dt / 1000);
-        }
-        const bufferPromises = barIds.map((barId) => engine.getBuffer(barId));
-        const preloadCount = Math.min(barIds.length, PLAYALL_PRELOAD_BARS);
-        await Promise.all(bufferPromises.slice(0, preloadCount));
-        if (import.meta.env.DEV) {
-          performance.mark('playall_prepare_end');
-          try {
-            performance.measure('playall_prepare', 'playall_prepare_start', 'playall_prepare_end');
-          } catch {
-            // ignore
-          }
-        }
-        return {
-          barIds,
-            durationsByIndex,
-          bufferPromises,
-        } satisfies PlayAllPlan;
-      })().catch((error) => {
-        playAllPrepPromise = null;
-        throw error;
-      });
+    const { durationsByIndex, barIds: plannedBarIds } = buildPlan(barIds, opts);
+    const bufferPromises = plannedBarIds.map((barId) => engine.getBuffer(barId));
+    const preloadCount = Math.min(plannedBarIds.length, PLAYALL_PRELOAD_BARS);
+    await Promise.all(bufferPromises.slice(0, preloadCount));
+    if (import.meta.env.DEV) {
+      performance.mark('playall_prepare_end');
+      try {
+        performance.measure('playall_prepare', 'playall_prepare_start', 'playall_prepare_end');
+      } catch {
+        // ignore
+      }
     }
-    return playAllPrepPromise;
+
+    return {
+      barIds: plannedBarIds,
+      durationsByIndex,
+      bufferPromises,
+    } satisfies PlayAllPlan;
   }, [engine]);
 
   const prewarmBars = useCallback((barIds: BarId[]) => {
-    void preparePlayAll(barIds, { intervalMs: 55, overlapMs: 0, mode: 'constant', gain: 0.9 }).catch(() => {
-      clearPlayAllPrepCache();
+    const prewarmCount = Math.min(barIds.length, PLAYALL_PRELOAD_BARS);
+    barIds.slice(0, prewarmCount).forEach((barId) => {
+      void engine.getBuffer(barId).catch(() => undefined);
     });
-  }, [clearPlayAllPrepCache, preparePlayAll]);
+  }, [engine]);
 
   const stopVoice = useCallback((id: string) => {
     const timer = endTimers.current.get(id);
@@ -314,10 +290,22 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     try {
       plan = await preparePlayAll(barIds, opts);
     } catch {
-      clearPlayAllPrepCache();
       return;
     }
     if (token !== playSequenceToken.current) return;
+    if (import.meta.env.DEV) {
+      const firstInput = barIds[0];
+      const lastInput = barIds[barIds.length - 1];
+      const firstPlan = plan.barIds[0];
+      const lastPlan = plan.barIds[plan.barIds.length - 1];
+      if (plan.barIds.length !== barIds.length || firstInput !== firstPlan || lastInput !== lastPlan) {
+        console.error('[playall] plan/input mismatch; aborting sequence start', {
+          requestedBarIds: barIds,
+          plannedBarIds: plan.barIds,
+        });
+        return;
+      }
+    }
 
     const ctx = engine.context;
     const t0 = ctx.currentTime + PLAYALL_PREROLL_S;
@@ -437,7 +425,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
     schedulerRef.current = window.setInterval(runTick, PLAYALL_TICK_MS);
     runTick();
-  }, [clearPlayAllPrepCache, clearSequenceStepTimers, engine, ensureReady, flushPlayAllPerf, mark, measure, preparePlayAll, scheduleCleanup, stopSequenceInternal, voices]);
+  }, [clearSequenceStepTimers, engine, ensureReady, flushPlayAllPerf, mark, measure, preparePlayAll, scheduleCleanup, stopSequenceInternal, voices]);
 
   const stopAll = useCallback(() => {
     playSequenceToken.current += 1;
