@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { AudioEngine } from './AudioEngine';
 import { loadBars } from '../data/loaders';
 import type { BarId } from '../data/types';
-import { playSequence, type SequenceOpts } from '../lib/sequencer';
+import type { SequenceOpts } from '../lib/sequencer';
 import { ensureAudioReady, getAudioDiagnostics, isAudioUnlocked, isIosSafari, primeOnFirstUserGesture } from './iosUnmute';
 
 type Voice = { id: string; barId: BarId; startedAt: number; stop: () => void };
@@ -33,6 +33,8 @@ type AudioApi = {
   showUnlockHint: boolean;
   unlockToast: string | null;
   requestAudioUnlock: () => Promise<void>;
+  primeAudio: () => void;
+  prewarmBars: (barIds: BarId[]) => void;
 };
 
 const Ctx = createContext<AudioApi | null>(null);
@@ -56,6 +58,32 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const unlockToastTimer = useRef<number | null>(null);
   const [audioUnlocked, setAudioUnlocked] = useState(() => isAudioUnlocked());
   const [unlockToast, setUnlockToast] = useState<string | null>(null);
+  const playSequenceToken = useRef(0);
+
+  const mark = useCallback((name: string) => {
+    if (!import.meta.env.DEV) return;
+    performance.mark(name);
+  }, []);
+
+  const measure = useCallback((name: string, start: string, end: string) => {
+    if (!import.meta.env.DEV) return;
+    try {
+      performance.measure(name, start, end);
+    } catch {
+      // ignore missing marks
+    }
+  }, []);
+
+  const flushPlayAllPerf = useCallback(() => {
+    if (!import.meta.env.DEV) return;
+    const entries = performance
+      .getEntriesByType('measure')
+      .filter((entry) => entry.name.startsWith('playall_'));
+    if (!entries.length) return;
+    console.table(entries.map((entry) => ({ name: entry.name, ms: Number(entry.duration.toFixed(1)) })));
+    performance.clearMeasures();
+    performance.clearMarks();
+  }, []);
 
   const clearSequenceStepTimers = useCallback(() => {
     sequenceStepTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -112,6 +140,22 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       }, 2200);
       throw new Error('audio unlock failed');
     }
+  }, [engine]);
+
+  const primeAudio = useCallback(() => {
+    mark('playall_prime_start');
+    void ensureAudioReady(engine.context)
+      .catch(() => undefined)
+      .finally(() => {
+        mark('playall_prime_end');
+        measure('playall_prime', 'playall_prime_start', 'playall_prime_end');
+      });
+  }, [engine, mark, measure]);
+
+  const prewarmBars = useCallback((barIds: BarId[]) => {
+    barIds.forEach((barId) => {
+      void engine.getBuffer(barId).catch(() => undefined);
+    });
   }, [engine]);
 
   const stopVoice = useCallback((id: string) => {
@@ -173,6 +217,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   const playSequenceByBarIds = useCallback(async (barIds: BarId[], opts: SequenceOpts, meta?: { name?: string }) => {
     if (!barIds.length) return;
+    mark('playall_click');
 
     const oldestActiveVoiceId = voices
       .slice()
@@ -180,15 +225,46 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     const protectedVoiceIds = oldestActiveVoiceId ? new Set([oldestActiveVoiceId]) : undefined;
 
     stopSequenceInternal({ protectedVoiceIds });
+    playSequenceToken.current += 1;
+    const token = playSequenceToken.current;
 
     try {
+      mark('playall_ensureAudioReady_start');
       await ensureReady();
+      mark('playall_ensureAudioReady_end');
+      measure('playall_ensureAudioReady', 'playall_ensureAudioReady_start', 'playall_ensureAudioReady_end');
     } catch {
       return;
     }
+    if (token !== playSequenceToken.current) return;
+
+    mark('playall_buildPlan_start');
     const startAt = engine.context.currentTime + 0.03;
-    const startedNow = performance.now();
-    const ids = await playSequence(engine, barIds, opts);
+    const whenByIndex: number[] = [];
+    let t = startAt;
+    for (let i = 0; i < barIds.length; i += 1) {
+      whenByIndex.push(t);
+      const dt = opts.mode === 'expAccelerando'
+        ? Math.max(opts.minIntervalMs ?? 20, opts.intervalMs * Math.pow(opts.expFactor ?? 0.93, i))
+        : opts.intervalMs;
+      t += dt / 1000;
+    }
+    const bufferPromises = barIds.map((barId) => engine.getBuffer(barId));
+    mark('playall_buildPlan_end');
+    measure('playall_buildPlan', 'playall_buildPlan_start', 'playall_buildPlan_end');
+
+    mark('playall_scheduleFirst_start');
+    const firstBuffer = await bufferPromises[0];
+    if (token !== playSequenceToken.current) return;
+    const firstId = engine.playBufferAt(barIds[0], firstBuffer, whenByIndex[0], { gain: opts.gain });
+    const firstStartedAt = performance.now() + (whenByIndex[0] - engine.context.currentTime) * 1000;
+    const firstVoice = scheduleCleanup(firstId, barIds[0], firstStartedAt, firstBuffer.duration);
+    setVoices((v) => [...v, firstVoice]);
+    mark('playall_scheduleFirst_end');
+    measure('playall_scheduleFirst', 'playall_scheduleFirst_start', 'playall_scheduleFirst_end');
+    measure('playall_total_to_scheduleFirst', 'playall_click', 'playall_scheduleFirst_end');
+
+    const ids: string[] = [firstId];
 
     clearSequenceStepTimers();
     setSequence({
@@ -198,35 +274,68 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       totalSteps: barIds.length,
       barIds,
       voiceIds: ids,
-      anchorVoiceId: oldestActiveVoiceId ?? ids[0] ?? null,
+      anchorVoiceId: oldestActiveVoiceId ?? firstId,
     });
 
-    let t = startAt;
-    for (let i = 0; i < barIds.length; i += 1) {
-      const buffer = await engine.getBuffer(barIds[i]);
-      const startedAt = startedNow + (t - engine.context.currentTime) * 1000;
-      const voice = scheduleCleanup(ids[i], barIds[i], startedAt, buffer.duration);
-      setVoices((v) => [...v, voice]);
-      const stepTimer = window.setTimeout(() => {
-        setSequence((prev) => {
-          if (!prev.active || prev.voiceIds !== ids) return prev;
-          const nextStep = i + 1;
-          if (nextStep >= prev.totalSteps) {
-            return { ...prev, currentStep: nextStep, active: false };
-          }
-          return { ...prev, currentStep: nextStep };
-        });
-      }, Math.max(0, startedAt - performance.now()));
-      sequenceStepTimers.current.push(stepTimer);
+    const firstStepTimer = window.setTimeout(() => {
+      setSequence((prev) => {
+        if (!prev.active || prev.voiceIds[0] !== firstId) return prev;
+        if (prev.totalSteps <= 1) {
+          return { ...prev, currentStep: 1, active: false };
+        }
+        return { ...prev, currentStep: 1 };
+      });
+    }, Math.max(0, firstStartedAt - performance.now()));
+    sequenceStepTimers.current.push(firstStepTimer);
 
-      const dt = opts.mode === 'expAccelerando'
-        ? Math.max(opts.minIntervalMs ?? 20, opts.intervalMs * Math.pow(opts.expFactor ?? 0.93, i))
-        : opts.intervalMs;
-      t += dt / 1000;
-    }
-  }, [clearSequenceStepTimers, engine, ensureReady, scheduleCleanup, stopSequenceInternal, voices]);
+    mark('playall_scheduleRest_start');
+
+    let index = 1;
+    const chunkSize = 8;
+    const scheduleChunk = () => {
+      if (token !== playSequenceToken.current) return;
+      const end = Math.min(index + chunkSize, barIds.length);
+      for (let i = index; i < end; i += 1) {
+        void bufferPromises[i].then((buffer) => {
+          if (token !== playSequenceToken.current) return;
+          const id = engine.playBufferAt(barIds[i], buffer, whenByIndex[i], { gain: opts.gain });
+          ids[i] = id;
+          const startedAt = performance.now() + (whenByIndex[i] - engine.context.currentTime) * 1000;
+          const voice = scheduleCleanup(id, barIds[i], startedAt, buffer.duration);
+          setVoices((v) => [...v, voice]);
+          const stepTimer = window.setTimeout(() => {
+            setSequence((prev) => {
+              if (!prev.active || prev.voiceIds[0] !== firstId) return prev;
+              const nextStep = i + 1;
+              if (nextStep >= prev.totalSteps) {
+                return { ...prev, currentStep: nextStep, active: false };
+              }
+              return { ...prev, currentStep: nextStep };
+            });
+          }, Math.max(0, startedAt - performance.now()));
+          sequenceStepTimers.current.push(stepTimer);
+          setSequence((prev) => {
+            if (!prev.active || prev.voiceIds[0] !== firstId) return prev;
+            const nextVoiceIds = prev.voiceIds.slice();
+            nextVoiceIds[i] = id;
+            return { ...prev, voiceIds: nextVoiceIds };
+          });
+        });
+      }
+      index = end;
+      if (index < barIds.length) {
+        window.setTimeout(scheduleChunk, 0);
+        return;
+      }
+      mark('playall_scheduleRest_end');
+      measure('playall_scheduleRest', 'playall_scheduleRest_start', 'playall_scheduleRest_end');
+      flushPlayAllPerf();
+    };
+    scheduleChunk();
+  }, [clearSequenceStepTimers, engine, ensureReady, flushPlayAllPerf, mark, measure, scheduleCleanup, stopSequenceInternal, voices]);
 
   const stopAll = useCallback(() => {
+    playSequenceToken.current += 1;
     clearSequenceStepTimers();
     setSequence(idleSequence);
     endTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -260,6 +369,8 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     showUnlockHint: isIosSafari() && !audioUnlocked,
     unlockToast,
     requestAudioUnlock: ensureReady,
+    primeAudio,
+    prewarmBars,
   };
 
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>;
