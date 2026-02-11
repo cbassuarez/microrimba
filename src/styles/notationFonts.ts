@@ -10,8 +10,9 @@ export function installNotationFonts(): void {
   }
 
   const base = import.meta.env.BASE_URL || '/';
-  const heji2Url = new URL('fonts/heji/HEJI2.otf', base).toString();
-  const heji2TextUrl = new URL('fonts/heji/HEJI2Text.otf', base).toString();
+  const absoluteBase = new URL(base, window.location.origin);
+  const heji2Url = new URL('fonts/heji/HEJI2.otf', absoluteBase).toString();
+  const heji2TextUrl = new URL('fonts/heji/HEJI2Text.otf', absoluteBase).toString();
 
   const style = document.createElement('style');
   style.id = NOTATION_STYLE_ID;
