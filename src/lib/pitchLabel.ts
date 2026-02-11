@@ -1,7 +1,8 @@
-import { renderHeji2Accidental, type Heji2AccidentalResult } from './heji2Accidental';
-import type { DiatonicAccidental } from './heji2Mapping';
+import { factorFrac, parseFracString } from './fraction';
+import { getDiatonicGlyph, getPrimeGlyph, type DiatonicAccidental, type HejiPrime, type PrimeDirection, type PrimeMagnitude } from './heji2Mapping';
 
 export type PitchLetter = 'C' | 'D' | 'E' | 'F' | 'G' | 'A' | 'B';
+export type HejiConfidence = 'exact' | 'fallback';
 
 export type PitchNote = {
   letter: PitchLetter;
@@ -10,12 +11,22 @@ export type PitchNote = {
   midi: number;
 };
 
+export type PrimeGlyphInfo = { prime: HejiPrime; magnitude: PrimeMagnitude; direction: PrimeDirection; glyph: string };
+
 export type PitchLabelModel = {
   note: PitchNote;
   hz: number;
-  midiFloat: number;
-  centsOffset: number;
-  heji: Heji2AccidentalResult;
+  expectedHz: number;
+  midiFloatExpected: number;
+  heji: {
+    diatonicGlyph: string;
+    primeGlyphs: string[];
+    primeGlyphInfo: PrimeGlyphInfo[];
+    residualCents: number;
+    confidence: HejiConfidence;
+    ratioPrimeLimit: number;
+    unsupportedPrimeFound: boolean;
+  };
   display: {
     noteText: string;
     hejiAccidentalText: string;
@@ -23,8 +34,10 @@ export type PitchLabelModel = {
   };
 };
 
-const SAFE_FALLBACK_NOTE: PitchNote = { letter: 'C', octave: 0, diatonicAccidental: '', midi: 12 };
+export const MAX_TOTAL_PRIME_GLYPHS = 4;
 
+const SAFE_FALLBACK_NOTE: PitchNote = { letter: 'C', octave: 0, diatonicAccidental: '', midi: 12 };
+const PRIME_ORDER: HejiPrime[] = [5, 7, 11, 13, 17, 19, 23, 29, 31];
 const SHARP_SPELLINGS: Array<{ letter: PitchLetter; diatonicAccidental: DiatonicAccidental }> = [
   { letter: 'C', diatonicAccidental: '' },
   { letter: 'C', diatonicAccidental: '#' },
@@ -40,21 +53,36 @@ const SHARP_SPELLINGS: Array<{ letter: PitchLetter; diatonicAccidental: Diatonic
   { letter: 'B', diatonicAccidental: '' },
 ];
 
-const HARMONIC_SCALE_ID = 'harmonic';
-const HARMONIC_FIRST_BAR_ID = 'harmonic-001';
+const refHzByInstrument = new Map<string, number>();
 
-export function hzToMidiFloat(hz: number): number {
-  return 69 + 12 * Math.log2(hz / 440);
+function ratioToNumber(p: number, q: number): number {
+  if (!Number.isFinite(p) || !Number.isFinite(q) || q === 0) return 1;
+  return p / q;
 }
 
-export function midiToSpelling(midi: number): PitchNote {
-  const pitchClass = ((midi % 12) + 12) % 12;
-  const base = SHARP_SPELLINGS[pitchClass];
-  return {
-    ...base,
-    midi,
-    octave: Math.floor(midi / 12) - 1,
-  };
+function getRatioPrimeLimit(factors: Map<number, number>): number {
+  let max = 3;
+  for (const [prime, exp] of factors.entries()) {
+    if (prime <= 3 || exp === 0) continue;
+    max = Math.max(max, prime);
+  }
+  return max;
+}
+
+function nearestMidiWithPitchClass(midiFloatExpected: number, pitchClass: number): number {
+  const lo = Math.floor(midiFloatExpected) - 24;
+  const hi = Math.ceil(midiFloatExpected) + 24;
+  let best = lo;
+  let bestDist = Number.POSITIVE_INFINITY;
+  for (let midi = lo; midi <= hi; midi += 1) {
+    if ((((midi % 12) + 12) % 12) !== pitchClass) continue;
+    const dist = Math.abs(midi - midiFloatExpected);
+    if (dist < bestDist || (dist === bestDist && midi > best)) {
+      best = midi;
+      bestDist = dist;
+    }
+  }
+  return best;
 }
 
 export function formatSignedCents(x: number): string {
@@ -62,80 +90,133 @@ export function formatSignedCents(x: number): string {
   return `${rounded >= 0 ? '+' : ''}${rounded}c`;
 }
 
-export function computeCentsOffset(midiFloat: number, midiBase: number): number {
-  return (midiFloat - midiBase) * 100;
-}
-
-export function nearestMidiForPitchClass(midiFloat: number, pitchClass: number): number {
-  const lowerMidi = Math.floor(midiFloat);
-  const upperMidi = Math.ceil(midiFloat);
-
-  let bestMidi = upperMidi;
-  let bestDistance = Number.POSITIVE_INFINITY;
-
-  for (let candidate = lowerMidi - 12; candidate <= upperMidi + 12; candidate += 1) {
-    if ((((candidate % 12) + 12) % 12) !== pitchClass) continue;
-    const distance = Math.abs(candidate - midiFloat);
-    if (distance < bestDistance || (distance === bestDistance && candidate > bestMidi)) {
-      bestMidi = candidate;
-      bestDistance = distance;
-    }
+function chunksForExponent(absExp: number): PrimeMagnitude[] {
+  const chunks: PrimeMagnitude[] = [];
+  let remaining = absExp;
+  while (remaining > 0) {
+    const next = Math.min(3, remaining) as PrimeMagnitude;
+    chunks.push(next);
+    remaining -= next;
   }
-
-  return bestMidi;
+  return chunks;
 }
 
-export function getPitchLabelModel(args: { hz: number; scaleId?: string; barId?: string; ratioFrac?: string }): PitchLabelModel {
-  const { hz, scaleId, barId, ratioFrac = '1/1' } = args;
+export function getPitchLabelModel(args: {
+  hz: number;
+  ratio_to_step0: string;
+  instrumentId?: string;
+  refHzStep0?: number;
+  scaleId?: string;
+  barId?: string;
+}): PitchLabelModel {
+  const { hz, ratio_to_step0, instrumentId, refHzStep0 } = args;
 
   if (!Number.isFinite(hz) || hz <= 0) {
     return {
       note: SAFE_FALLBACK_NOTE,
       hz,
-      midiFloat: Number.NaN,
-      centsOffset: 0,
+      expectedHz: hz,
+      midiFloatExpected: Number.NaN,
       heji: {
         diatonicGlyph: '',
         primeGlyphs: [],
-        microFrac: '1/1',
+        primeGlyphInfo: [],
         residualCents: 0,
         confidence: 'fallback',
-        finalLimit: 3,
         ratioPrimeLimit: 3,
-        hzPrimeLimit: 3,
+        unsupportedPrimeFound: false,
       },
       display: { noteText: '—', hejiAccidentalText: '', centsText: null },
     };
   }
 
-  const midiFloat = hzToMidiFloat(hz);
-  let midiBase = Math.round(midiFloat);
+  const { p, q } = parseFracString(ratio_to_step0);
+  const factors = factorFrac(p, q);
+  const e3 = factors.get(3) ?? 0;
+  const pitchClass = ((7 * e3) % 12 + 12) % 12;
 
-  if (scaleId === HARMONIC_SCALE_ID && barId === HARMONIC_FIRST_BAR_ID) {
-    midiBase = nearestMidiForPitchClass(midiFloat, 0);
+  const baseSpelling = SHARP_SPELLINGS[pitchClass];
+  const ratio = ratioToNumber(p, q);
+  let step0Ref = refHzStep0;
+
+  if (!step0Ref && instrumentId && refHzByInstrument.has(instrumentId)) {
+    step0Ref = refHzByInstrument.get(instrumentId);
+  }
+  if (!step0Ref || step0Ref <= 0) {
+    step0Ref = hz / (ratio || 1);
   }
 
-  const centsOffset = computeCentsOffset(midiFloat, midiBase);
-  const note = midiToSpelling(midiBase);
-  const heji = renderHeji2Accidental({
-    hz,
-    midiBase,
-    diatonicAccidental: note.diatonicAccidental,
-    ratioFrac,
-  });
+  if (instrumentId && Number.isFinite(step0Ref) && step0Ref > 0) {
+    refHzByInstrument.set(instrumentId, step0Ref);
+  }
 
-  const noteText = `${note.letter}${note.octave}`;
-  const hejiAccidentalText = `${heji.diatonicGlyph}${heji.primeGlyphs.join('')}`;
-  const centsText = heji.confidence === 'fallback' || Math.abs(heji.residualCents) > 5
-    ? formatSignedCents(heji.residualCents)
-    : null;
+  const expectedHz = step0Ref * ratio;
+  const midiFloatExpected = 69 + 12 * Math.log2(expectedHz / 440);
+  const midiBase = nearestMidiWithPitchClass(midiFloatExpected, pitchClass);
+
+  const note: PitchNote = {
+    ...baseSpelling,
+    midi: midiBase,
+    octave: Math.floor(midiBase / 12) - 1,
+  };
+
+  const diatonicGlyph = getDiatonicGlyph(baseSpelling.diatonicAccidental);
+  const primeGlyphInfo: PrimeGlyphInfo[] = [];
+  const primeGlyphs: string[] = [];
+  let confidence: HejiConfidence = 'exact';
+  let unsupportedPrimeFound = false;
+
+  for (const [prime, exp] of factors.entries()) {
+    if (prime <= 3 || exp === 0) continue;
+    if (!PRIME_ORDER.includes(prime as HejiPrime)) {
+      unsupportedPrimeFound = true;
+      confidence = 'fallback';
+    }
+  }
+
+  for (const prime of PRIME_ORDER) {
+    const exp = factors.get(prime) ?? 0;
+    if (exp === 0) continue;
+    const direction: PrimeDirection = exp > 0 ? 'up' : 'down';
+    for (const magnitude of chunksForExponent(Math.abs(exp))) {
+      if (primeGlyphInfo.length >= MAX_TOTAL_PRIME_GLYPHS) {
+        confidence = 'fallback';
+        break;
+      }
+      const glyph = getPrimeGlyph(prime, magnitude, direction);
+      if (!glyph) {
+        confidence = 'fallback';
+        continue;
+      }
+      primeGlyphInfo.push({ prime, magnitude, direction, glyph });
+      primeGlyphs.push(glyph);
+    }
+    if (primeGlyphInfo.length >= MAX_TOTAL_PRIME_GLYPHS) break;
+  }
+
+  const residualCents = 1200 * Math.log2(hz / expectedHz);
+  if (unsupportedPrimeFound) {
+    confidence = 'fallback';
+  }
+
+  const noteText = `${note.letter}${note.diatonicAccidental}${note.octave}`;
+  const hejiAccidentalText = `${diatonicGlyph}${primeGlyphs.join('')}`;
+  const centsText = confidence === 'fallback' || Math.abs(residualCents) > 5 ? formatSignedCents(residualCents) : null;
 
   return {
     note,
     hz,
-    midiFloat,
-    centsOffset,
-    heji,
+    expectedHz,
+    midiFloatExpected,
+    heji: {
+      diatonicGlyph,
+      primeGlyphs,
+      primeGlyphInfo,
+      residualCents,
+      confidence,
+      ratioPrimeLimit: getRatioPrimeLimit(factors),
+      unsupportedPrimeFound,
+    },
     display: {
       noteText,
       hejiAccidentalText,
