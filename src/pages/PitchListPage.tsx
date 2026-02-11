@@ -24,6 +24,7 @@ import { formatHz } from '../lib/format';
 import { normalizeFracString } from '../lib/rational';
 import { setTheme, type ThemeMode } from '../ui/theme';
 import { PITCH_GRID_COLS_DESKTOP, PITCH_GRID_COLS_MOBILE } from '../components/pitch/pitchGridCols';
+import { PitchLabel } from '../components/PitchLabel';
 
 type TolKey = '5' | '15' | '30';
 type ModeKey = 'unique' | 'all';
@@ -415,6 +416,7 @@ export function PitchListPage() {
                   className="sticky top-0 z-10 border-b border-rim bg-white/70 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70"
                 >
                 <div className="text-left justify-self-start">Index</div>
+                <div className="text-left justify-self-start">Pitch</div>
                 <div className="text-left justify-self-start">Play</div>
                 <div className="tabular-nums text-right justify-self-end">Hz</div>
                 <div className="text-left justify-self-start">Instrument</div>
@@ -453,6 +455,9 @@ export function PitchListPage() {
                       >
                         <PitchGridRow variant="row" cols={cols} className="h-[60px] text-sm">
                           <div className="tabular-nums text-right justify-self-end">{row.absoluteIndex + 1}</div>
+                          <div className="min-w-0 text-left justify-self-start">
+                            <PitchLabel hz={row.bar.hz} scaleId={row.bar.scaleId} barId={row.bar.barId} variant="list" />
+                          </div>
                           <div className="justify-self-start">
                             <button onClick={() => void playBarWithPaging(row.bar.barId)} className={`inline-flex h-9 w-9 items-center justify-center rounded-full border ${playingBarIds.has(row.bar.barId) ? 'border-emerald-400 bg-emerald-500/25' : 'border-rim'}`}>
                               {playingBarIds.has(row.bar.barId) ? (
@@ -572,7 +577,8 @@ export function PitchListPage() {
                     marginTop: `${(idx % 4) * 6}px`,
                   }}
                 >
-                  <div className="text-sm font-semibold">{formatHz(bar.hz).text}</div>
+                  <PitchLabel hz={bar.hz} scaleId={bar.scaleId} barId={bar.barId} variant="pad" />
+                  <div className="text-xs font-medium opacity-90">{formatHz(bar.hz).text} Hz</div>
                   <div className="mt-1 text-xs opacity-80">{selectedInstruments.has('composite') ? `×${count}` : instrumentLabel(bar)}</div>
                 </button>
               );
