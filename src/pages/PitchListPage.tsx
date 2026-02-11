@@ -99,7 +99,7 @@ export function PitchListPage() {
   const isSmOrUp = useMediaQuery('(min-width: 640px)');
   const cols = isSmOrUp ? PITCH_GRID_COLS_DESKTOP : PITCH_GRID_COLS_MOBILE;
   const { bars, scales, pitchIndex, loading, error } = useMicrorimbaData();
-  const { toggleBar, stopAll, playingBarIds, playSequenceByBarIds, voices } = useAudio();
+  const { toggleBar, stopAll, playingBarIds, playSequenceByBarIds, sequence } = useAudio();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialInstrument = searchParams.get('instrument');
 
@@ -112,10 +112,12 @@ export function PitchListPage() {
   const [theme, setThemeState] = useState<ThemeMode>(() => (document.documentElement.classList.contains('dark') ? 'dark' : 'light'));
   const [openDetailsKey, setOpenDetailsKey] = useState<string | null>(null);
   const [pageDirection, setPageDirection] = useState(0);
+  const [followSequence, setFollowSequence] = useState(false);
 
   const listSurfaceRef = useRef<HTMLDivElement>(null);
   const listHeaderRef = useRef<HTMLDivElement>(null);
   const wheelThrottleRef = useRef(0);
+  const followSequenceRef = useRef(false);
   const rowAnchorRefs = useRef(new Map<string, HTMLDivElement>());
 
   const barById = useMemo(() => new Map(bars.map((bar) => [bar.barId, bar])), [bars]);
@@ -232,11 +234,32 @@ export function PitchListPage() {
     paged.setPageIndex(Math.floor(index / Math.max(1, paged.rowsPerPage)));
   };
 
+  const setSequenceFollow = (next: boolean) => {
+    followSequenceRef.current = next;
+    setFollowSequence(next);
+  };
+
   useEffect(() => {
-    const latest = voices.reduce((winner, voice) => (voice.startedAt > winner.startedAt ? voice : winner), voices[0]);
-    if (!latest?.barId) return;
-    ensureItemVisible(latest.barId);
-  }, [voices]);
+    if (!followSequence || !sequence.active || sequence.barIds.length === 0) return;
+    const clampedStep = Math.min(Math.max(sequence.currentStep, 0), sequence.barIds.length - 1);
+    const currentBarId = sequence.barIds[clampedStep];
+    if (!currentBarId) return;
+    const key = keyByAnyBarId.get(currentBarId);
+    if (!key) return;
+    const index = visibleRows.findIndex((row) => row.key === key);
+    if (index < 0) return;
+    const targetPage = Math.floor(index / Math.max(1, paged.rowsPerPage));
+    if (targetPage !== paged.pageIndex) {
+      setPageDirection(targetPage > paged.pageIndex ? 1 : -1);
+      paged.setPageIndex(targetPage);
+    }
+  }, [followSequence, keyByAnyBarId, paged, sequence.active, sequence.barIds, sequence.currentStep, visibleRows]);
+
+  useEffect(() => {
+    if (!sequence.active && followSequenceRef.current) {
+      setSequenceFollow(false);
+    }
+  }, [sequence.active]);
 
   const playBarWithPaging = async (barId: string) => {
     ensureItemVisible(barId);
@@ -244,9 +267,15 @@ export function PitchListPage() {
   };
 
   const jumpWithDirection = (nextPage: number) => {
+    setSequenceFollow(false);
     const clamped = Math.min(Math.max(nextPage, 0), paged.pageCount - 1);
     setPageDirection(clamped > paged.pageIndex ? 1 : clamped < paged.pageIndex ? -1 : 0);
     paged.setPageIndex(clamped);
+  };
+
+  const stopAllWithFollowReset = () => {
+    setSequenceFollow(false);
+    stopAll();
   };
 
   const stepPrev = () => jumpWithDirection(paged.pageIndex - 1);
@@ -274,8 +303,11 @@ export function PitchListPage() {
             <p className="mt-3 max-w-2xl text-base text-slate-700 dark:text-slate-200">CalArts recently got some microtonal marimbas, and we measured and recorded the bars as a pitch set. View all pitches in a table, hear a whole-set gliss, or listen to the overtone marimba glissando (ooh, ahh).</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <button className="rounded-full border border-rim bg-white/60 px-4 py-2 text-sm shadow-sm dark:bg-black/20" onClick={() => void playSequenceByBarIds(uniqueVisible.map((row) => row.rep.barId), { intervalMs: 55, overlapMs: 0, mode: 'constant', gain: 0.9 }, { name: 'Play All (Unique)' })}> <Play className="mr-1 inline h-4 w-4" /> Play All </button>
-            <button className="rounded-full border border-rim px-4 py-2 text-sm" onClick={stopAll}><Square className="mr-1 inline h-4 w-4" /> Stop All</button>
+            <button className="rounded-full border border-rim bg-white/60 px-4 py-2 text-sm shadow-sm dark:bg-black/20" onClick={() => {
+              setSequenceFollow(true);
+              void playSequenceByBarIds(uniqueVisible.map((row) => row.rep.barId), { intervalMs: 55, overlapMs: 0, mode: 'constant', gain: 0.9 }, { name: 'Play All (Unique)' });
+            }}> <Play className="mr-1 inline h-4 w-4" /> Play All </button>
+            <button className="rounded-full border border-rim px-4 py-2 text-sm" onClick={stopAllWithFollowReset}><Square className="mr-1 inline h-4 w-4" /> Stop All</button>
             <button className="rounded-full border border-rim px-3 py-2 text-sm" onClick={() => setShowGroupingMenu((v) => !v)}><Filter className="h-4 w-4" /></button>
             <button
               className="rounded-full border border-rim px-3 py-2 text-sm"
@@ -505,7 +537,7 @@ export function PitchListPage() {
             <h2 className="mr-auto text-xl font-semibold">Instrument Pads</h2>
             <button className={`rounded-full border px-3 py-1 text-xs ${mode === 'unique' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ''}`} onClick={() => setMode('unique')}>Unique</button>
             <button className={`rounded-full border px-3 py-1 text-xs ${mode === 'all' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ''}`} onClick={() => setMode('all')}>All bars</button>
-            <button className="rounded-full border px-3 py-1 text-xs" onClick={stopAll}>Stop All</button>
+            <button className="rounded-full border px-3 py-1 text-xs" onClick={stopAllWithFollowReset}>Stop All</button>
           </div>
           <div className="mb-3 flex flex-wrap gap-2">
             {['composite', ...instruments].map((instrument) => {
@@ -567,6 +599,7 @@ export function PitchListPage() {
                         disabled={!scale}
                         onClick={() => {
                           if (!scale) return;
+                          setSequenceFollow(true);
                           void playSequenceByBarIds(scale.bars, scale.scaleId === 'harmonic' ? { intervalMs: 220, overlapMs: 0, mode: 'expAccelerando', expFactor: 0.92, minIntervalMs: 25, gain: 0.9 } : { intervalMs: 200, overlapMs: 0, mode: 'constant', gain: 0.9 }, { name: scale.title });
                         }}
                         className="rounded-full border border-rim px-3 py-1 text-xs disabled:opacity-50"
