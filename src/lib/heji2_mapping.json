@@ -1,0 +1,40 @@
+{
+  "diatonicAccidentals": {
+    "-2": [{ "glyph": "\uE264" }],
+    "-1": [{ "glyph": "\uE260" }],
+    "1": [{ "glyph": "\uE262" }],
+    "2": [{ "glyph": "\uE263" }]
+  },
+  "primeComponents": {
+    "5": {
+      "1": { "up": [{ "glyph": "\uE2C0" }], "down": [{ "glyph": "\uE2C1" }] },
+      "2": { "up": [{ "glyph": "\uE2C2" }], "down": [{ "glyph": "\uE2C3" }] },
+      "3": { "up": [{ "glyph": "\uE2C4" }], "down": [{ "glyph": "\uE2C5" }] }
+    },
+    "7": {
+      "1": { "up": [{ "glyph": "\uE2D0" }], "down": [{ "glyph": "\uE2D1" }] },
+      "2": { "up": [{ "glyph": "\uE2D2" }], "down": [{ "glyph": "\uE2D3" }] }
+    },
+    "11": {
+      "1": { "up": [{ "glyph": "\uE2E0" }], "down": [{ "glyph": "\uE2E1" }] }
+    },
+    "13": {
+      "1": { "up": [{ "glyph": "\uE2E2" }], "down": [{ "glyph": "\uE2E3" }] }
+    },
+    "17": {
+      "1": { "up": [{ "glyph": "\uE2E4" }], "down": [{ "glyph": "\uE2E5" }] }
+    },
+    "19": {
+      "1": { "up": [{ "glyph": "\uE2E6" }], "down": [{ "glyph": "\uE2E7" }] }
+    },
+    "23": {
+      "1": { "up": [{ "glyph": "\uE2E8" }], "down": [{ "glyph": "\uE2E9" }] }
+    },
+    "29": {
+      "1": { "up": [{ "glyph": "\uE2EA" }], "down": [{ "glyph": "\uE2EB" }] }
+    },
+    "31": {
+      "1": { "up": [{ "glyph": "\uE2EC" }], "down": [{ "glyph": "\uE2ED" }] }
+    }
+  }
+}

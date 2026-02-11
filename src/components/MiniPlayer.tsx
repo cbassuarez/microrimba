@@ -26,9 +26,8 @@ const SCALE_BORDER: Record<string, string> = {
 const COMPACT_HEIGHT = 52;
 const EXPANDED_MAX_HEIGHT = 220;
 
-function mergePitchText(notePrimary: string, hejiGlyph: string): string {
-  if (!hejiGlyph) return notePrimary;
-  return notePrimary.replace(/(-?\d+)$/, `${hejiGlyph}$1`);
+function mergePitchText(letter: string, accidental: string, octave: string, hejiGlyph: string): string {
+  return `${letter}${accidental}${hejiGlyph}${octave}`;
 }
 
 export function MiniPlayer() {
@@ -88,12 +87,12 @@ export function MiniPlayer() {
     if (!sortedVoices.length) return 'No active voices';
     if (sortedVoices.length === 1 && latestBar) {
       const pitch = getPitchDisplayStrings(latestBar.hz, latestBar.scaleId, latestBar.barId);
-      const pitchText = mergePitchText(pitch.notePrimary, pitch.hejiGlyph);
+      const pitchText = mergePitchText(pitch.noteLetter, pitch.accidentalText, pitch.octaveText, pitch.hejiGlyph);
       return `${pitchText}${pitch.centsText ? ` ${pitch.centsText}` : ''} • ${formatHz(latestBar.hz).text} Hz • ${prettyInstrumentLabel(latestBar.scaleId, latestBar.instrumentId, latestBar.edo)}`;
     }
     if (latestBar) {
       const pitch = getPitchDisplayStrings(latestBar.hz, latestBar.scaleId, latestBar.barId);
-      const pitchText = mergePitchText(pitch.notePrimary, pitch.hejiGlyph);
+      const pitchText = mergePitchText(pitch.noteLetter, pitch.accidentalText, pitch.octaveText, pitch.hejiGlyph);
       return `${sortedVoices.length} voices • Polyphonic • ${pitchText}`;
     }
     return `${sortedVoices.length} voices • Polyphonic`;
@@ -181,7 +180,7 @@ export function MiniPlayer() {
 
               {groupedVoices.map(({ voice, bar, showDivider }) => {
                 const pitch = bar ? getPitchDisplayStrings(bar.hz, bar.scaleId, bar.barId) : null;
-                const pitchText = pitch ? mergePitchText(pitch.notePrimary, pitch.hejiGlyph) : null;
+                const pitchText = pitch ? mergePitchText(pitch.noteLetter, pitch.accidentalText, pitch.octaveText, pitch.hejiGlyph) : null;
 
                 return (
                 <motion.div
