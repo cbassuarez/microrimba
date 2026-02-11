@@ -18,11 +18,12 @@ const SIZE_BY_VARIANT: Record<NonNullable<PitchLabelProps['variant']>, string> =
 
 export function getPitchDisplayStrings(hz: number, scaleId?: string, barId?: string) {
   const model = getPitchLabelModel({ hz, scaleId, barId });
-  const octaveText = String(model.note.octave);
-  const notePrimary = `${model.note.letter}${model.note.baseAccidental}${octaveText}`;
 
   return {
-    notePrimary,
+    notePrimary: model.display.noteText,
+    noteLetter: model.note.letter,
+    accidentalText: model.note.baseAccidental,
+    octaveText: String(model.note.octave),
     hejiGlyph: model.heji.glyph,
     centsText: model.display.centsText,
   };
@@ -35,17 +36,15 @@ export function PitchLabel({ hz, scaleId, barId, variant = 'list', showCents = t
     return <span className="font-mono tracking-tight tabular-nums">—</span>;
   }
 
-  const octaveText = String(model.note.octave);
-
   return (
     <div className={`flex items-center gap-2 ${variant === 'pad' ? 'flex-wrap' : ''}`}>
       <span className={`font-mono tracking-tight tabular-nums ${SIZE_BY_VARIANT[variant]}`}>
         <span>{model.note.letter}</span>
         <span>{model.note.baseAccidental}</span>
         {model.heji.glyph ? (
-          <span className="font-smufl text-[1.05em] leading-none align-[-0.08em]">{model.heji.glyph}</span>
+          <span className="font-heji-music text-[1.05em] leading-none align-[-0.08em]">{model.heji.glyph}</span>
         ) : null}
-        <span>{octaveText}</span>
+        <span>{model.note.octave}</span>
       </span>
       {showCents && model.display.centsText ? (
         <span className="rounded-full border border-rim/50 px-1.5 py-0.5 text-[10px] tabular-nums opacity-75">{model.display.centsText}</span>

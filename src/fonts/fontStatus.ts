@@ -9,7 +9,7 @@ export async function getSmuflFontStatus(): Promise<SmuflFontStatus> {
   }
 
   return {
-    heji2: document.fonts.check('16px "HEJI2"'),
+    heji2: document.fonts.check('16px "HEJI2Music"'),
     heji2Text: document.fonts.check('16px "HEJI2Text"'),
   };
 }

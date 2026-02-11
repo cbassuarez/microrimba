@@ -1,4 +1,4 @@
-import { chooseHejiAccidental } from './heji';
+import { chooseHejiFromCents, type HejiRender } from './hejiAccidental';
 
 export type PitchLetter = 'C' | 'D' | 'E' | 'F' | 'G' | 'A' | 'B';
 export type BaseAccidental = '' | '#' | 'b';
@@ -11,20 +11,12 @@ export type PitchNote = {
   midi: number;
 };
 
-export type HejiAccidental = {
-  glyph: string;
-  name: string;
-  approxCents: number;
-  residualCents: number;
-  confidence: HejiConfidence;
-};
-
 export type PitchLabelModel = {
   note: PitchNote;
   hz: number;
   midiFloat: number;
   centsOffset: number;
-  heji: HejiAccidental;
+  heji: HejiRender;
   display: { noteText: string; centsText: string | null };
 };
 
@@ -99,7 +91,7 @@ export function getPitchLabelModel(args: { hz: number; scaleId?: string; barId?:
       hz,
       midiFloat: Number.NaN,
       centsOffset: 0,
-      heji: { glyph: '', name: 'natural', approxCents: 0, residualCents: 0, confidence: 'fallback' },
+      heji: { diatonic: 0, components: [], glyph: '', residualCents: 0, confidence: 'fallback' },
       display: { noteText: '—', centsText: null },
     };
   }
@@ -113,7 +105,7 @@ export function getPitchLabelModel(args: { hz: number; scaleId?: string; barId?:
 
   const centsOffset = computeCentsOffset(midiFloat, midiBase);
   const note = midiToSpelling(midiBase);
-  const heji = chooseHejiAccidental(centsOffset);
+  const heji = chooseHejiFromCents(centsOffset, note.baseAccidental);
 
   const noteText = `${note.letter}${note.baseAccidental}${note.octave}`;
   const centsText = heji.confidence === 'fallback' || Math.abs(heji.residualCents) > 3
