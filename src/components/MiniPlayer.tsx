@@ -86,12 +86,12 @@ export function MiniPlayer() {
   const summaryText = useMemo(() => {
     if (!sortedVoices.length) return 'No active voices';
     if (sortedVoices.length === 1 && latestBar) {
-      const pitch = getPitchDisplayStrings(latestBar.hz, latestBar.ratioToStep0, latestBar.scaleId, latestBar.barId);
+      const pitch = getPitchDisplayStrings(latestBar.hz, latestBar.ratioToStep0, latestBar.instrumentId, latestBar.scaleId, latestBar.barId);
       const pitchText = mergePitchText(pitch.noteLetter, pitch.accidentalText, pitch.octaveText);
       return `${pitchText}${pitch.centsText ? ` ${pitch.centsText}` : ''} • ${formatHz(latestBar.hz).text} Hz • ${prettyInstrumentLabel(latestBar.scaleId, latestBar.instrumentId, latestBar.edo)}`;
     }
     if (latestBar) {
-      const pitch = getPitchDisplayStrings(latestBar.hz, latestBar.ratioToStep0, latestBar.scaleId, latestBar.barId);
+      const pitch = getPitchDisplayStrings(latestBar.hz, latestBar.ratioToStep0, latestBar.instrumentId, latestBar.scaleId, latestBar.barId);
       const pitchText = mergePitchText(pitch.noteLetter, pitch.accidentalText, pitch.octaveText);
       return `${sortedVoices.length} voices • Polyphonic • ${pitchText}`;
     }
@@ -179,7 +179,7 @@ export function MiniPlayer() {
               )}
 
               {groupedVoices.map(({ voice, bar, showDivider }) => {
-                const pitch = bar ? getPitchDisplayStrings(bar.hz, bar.ratioToStep0, bar.scaleId, bar.barId) : null;
+                const pitch = bar ? getPitchDisplayStrings(bar.hz, bar.ratioToStep0, bar.instrumentId, bar.scaleId, bar.barId) : null;
                 const pitchText = pitch ? mergePitchText(pitch.noteLetter, pitch.accidentalText, pitch.octaveText) : null;
 
                 return (

@@ -1,4 +1,4 @@
-import rawMapping from './heji2_mapping.json';
+import mapping from '../assets/heji2_mapping.json';
 
 export type DiatonicAccidental = '' | 'b' | '#' | 'bb' | '##';
 export type PrimeDirection = 'up' | 'down';
@@ -6,29 +6,34 @@ export type PrimeMagnitude = 1 | 2 | 3;
 export type HejiPrime = 5 | 7 | 11 | 13 | 17 | 19 | 23 | 29 | 31;
 
 type GlyphRecord = { glyph: string };
+type DirGlyph = { up?: GlyphRecord[]; down?: GlyphRecord[] };
+
 type MappingShape = {
-  diatonicAccidentals: Record<string, GlyphRecord[]>;
-  primeComponents: Record<string, Record<string, Record<PrimeDirection, GlyphRecord[]>>>;
+  diatonicAccidentals: Record<string, GlyphRecord[] | DirGlyph>;
+  primeComponents: Record<string, Record<string, DirGlyph>>;
 };
 
-const mapping = rawMapping as MappingShape;
+export const HEJI2Mapping = mapping as MappingShape;
 
-const DIATONIC_KEY: Record<DiatonicAccidental, string | null> = {
-  '': null,
-  b: '-1',
-  '#': '1',
-  bb: '-2',
-  '##': '2',
-};
-
-export const HEJI2Mapping = mapping;
-
-export function getDiatonicGlyph(acc: DiatonicAccidental): string {
-  const key = DIATONIC_KEY[acc];
-  if (!key) return '';
-  return HEJI2Mapping.diatonicAccidentals[key]?.[0]?.glyph ?? '';
+function pickFirstGlyph(value: GlyphRecord[] | DirGlyph | undefined, dir?: PrimeDirection): string {
+  if (!value) return '';
+  if (Array.isArray(value)) return value[0]?.glyph ?? '';
+  if (!dir) return '';
+  return value[dir]?.[0]?.glyph ?? '';
 }
 
-export function getPrimeGlyph(prime: number, mag: PrimeMagnitude, dir: PrimeDirection): string | null {
-  return HEJI2Mapping.primeComponents[String(prime)]?.[String(mag)]?.[dir]?.[0]?.glyph ?? null;
+export function getDiatonicGlyph(acc: DiatonicAccidental): string {
+  if (acc === '') return '';
+  const dir: PrimeDirection = acc.includes('#') ? 'up' : 'down';
+  const count = acc.length as 1 | 2;
+  const key = String(count);
+  const fromOne = pickFirstGlyph(HEJI2Mapping.diatonicAccidentals[key], dir);
+  if (fromOne) return fromOne.repeat(count);
+
+  const fallbackKey = acc === '#' ? '1' : acc === 'b' ? '-1' : acc === '##' ? '2' : '-2';
+  return pickFirstGlyph(HEJI2Mapping.diatonicAccidentals[fallbackKey], dir);
+}
+
+export function getPrimeGlyph(prime: HejiPrime, mag: PrimeMagnitude, dir: PrimeDirection): string {
+  return HEJI2Mapping.primeComponents[String(prime)]?.[String(mag)]?.[dir]?.[0]?.glyph ?? '';
 }

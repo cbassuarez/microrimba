@@ -3,7 +3,8 @@ import { getPitchLabelModel } from '../lib/pitchLabel';
 
 type PitchLabelProps = {
   hz: number;
-  ratioFrac?: string;
+  ratio: string;
+  instrumentId: string;
   scaleId?: string;
   barId?: string;
   variant?: 'list' | 'pad' | 'mini' | 'inline';
@@ -17,8 +18,8 @@ const SIZE_BY_VARIANT: Record<NonNullable<PitchLabelProps['variant']>, string> =
   inline: 'text-sm',
 };
 
-export function getPitchDisplayStrings(hz: number, ratioFrac = '1/1', scaleId?: string, barId?: string) {
-  const model = getPitchLabelModel({ hz, ratioFrac, scaleId, barId });
+export function getPitchDisplayStrings(hz: number, ratio: string, instrumentId: string, scaleId?: string, barId?: string) {
+  const model = getPitchLabelModel({ hz, ratio_to_step0: ratio, instrumentId, scaleId, barId });
 
   return {
     notePrimary: `${model.note.letter}${model.display.hejiAccidentalText}${model.note.octave}`,
@@ -29,8 +30,11 @@ export function getPitchDisplayStrings(hz: number, ratioFrac = '1/1', scaleId?: 
   };
 }
 
-export function PitchLabel({ hz, ratioFrac = '1/1', scaleId, barId, variant = 'list', showCents = true }: PitchLabelProps) {
-  const model = useMemo(() => getPitchLabelModel({ hz, ratioFrac, scaleId, barId }), [barId, hz, ratioFrac, scaleId]);
+export function PitchLabel({ hz, ratio, instrumentId, scaleId, barId, variant = 'list', showCents = true }: PitchLabelProps) {
+  const model = useMemo(
+    () => getPitchLabelModel({ hz, ratio_to_step0: ratio, instrumentId, scaleId, barId }),
+    [barId, hz, instrumentId, ratio, scaleId],
+  );
 
   if (model.display.noteText === '—') {
     return <span className="font-mono tracking-tight tabular-nums">—</span>;
@@ -50,7 +54,7 @@ export function PitchLabel({ hz, ratioFrac = '1/1', scaleId, barId, variant = 'l
       ) : null}
       {import.meta.env.DEV ? (
         <span className="hidden text-[10px] text-slate-500 lg:inline">
-          limit: {model.heji.finalLimit} (ratio {model.heji.ratioPrimeLimit}, hz-fit {model.heji.hzPrimeLimit}) · micro: {model.heji.microFrac} · residual: {model.display.centsText ?? '0c'}
+          ratio-limit: {model.heji.ratioPrimeLimit} · residual: {model.display.centsText ?? '0c'}
         </span>
       ) : null}
     </div>

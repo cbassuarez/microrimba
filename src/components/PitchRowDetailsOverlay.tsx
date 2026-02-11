@@ -90,7 +90,8 @@ export function PitchRowDetailsOverlay({
           hz: openRow.bar.hz,
           scaleId: openRow.bar.scaleId,
           barId: openRow.bar.barId,
-          ratioFrac: openRow.bar.ratioToStep0,
+          ratio_to_step0: openRow.bar.ratioToStep0,
+          instrumentId: openRow.bar.instrumentId,
         })
       : null;
 
@@ -109,7 +110,7 @@ export function PitchRowDetailsOverlay({
         )}
         {import.meta.env.DEV && debugHeji ? (
           <div className="rounded border border-rim/60 px-2 py-1 text-[11px] text-slate-600 dark:text-slate-300">
-            limit: {debugHeji.heji.finalLimit} (ratio {debugHeji.heji.ratioPrimeLimit}, hz-fit {debugHeji.heji.hzPrimeLimit}) · micro: {debugHeji.heji.microFrac} · residual: {formatSignedCents(debugHeji.heji.residualCents)}
+            ratio-limit: {debugHeji.heji.ratioPrimeLimit} · residual: {formatSignedCents(debugHeji.heji.residualCents)}
           </div>
         ) : null}
 
