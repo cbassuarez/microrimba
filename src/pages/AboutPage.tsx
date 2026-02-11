@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Check, Copy } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { getSmuflFontStatus, type SmuflFontStatus } from '../fonts/fontStatus';
 
 type GlossaryTermProps = {
@@ -9,11 +10,57 @@ type GlossaryTermProps = {
 };
 
 function GlossaryTerm({ term, definition }: GlossaryTermProps) {
+  const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState({ top: 0, left: 12 });
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const tooltipRef = useRef<HTMLSpanElement>(null);
+  const rafRef = useRef<number | null>(null);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+
+    const updatePosition = () => {
+      const triggerRect = triggerRef.current?.getBoundingClientRect();
+      const tooltipRect = tooltipRef.current?.getBoundingClientRect();
+      if (!triggerRect || !tooltipRect) return;
+
+      const horizontalPadding = 12;
+      const defaultTop = triggerRect.top - tooltipRect.height - 8;
+      const top = defaultTop < horizontalPadding ? triggerRect.bottom + 8 : defaultTop;
+      const left = Math.min(
+        Math.max(triggerRect.left, horizontalPadding),
+        window.innerWidth - tooltipRect.width - horizontalPadding,
+      );
+
+      setPosition({ top, left });
+    };
+
+    const schedule = () => {
+      if (rafRef.current !== null) return;
+      rafRef.current = window.requestAnimationFrame(() => {
+        rafRef.current = null;
+        updatePosition();
+      });
+    };
+
+    updatePosition();
+    window.addEventListener('scroll', schedule, true);
+    window.addEventListener('resize', schedule);
+
+    return () => {
+      window.removeEventListener('scroll', schedule, true);
+      window.removeEventListener('resize', schedule);
+      if (rafRef.current !== null) {
+        window.cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, [open]);
 
   return (
     <span className="relative inline-flex">
       <button
+        ref={triggerRef}
         type="button"
         className="rounded-md border border-rim/70 bg-white/40 px-1.5 py-0.5 font-mono text-xs font-medium text-slate-700 underline decoration-dotted underline-offset-2 transition hover:bg-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 dark:bg-black/20 dark:text-slate-200 dark:hover:bg-black/40"
         aria-label={`${term} definition`}
@@ -26,24 +73,31 @@ function GlossaryTerm({ term, definition }: GlossaryTermProps) {
       >
         {term}
       </button>
-      <AnimatePresence>
-        {open && (
-          <motion.span
-            id={`glossary-${term}`}
-            role="tooltip"
-            className="pointer-events-none absolute left-1/2 top-[calc(100%+0.5rem)] z-20 w-64 -translate-x-1/2 rounded-xl border border-rim bg-surface p-2 text-xs text-slate-700 shadow-glass backdrop-blur-md dark:text-slate-200"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.16 }}
-          >
-            {definition}
-          </motion.span>
-        )}
-      </AnimatePresence>
+      {createPortal(
+        <AnimatePresence>
+          {open && (
+            // Render tooltips in a body portal so glass-card overflow clipping cannot cut them off.
+            <motion.span
+              ref={tooltipRef}
+              id={`glossary-${term}`}
+              role="tooltip"
+              className="fixed z-50 pointer-events-auto max-w-[min(320px,calc(100vw-24px))] rounded-xl border border-rim bg-surface p-2 text-xs text-slate-700 shadow-glass backdrop-blur-md dark:text-slate-200"
+              style={{ top: position.top, left: position.left }}
+              initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.98 }}
+              animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+              exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.16 }}
+            >
+              {definition}
+            </motion.span>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </span>
   );
 }
+
 
 export function AboutPage() {
   const reduced = useReducedMotion();

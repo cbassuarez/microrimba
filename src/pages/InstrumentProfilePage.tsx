@@ -106,7 +106,7 @@ export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { in
     rowHeightPx: ROW_H,
     minRows: 4,
     maxRows: 12,
-    containerRef: listSurfaceRef,
+    viewportRef: listSurfaceRef,
     stickyHeaderRef: listHeaderRef,
     getAnchorKey: (row) => row.key,
   });
@@ -158,9 +158,14 @@ export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { in
   };
 
   const cardsByScale = instruments.reduce<Record<string, typeof instruments>>((acc, item) => {
-    acc[item.scaleId] = acc[item.scaleId] ? [...acc[item.scaleId], item] : [item];
+    const group = typeof item.edo === 'number' ? 'EDO' : (item.edo === 'harmonic' || item.scaleId === 'harmonic' ? 'Harmonic' : item.scaleId);
+    acc[group] = acc[group] ? [...acc[group], item] : [item];
     return acc;
   }, {});
+  const cardGroups = [
+    ['EDO', cardsByScale.EDO ?? []],
+    ['Harmonic', cardsByScale.Harmonic ?? []],
+  ] as const;
 
   return (
     <div className="space-y-6 pb-8">
@@ -268,21 +273,23 @@ export function InstrumentProfilePage({ instrumentId: forcedInstrumentId }: { in
 
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Other instruments</h2>
-        {Object.entries(cardsByScale).map(([scaleId, items]) => (
-          <div key={scaleId} className="space-y-2">
-            <h3 className="text-sm uppercase opacity-70">{scaleId}</h3>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((item) => (
-                <article key={item.instrumentId} className="glass-panel glass-rim p-4" style={{ borderColor: `hsla(${SCALE_ACCENTS[item.scaleId] ?? '220 10% 50%'}, 0.5)` }}>
-                  <button className="w-full text-left" onClick={() => navigate(`/instrument/${item.instrumentId}`)}>
-                    <div className="font-semibold">{item.label}</div>
-                    <div className="mt-1 text-xs opacity-75">{item.barIdsInOrder.length} bars</div>
-                  </button>
-                  <button className="mt-3 rounded-full border border-rim px-3 py-1 text-xs" onClick={() => void playSequenceByBarIds(item.barIdsInOrder, playOpts(item.scaleId))}>Play</button>
-                </article>
-              ))}
+        {cardGroups.map(([groupName, items]) => (
+          items.length ? (
+            <div key={groupName} className="space-y-2">
+              <h3 className="text-sm uppercase opacity-70">{groupName}</h3>
+              <div className="grid gap-3 sm:gap-4 items-stretch [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+                {items.map((item) => (
+                  <article key={item.instrumentId} className="glass-panel glass-rim h-full p-4" style={{ borderColor: `hsla(${SCALE_ACCENTS[item.scaleId] ?? '220 10% 50%'}, 0.5)` }}>
+                    <button className="w-full text-left" onClick={() => navigate(`/instrument/${item.instrumentId}`)}>
+                      <div className="font-semibold">{item.label}</div>
+                      <div className="mt-1 text-xs opacity-75">{item.barIdsInOrder.length} bars</div>
+                    </button>
+                    <button className="mt-3 rounded-full border border-rim px-3 py-1 text-xs" onClick={() => void playSequenceByBarIds(item.barIdsInOrder, playOpts(item.scaleId))}>Play</button>
+                  </article>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : null
         ))}
       </section>
     </div>
