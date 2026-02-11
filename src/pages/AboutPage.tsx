@@ -48,7 +48,7 @@ function GlossaryTerm({ term, definition }: GlossaryTermProps) {
 export function AboutPage() {
   const reduced = useReducedMotion();
   const [copied, setCopied] = useState(false);
-  const [fontStatus, setFontStatus] = useState<SmuflFontStatus>({ bravura: false, heji: false });
+  const [fontStatus, setFontStatus] = useState<SmuflFontStatus>({ heji2: false, heji2Text: false });
 
   const sectionMotion = (delay: number) =>
     reduced
@@ -173,7 +173,7 @@ export function AboutPage() {
             You can use this library to compose, teach, cite, and reuse material where permitted. Licensing details live in the repository LICENSE and README.
           </p>
           <p className="mt-3 text-sm text-slate-700 dark:text-slate-200">
-            Fonts: Bravura (SMuFL) and HEJI2 are included for notation glyph rendering workflows.
+            Fonts: HEJI2 and HEJI2Text are included for notation glyph rendering workflows.
           </p>
         </article>
       </motion.section>
@@ -181,7 +181,7 @@ export function AboutPage() {
       {showFontDebug ? (
         <motion.section className="glass-panel glass-rim p-3" {...sectionMotion(0.18)}>
           <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-            Fonts: Bravura {fontStatus.bravura ? '✓' : '✕'} / HEJI2 {fontStatus.heji2 ? '✓' : '✕'}
+            Fonts: HEJI2 {fontStatus.heji2 ? '✓' : '✕'} / HEJI2Text {fontStatus.heji2Text ? '✓' : '✕'}
           </p>
         </motion.section>
       ) : null}
