@@ -3,6 +3,7 @@ import { Check, Copy } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getSmuflFontStatus, type SmuflFontStatus } from '../fonts/fontStatus';
+import { Meta } from '../components/Meta';
 
 type GlossaryTermProps = {
   term: string;
@@ -152,7 +153,13 @@ export function AboutPage() {
   const showFontDebug = import.meta.env.DEV || new URLSearchParams(window.location.search).get('debug') === '1';
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 pb-8 font-condensed">
+    <>
+      <Meta
+        title="About"
+        description="Background, methodology, and credits for the Microtonal Marimba Instruments reference library."
+        canonicalPath="/about"
+      />
+      <div className="mx-auto max-w-4xl space-y-6 pb-8 font-condensed">
       <motion.section className="glass-panel glass-rim p-6 md:p-8" {...sectionMotion(0)}>
         <p className="font-mono text-xs uppercase tracking-[0.22em] text-slate-600 dark:text-slate-300">About</p>
         <h1 className="mt-3 text-3xl font-semibold md:text-5xl">Microtonal Marimba Instruments</h1>
@@ -258,6 +265,7 @@ export function AboutPage() {
           </button>
         </div>
       </motion.section>
-    </div>
+      </div>
+    </>
   );
 }

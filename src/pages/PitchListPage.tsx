@@ -26,6 +26,7 @@ import { setTheme, type ThemeMode } from '../ui/theme';
 import { glassHoverMotion } from '../ui/glassHoverMotion';
 import { PITCH_GRID_COLS_DESKTOP, PITCH_GRID_COLS_MOBILE } from '../components/pitch/pitchGridCols';
 import { PitchLabel } from '../components/PitchLabel';
+import { DEFAULT_DESCRIPTION, Meta } from '../components/Meta';
 
 type TolKey = '5' | '15' | '30';
 type ModeKey = 'unique' | 'all';
@@ -290,19 +291,23 @@ export function PitchListPage() {
   const stepNext = () => jumpWithDirection(paged.pageIndex + 1);
 
   if (loading) {
-    return <section className="glass-panel glass-rim p-8 text-lg">Loading the resonator library…</section>;
+    return <><Meta description={DEFAULT_DESCRIPTION} canonicalPath="/" /><section className="glass-panel glass-rim p-8 text-lg">Loading the resonator library…</section></>;
   }
 
   if (error || !pitchIndex) {
     return (
-      <section className="glass-panel glass-rim p-8 text-rose-500">
-        Data failed to load: {error ?? 'unknown error'}
-      </section>
+      <>
+        <Meta description={DEFAULT_DESCRIPTION} canonicalPath="/" />
+        <section className="glass-panel glass-rim p-8 text-rose-500">
+          Data failed to load: {error ?? 'unknown error'}
+        </section>
+      </>
     );
   }
 
   return (
     <div className="flex min-h-[calc(100vh-8.5rem)] flex-col gap-6 font-condensed">
+      <Meta description={DEFAULT_DESCRIPTION} canonicalPath="/" />
       <motion.section className="glass-panel glass-rim p-6 md:p-8" {...motionProps}>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
