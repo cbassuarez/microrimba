@@ -49,6 +49,7 @@ export function PlayAllCTA({
   const lastFrameRef = useRef(0);
   const currentSpeedRef = useRef(0.15);
   const targetSpeedRef = useRef(0.15);
+  const boostRef = useRef(0);
   const flashRef = useRef(0);
   const [hovered, setHovered] = useState(false);
   const [isInView, setIsInView] = useState(true);
@@ -144,17 +145,19 @@ export function PlayAllCTA({
       const f = Math.min(cssWidth, cssHeight) * 0.8;
 
       currentSpeedRef.current += (targetSpeedRef.current - currentSpeedRef.current) * 0.08;
+      boostRef.current *= 0.86;
       flashRef.current *= 0.85;
-      const brightness = 0.22 + currentSpeedRef.current * 0.28 + flashRef.current * 0.5;
+      const effectiveSpeed = currentSpeedRef.current * (1 + boostRef.current);
+      const brightness = 0.18 + effectiveSpeed * 0.28 + flashRef.current * 0.35;
 
       context.clearRect(0, 0, cssWidth, cssHeight);
-      context.fillStyle = 'rgba(8, 14, 30, 0.28)';
+      context.fillStyle = 'rgba(8, 10, 15, 0.2)';
       context.fillRect(0, 0, cssWidth, cssHeight);
       context.lineWidth = 1;
-      context.strokeStyle = `rgba(170,220,255,${Math.min(0.72, brightness)})`;
+      context.strokeStyle = `rgba(255,255,255,${Math.min(0.68, brightness)})`;
 
       const stars = starsRef.current;
-      const zStep = currentSpeedRef.current * (dt / 16.666) * 0.028;
+      const zStep = effectiveSpeed * (dt / 16.666) * 0.028;
 
       for (let i = 0; i < stars.length; i += 1) {
         const star = stars[i];
@@ -212,41 +215,31 @@ export function PlayAllCTA({
       aria-label={ctaLabel}
       aria-pressed={isPlaying}
       onClick={onToggle}
-      onPointerEnter={() => setHovered(true)}
+      onPointerEnter={() => {
+        boostRef.current = Math.max(boostRef.current, 0.45);
+        setHovered(true);
+      }}
       onPointerLeave={() => setHovered(false)}
       onPointerDown={() => {
+        boostRef.current = Math.max(boostRef.current, 0.7);
         flashRef.current = 1;
       }}
       whileHover={prefersReducedMotion ? undefined : { y: -2, scale: 1.01 }}
       whileTap={{ scale: 0.995 }}
       transition={{ type: 'spring', stiffness: 380, damping: 26, mass: 0.8 }}
-      className={`group relative h-[54px] w-full overflow-hidden rounded-2xl border border-white/15 bg-white/10 text-left shadow-[0_10px_30px_rgba(0,0,0,0.22)] backdrop-blur-md dark:border-white/10 dark:bg-black/20 sm:h-[64px] ${sticky ? 'max-w-xs' : ''} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black/30 ${className ?? ''}`}
+      className={`group relative h-[54px] w-full overflow-hidden rounded-full border border-rim bg-white/60 px-4 py-2 text-left text-sm shadow-sm backdrop-blur sm:h-[64px] sm:w-auto sm:min-w-[280px] dark:bg-black/20 ${sticky ? 'max-w-xs' : ''} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black/30 ${className ?? ''}`}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(143,196,255,0.24),transparent_55%),radial-gradient(circle_at_78%_82%,rgba(147,127,255,0.2),transparent_50%)]" />
-      <div
-        className={`pointer-events-none absolute inset-[-20%] rounded-[28px] bg-[radial-gradient(circle,rgba(142,212,255,0.36)_0%,rgba(142,212,255,0)_62%)] blur-2xl transition-opacity duration-300 ${hovered || isPlaying ? 'opacity-100' : 'opacity-35'}`}
-      />
-      {!prefersReducedMotion && (
-        <motion.div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-          animate={{ x: ['0%', '260%'] }}
-          transition={{ duration: 3.6, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
-        />
-      )}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.1] [background-image:radial-gradient(rgba(255,255,255,0.6)_0.5px,transparent_0.5px)] [background-size:3px_3px]" />
       {!prefersReducedMotion ? (
         <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true" />
       ) : (
-        <div className="pointer-events-none absolute inset-0 bg-[conic-gradient(from_200deg_at_60%_45%,rgba(74,144,226,0.35),rgba(29,49,91,0.22),rgba(153,116,255,0.3),rgba(74,144,226,0.35))] opacity-50" />
+        <div className="pointer-events-none absolute inset-0 bg-black/20" />
       )}
-      <div className="relative z-10 flex h-full items-center justify-between px-4 sm:px-5">
-        <div className="rounded-xl bg-slate-950/32 px-3 py-1.5 backdrop-blur">
-          <p className="text-base font-semibold tracking-tight text-white sm:text-lg">{ctaLabel}</p>
-          <p className="text-[11px] text-white/80 sm:text-xs">{subLabel}</p>
-        </div>
-        <div className={`rounded-full border border-white/25 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-white/85 transition-opacity sm:px-3 ${hovered || isPlaying ? 'opacity-100' : 'opacity-70'}`}>
-          {isPlaying ? 'Live' : 'Hero'}
+      <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-gradient-to-b from-white/18 to-transparent opacity-70" />
+      <div className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_-18px_30px_rgba(0,0,0,0.35)]" />
+      <div className="relative z-10 flex h-full items-center justify-start px-1 sm:px-2">
+        <div className="rounded-xl bg-black/35 px-3 py-1.5 ring-1 ring-white/10 backdrop-blur-sm dark:bg-black/40">
+          <p className="text-base font-semibold tracking-tight text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.55)] sm:text-lg">{ctaLabel}</p>
+          <p className="text-[11px] text-white/75 sm:text-xs">{subLabel}</p>
         </div>
       </div>
     </motion.button>
