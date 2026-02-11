@@ -3,6 +3,7 @@ import { AudioEngine } from './AudioEngine';
 import { loadBars } from '../data/loaders';
 import type { BarId } from '../data/types';
 import { playSequence, type SequenceOpts } from '../lib/sequencer';
+import { ensureAudioReady, isAudioUnlocked, isIosSafari, primeOnFirstUserGesture } from './iosUnmute';
 
 type Voice = { id: string; barId: BarId; startedAt: number; stop: () => void };
 
@@ -27,6 +28,9 @@ type AudioApi = {
   toggleBar: (barId: BarId) => Promise<void>;
   stopVoice: (id: string) => void;
   stopAll: () => void;
+  audioUnlocked: boolean;
+  showUnlockHint: boolean;
+  unlockToast: string | null;
 };
 
 const Ctx = createContext<AudioApi | null>(null);
@@ -46,6 +50,9 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const [sequence, setSequence] = useState<SequenceState>(idleSequence);
   const endTimers = useRef(new Map<string, number>());
   const sequenceStepTimers = useRef<number[]>([]);
+  const unlockToastTimer = useRef<number | null>(null);
+  const [audioUnlocked, setAudioUnlocked] = useState(() => isAudioUnlocked());
+  const [unlockToast, setUnlockToast] = useState<string | null>(null);
 
   const clearSequenceStepTimers = useCallback(() => {
     sequenceStepTimers.current.forEach((timer) => window.clearTimeout(timer));
@@ -63,15 +70,38 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   }, [engine]);
 
   useEffect(() => {
-    engine.onFirstGestureUnlock();
+    primeOnFirstUserGesture(engine.context);
     loadBars().then((bars) => engine.setPathMap(Object.fromEntries(bars.map((b) => [b.barId, b.audioPath]))));
     return () => {
       endTimers.current.forEach((timer) => window.clearTimeout(timer));
       endTimers.current.clear();
       clearSequenceStepTimers();
+      if (unlockToastTimer.current) {
+        window.clearTimeout(unlockToastTimer.current);
+      }
       engine.stopAll();
     };
   }, [clearSequenceStepTimers, engine]);
+
+
+  const ensureReady = useCallback(async () => {
+    try {
+      await ensureAudioReady(engine.context);
+      setAudioUnlocked(true);
+      setUnlockToast(null);
+      return true;
+    } catch {
+      setUnlockToast('Tap again to enable sound');
+      if (unlockToastTimer.current) {
+        window.clearTimeout(unlockToastTimer.current);
+      }
+      unlockToastTimer.current = window.setTimeout(() => {
+        setUnlockToast(null);
+        unlockToastTimer.current = null;
+      }, 2200);
+      return false;
+    }
+  }, [engine]);
 
   const stopVoice = useCallback((id: string) => {
     const timer = endTimers.current.get(id);
@@ -107,19 +137,19 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   }, [stopVoice, voices]);
 
   const playBar = useCallback(async (barId: BarId) => {
-    await engine.ensureUnlocked();
+    if (!(await ensureReady())) return;
     const buffer = await engine.getBuffer(barId);
     const when = engine.context.currentTime;
     const startedAt = performance.now() + Math.max(0, (when - engine.context.currentTime) * 1000);
     const id = engine.playBufferAt(barId, buffer, when, { gain: 1 });
     const voice = scheduleCleanup(id, barId, startedAt, buffer.duration);
     setVoices((v) => [...v, voice]);
-  }, [engine, scheduleCleanup]);
+  }, [engine, ensureReady, scheduleCleanup]);
 
   const playSequenceByBarIds = useCallback(async (barIds: BarId[], opts: SequenceOpts, meta?: { name?: string }) => {
     if (!barIds.length) return;
     stopSequence();
-    await engine.ensureUnlocked();
+    if (!(await ensureReady())) return;
     const startAt = engine.context.currentTime + 0.03;
     const startedNow = performance.now();
     const ids = await playSequence(engine, barIds, opts);
@@ -157,7 +187,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         : opts.intervalMs;
       t += dt / 1000;
     }
-  }, [clearSequenceStepTimers, engine, scheduleCleanup, stopSequence]);
+  }, [clearSequenceStepTimers, engine, ensureReady, scheduleCleanup, stopSequence]);
 
   const stopAll = useCallback(() => {
     clearSequenceStepTimers();
@@ -189,6 +219,9 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     toggleBar,
     stopVoice,
     stopAll,
+    audioUnlocked,
+    showUnlockHint: isIosSafari() && !audioUnlocked,
+    unlockToast,
   };
 
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>;

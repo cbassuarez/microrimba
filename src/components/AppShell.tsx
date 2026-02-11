@@ -3,12 +3,14 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 import { MiniPlayer } from './MiniPlayer';
 import { useMicrorimbaData } from '../data/useMicrorimbaData';
 import { getDefaultInstrumentForScale } from '../lib/instruments';
+import { useAudio } from '../audio/AudioContextProvider';
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur transition ${isActive ? 'border-slate-900/40 bg-slate-900/85 text-white dark:border-white/40 dark:bg-white/85 dark:text-slate-900' : 'border-rim/70 bg-surface/70 hover:bg-surface'}`;
 
 export function AppShell() {
   const { instruments } = useMicrorimbaData();
+  const { showUnlockHint, unlockToast } = useAudio();
   const defaultInstrument = getDefaultInstrumentForScale(instruments, '9edo') ?? instruments[0]?.instrumentId;
 
   return (
@@ -32,6 +34,14 @@ export function AppShell() {
             </a>
           </nav>
         </div>
+        {showUnlockHint && (
+          <div className="mb-4 inline-flex items-center rounded-full border border-rim/70 bg-surface/80 px-3 py-1.5 text-xs shadow-glass backdrop-blur">
+            Tap any Play button to enable sound on iPhone/iPad
+          </div>
+        )}
+        {unlockToast && (
+          <div className="mb-4 inline-flex items-center rounded-full border border-amber-400/50 bg-amber-500/20 px-3 py-1 text-xs text-amber-100 shadow-glass backdrop-blur" role="status" aria-live="polite">{unlockToast}</div>
+        )}
         <Outlet />
       </main>
       <div className="hidden sm:block">
