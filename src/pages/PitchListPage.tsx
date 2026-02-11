@@ -23,6 +23,7 @@ import { prettyInstrumentLabel } from '../lib/labels';
 import { formatHz } from '../lib/format';
 import { normalizeFracString } from '../lib/rational';
 import { setTheme, type ThemeMode } from '../ui/theme';
+import { glassHoverMotion } from '../ui/glassHoverMotion';
 import { PITCH_GRID_COLS_DESKTOP, PITCH_GRID_COLS_MOBILE } from '../components/pitch/pitchGridCols';
 import { PitchLabel } from '../components/PitchLabel';
 
@@ -414,8 +415,8 @@ export function PitchListPage() {
         >
           {/* This viewport is what rowsPerPage uses so we fill the visible list region exactly. */}
           <div ref={listViewportRef} className="flex min-h-0 flex-1 flex-col px-2 pt-2">
-            <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden overscroll-x-contain">
-            <div className="w-max min-w-full">
+            <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain">
+              <div className="w-max">
               {/* Drift prevention: header and data rows must always use PitchGridRow with shared cols constants. */}
               <div ref={headerRowRef}>
                 <PitchGridRow
@@ -425,14 +426,14 @@ export function PitchListPage() {
                 >
                 <div className="text-left justify-self-start">Index</div>
                 <div className="text-left justify-self-start">Pitch</div>
-                <div className="text-left justify-self-start">Play</div>
+                <div className="text-left justify-self-center">Play</div>
                 <div className="tabular-nums text-right justify-self-end">Hz</div>
                 <div className="text-left justify-self-start">Instrument</div>
                 <div className="tabular-nums text-right justify-self-end">Bar #</div>
                 <div className="text-left justify-self-start">Scale</div>
                 <div className="tabular-nums text-right justify-self-end">Degree</div>
                 <div className="tabular-nums text-right justify-self-end">Ratio</div>
-                <div className="text-left justify-self-start">More</div>
+                <div className="text-left justify-self-center">More</div>
                 </PitchGridRow>
               </div>
 
@@ -466,7 +467,7 @@ export function PitchListPage() {
                           <div className="min-w-0 text-left justify-self-start">
                             <PitchLabel hz={row.bar.hz} ratio={row.bar.ratioToStep0} instrumentId={row.bar.instrumentId} scaleId={row.bar.scaleId} barId={row.bar.barId} variant="list" />
                           </div>
-                          <div className="justify-self-start">
+                          <div className="justify-self-center">
                             <button onClick={() => void playBarWithPaging(row.bar.barId)} className={`inline-flex h-9 w-9 items-center justify-center rounded-full border ${playingBarIds.has(row.bar.barId) ? 'border-emerald-400 bg-emerald-500/25' : 'border-rim'}`}>
                               {playingBarIds.has(row.bar.barId) ? (
                                 <motion.span animate={reduced ? { opacity: [0.55, 1, 0.55] } : { scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }} transition={{ repeat: Infinity, duration: 1.2 }}>
@@ -484,7 +485,7 @@ export function PitchListPage() {
                             {Math.abs(row.bar.ratioErrorCents) >= 1 ? '≈ ' : ''}
                             {ratioForDisplay(row.bar)}
                           </div>
-                          <div className="justify-self-start">
+                          <div className="justify-self-center">
                             <button className="opacity-60 hover:opacity-100" onClick={() => setOpenDetailsKey((prev) => (prev === row.key ? null : row.key))}>{isOpen ? <ChevronDown className="h-4 w-4 rotate-180" /> : <ChevronDown className="h-4 w-4" />}</button>
                           </div>
                         </PitchGridRow>
@@ -533,7 +534,7 @@ export function PitchListPage() {
 
             {import.meta.env.DEV && (
               <div className="pointer-events-none absolute right-3 top-3 z-30 rounded bg-black/70 px-2 py-1 font-mono text-[10px] text-white">
-                v:{Math.round(measureDebug.viewport)} h:{Math.round(measureDebug.header)} p:{Math.round(measureDebug.pager)} r:{Math.round(measureDebug.row)} rows:{measureDebug.rowsPerPage}
+                viewport:{Math.round(measureDebug.viewport)} header:{Math.round(measureDebug.header)} pager:{Math.round(measureDebug.pager)} row:{Math.round(measureDebug.row)} rowsPerPage:{measureDebug.rowsPerPage}
               </div>
             )}
           </div>
@@ -553,8 +554,8 @@ export function PitchListPage() {
         </div>
       </motion.section>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <motion.section className="glass-panel glass-rim p-4" {...motionProps}>
+      <div className="grid min-h-0 gap-4 md:grid-cols-[minmax(0,1fr)_360px] md:items-stretch">
+        <motion.section className="glass-panel glass-rim flex min-h-0 flex-col p-4" {...motionProps}>
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <h2 className="mr-auto text-xl font-semibold">Instrument Pads</h2>
             <button className={`rounded-full border px-3 py-1 text-xs ${mode === 'unique' ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ''}`} onClick={() => setMode('unique')}>Unique</button>
@@ -581,25 +582,33 @@ export function PitchListPage() {
               );
             })}
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
+          <div className="min-h-0 max-h-[min(46vh,420px)] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
             {padsFilteredByInstrument.map((bar, idx) => {
               const count = uniqueVisible.find((row) => row.rep.barId === bar.barId)?.members.length ?? 1;
               return (
-                <button
+                <motion.button
                   key={bar.barId}
                   onClick={() => void playBarWithPaging(bar.barId)}
-                  className="relative rounded-md border border-rim p-3 text-left shadow-sm transition hover:-translate-y-0.5"
+                  className="group relative will-change-transform rounded-md border border-rim p-3 text-left shadow-sm"
                   style={{
                     background: `linear-gradient(180deg, hsla(${SCALE_ACCENTS[bar.scaleId] ?? '220 8% 60%'}, 0.4), hsla(${SCALE_ACCENTS[bar.scaleId] ?? '220 8% 60%'}, 0.18))`,
                     marginTop: `${(idx % 4) * 6}px`,
                   }}
+                  whileHover={reduced ? undefined : glassHoverMotion.whileHover}
+                  whileTap={reduced ? undefined : glassHoverMotion.whileTap}
+                  transition={reduced ? undefined : glassHoverMotion.transition}
                 >
-                  <PitchLabel hz={bar.hz} ratio={bar.ratioToStep0} instrumentId={bar.instrumentId} scaleId={bar.scaleId} barId={bar.barId} variant="pad" />
-                  <div className="text-xs font-medium opacity-90">{formatHz(bar.hz).text} Hz</div>
-                  <div className="mt-1 text-xs opacity-80">{selectedInstruments.has('composite') ? `×${count}` : instrumentLabel(bar)}</div>
-                </button>
+                  <span className="pointer-events-none absolute inset-0 -z-10 rounded-2xl bg-white/10 opacity-0 blur-xl transition-opacity duration-200 group-hover:opacity-100 dark:bg-white/5" />
+                  <div className="relative z-10">
+                    <PitchLabel hz={bar.hz} ratio={bar.ratioToStep0} instrumentId={bar.instrumentId} scaleId={bar.scaleId} barId={bar.barId} variant="pad" />
+                    <div className="text-xs font-medium opacity-90">{formatHz(bar.hz).text} Hz</div>
+                    <div className="mt-1 text-xs opacity-80">{selectedInstruments.has('composite') ? `×${count}` : instrumentLabel(bar)}</div>
+                  </div>
+                </motion.button>
               );
             })}
+          </div>
           </div>
         </motion.section>
 

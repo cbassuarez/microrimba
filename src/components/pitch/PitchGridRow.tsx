@@ -9,7 +9,7 @@ type PitchGridRowProps = PropsWithChildren<{
 export function PitchGridRow({ variant, cols, className, children }: PitchGridRowProps) {
   return (
     <div
-      className={`grid items-center gap-x-3 px-3 whitespace-nowrap sm:gap-x-4 sm:px-4 ${variant === 'header' ? 'select-none' : ''} ${className ?? ''}`}
+      className={`grid min-w-0 items-center gap-x-3 whitespace-nowrap px-3 sm:gap-x-4 sm:px-4 ${variant === 'header' ? 'select-none' : ''} ${className ?? ''}`}
       style={{ gridTemplateColumns: cols }}
     >
       {children}
