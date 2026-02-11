@@ -3,7 +3,7 @@ import { AudioEngine } from './AudioEngine';
 import { loadBars } from '../data/loaders';
 import type { BarId } from '../data/types';
 import { playSequence, type SequenceOpts } from '../lib/sequencer';
-import { ensureAudioReady, isAudioUnlocked, isIosSafari, primeOnFirstUserGesture } from './iosUnmute';
+import { ensureAudioReady, getAudioDiagnostics, isAudioUnlocked, isIosSafari, primeOnFirstUserGesture } from './iosUnmute';
 
 type Voice = { id: string; barId: BarId; startedAt: number; stop: () => void };
 
@@ -31,6 +31,7 @@ type AudioApi = {
   audioUnlocked: boolean;
   showUnlockHint: boolean;
   unlockToast: string | null;
+  requestAudioUnlock: () => Promise<void>;
 };
 
 const Ctx = createContext<AudioApi | null>(null);
@@ -87,9 +88,17 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const ensureReady = useCallback(async () => {
     try {
       await ensureAudioReady(engine.context);
+      if (import.meta.env.DEV) {
+        const diagnostics = getAudioDiagnostics();
+        console.info('[audio] diagnostics', {
+          ctxState: engine.context.state,
+          iosSafari: isIosSafari(),
+          keepAliveExists: diagnostics.keepAliveExists,
+          keepAlivePaused: diagnostics.keepAlivePaused,
+        });
+      }
       setAudioUnlocked(true);
       setUnlockToast(null);
-      return true;
     } catch {
       setUnlockToast('Tap again to enable sound');
       if (unlockToastTimer.current) {
@@ -99,7 +108,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         setUnlockToast(null);
         unlockToastTimer.current = null;
       }, 2200);
-      return false;
+      throw new Error('audio unlock failed');
     }
   }, [engine]);
 
@@ -137,7 +146,11 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   }, [stopVoice, voices]);
 
   const playBar = useCallback(async (barId: BarId) => {
-    if (!(await ensureReady())) return;
+    try {
+      await ensureReady();
+    } catch {
+      return;
+    }
     const buffer = await engine.getBuffer(barId);
     const when = engine.context.currentTime;
     const startedAt = performance.now() + Math.max(0, (when - engine.context.currentTime) * 1000);
@@ -149,7 +162,11 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const playSequenceByBarIds = useCallback(async (barIds: BarId[], opts: SequenceOpts, meta?: { name?: string }) => {
     if (!barIds.length) return;
     stopSequence();
-    if (!(await ensureReady())) return;
+    try {
+      await ensureReady();
+    } catch {
+      return;
+    }
     const startAt = engine.context.currentTime + 0.03;
     const startedNow = performance.now();
     const ids = await playSequence(engine, barIds, opts);
@@ -222,6 +239,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     audioUnlocked,
     showUnlockHint: isIosSafari() && !audioUnlocked,
     unlockToast,
+    requestAudioUnlock: ensureReady,
   };
 
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>;
