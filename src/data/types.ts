@@ -12,6 +12,8 @@ export type Bar = {
   centsFromStep0: number;
   ratioToStep0: string;
   ratioErrorCents: number;
+  ratioPrimeLimit: number | null;
+  ratioSupported: boolean;
   ratioToRef: number;
   hz: number;
   audioPath: string;

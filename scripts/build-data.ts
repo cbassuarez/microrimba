@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import Papa from 'papaparse';
 import { z } from 'zod';
+import { bestSimpleFractionConstrained, computeRatioPrimeLimit } from '../src/lib/ratioQuantize';
 
 const ROOT = path.resolve(path.join(import.meta.dirname, '..'));
 const MANIFEST_DIR = path.join(ROOT, 'manifest');
@@ -22,6 +23,8 @@ type Bar = {
   centsFromStep0: number;
   ratioToStep0: string;
   ratioErrorCents: number;
+  ratioPrimeLimit: number | null;
+  ratioSupported: boolean;
   hz: number;
   audioPath: string;
 };
@@ -36,52 +39,13 @@ const BarSchema = z.object({
   centsFromStep0: z.number(),
   ratioToStep0: z.string(),
   ratioErrorCents: z.number(),
+  ratioPrimeLimit: z.number().nullable(),
+  ratioSupported: z.boolean(),
   hz: z.number(),
   audioPath: z.string(),
 });
 
 const centsDiff = (a: number, b: number) => 1200 * Math.log2(a / b);
-
-function gcd(a: number, b: number): number {
-  a = Math.abs(a);
-  b = Math.abs(b);
-  while (b) [a, b] = [b, a % b];
-  return a;
-}
-
-function cents(x: number): number {
-  return 1200 * Math.log2(x);
-}
-
-function bestSimpleFraction(x: number, maxDen = 64) {
-  let best = { p: 1, q: 1, err: Infinity, score: Infinity };
-
-  for (let q = 1; q <= maxDen; q += 1) {
-    const p0 = Math.max(1, Math.round(x * q));
-    for (const pTry of [p0 - 1, p0, p0 + 1]) {
-      if (pTry <= 0) continue;
-
-      let p = pTry;
-      let qq = q;
-      const g = gcd(p, qq);
-      p /= g;
-      qq /= g;
-
-      const approx = p / qq;
-      const err = cents(x / approx);
-      const aerr = Math.abs(err);
-      const score = aerr + 0.08 * qq;
-
-      if (score < best.score) best = { p, q: qq, err, score };
-    }
-  }
-
-  return {
-    frac: `${best.p}/${best.q}`,
-    approx: best.p / best.q,
-    errCents: best.err,
-  };
-}
 
 function normalizeFracString(frac: string): string {
   const s = String(frac).trim();
@@ -205,6 +169,8 @@ async function main() {
         centsFromStep0: Number(row.cents_from_step0),
         ratioToStep0: row.ratio_to_step0.trim(),
         ratioErrorCents: 0,
+        ratioPrimeLimit: null,
+        ratioSupported: true,
         hz: Number(row.freq_if_step0_is_C),
         audioPath,
       });
@@ -238,6 +204,8 @@ async function main() {
             ...bar,
             ratioToStep0,
             ratioErrorCents: 0,
+            ratioPrimeLimit: computeRatioPrimeLimit(ratioToStep0),
+            ratioSupported: true,
           };
         });
       }
@@ -252,7 +220,7 @@ async function main() {
 
       return barsSorted.map((bar) => {
         const x = bar.hz / refHz;
-        const quant = bestSimpleFraction(x, 64);
+        const quant = bestSimpleFractionConstrained(x, 64);
         const ratioToStep0 = normalizeFracString(quant.frac);
         if (!ratioToStep0.includes('/')) {
           throw new Error(`Invalid ratioToStep0 '${ratioToStep0}' for ${bar.barId}`);
@@ -261,6 +229,8 @@ async function main() {
           ...bar,
           ratioToStep0,
           ratioErrorCents: quant.errCents,
+          ratioPrimeLimit: quant.ratioPrimeLimit,
+          ratioSupported: quant.ratioSupported,
         };
       });
     });

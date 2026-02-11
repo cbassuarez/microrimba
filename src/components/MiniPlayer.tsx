@@ -26,8 +26,8 @@ const SCALE_BORDER: Record<string, string> = {
 const COMPACT_HEIGHT = 52;
 const EXPANDED_MAX_HEIGHT = 220;
 
-function mergePitchText(letter: string, accidental: string, octave: string, hejiGlyph: string): string {
-  return `${letter}${accidental}${hejiGlyph}${octave}`;
+function mergePitchText(letter: string, accidental: string, octave: string): string {
+  return `${letter}${accidental}${octave}`;
 }
 
 export function MiniPlayer() {
@@ -86,13 +86,13 @@ export function MiniPlayer() {
   const summaryText = useMemo(() => {
     if (!sortedVoices.length) return 'No active voices';
     if (sortedVoices.length === 1 && latestBar) {
-      const pitch = getPitchDisplayStrings(latestBar.hz, latestBar.scaleId, latestBar.barId);
-      const pitchText = mergePitchText(pitch.noteLetter, pitch.accidentalText, pitch.octaveText, pitch.hejiGlyph);
+      const pitch = getPitchDisplayStrings(latestBar.hz, latestBar.ratioToStep0, latestBar.scaleId, latestBar.barId);
+      const pitchText = mergePitchText(pitch.noteLetter, pitch.accidentalText, pitch.octaveText);
       return `${pitchText}${pitch.centsText ? ` ${pitch.centsText}` : ''} • ${formatHz(latestBar.hz).text} Hz • ${prettyInstrumentLabel(latestBar.scaleId, latestBar.instrumentId, latestBar.edo)}`;
     }
     if (latestBar) {
-      const pitch = getPitchDisplayStrings(latestBar.hz, latestBar.scaleId, latestBar.barId);
-      const pitchText = mergePitchText(pitch.noteLetter, pitch.accidentalText, pitch.octaveText, pitch.hejiGlyph);
+      const pitch = getPitchDisplayStrings(latestBar.hz, latestBar.ratioToStep0, latestBar.scaleId, latestBar.barId);
+      const pitchText = mergePitchText(pitch.noteLetter, pitch.accidentalText, pitch.octaveText);
       return `${sortedVoices.length} voices • Polyphonic • ${pitchText}`;
     }
     return `${sortedVoices.length} voices • Polyphonic`;
@@ -179,8 +179,8 @@ export function MiniPlayer() {
               )}
 
               {groupedVoices.map(({ voice, bar, showDivider }) => {
-                const pitch = bar ? getPitchDisplayStrings(bar.hz, bar.scaleId, bar.barId) : null;
-                const pitchText = pitch ? mergePitchText(pitch.noteLetter, pitch.accidentalText, pitch.octaveText, pitch.hejiGlyph) : null;
+                const pitch = bar ? getPitchDisplayStrings(bar.hz, bar.ratioToStep0, bar.scaleId, bar.barId) : null;
+                const pitchText = pitch ? mergePitchText(pitch.noteLetter, pitch.accidentalText, pitch.octaveText) : null;
 
                 return (
                 <motion.div

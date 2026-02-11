@@ -456,7 +456,7 @@ export function PitchListPage() {
                         <PitchGridRow variant="row" cols={cols} className="h-[60px] text-sm">
                           <div className="tabular-nums text-right justify-self-end">{row.absoluteIndex + 1}</div>
                           <div className="min-w-0 text-left justify-self-start">
-                            <PitchLabel hz={row.bar.hz} scaleId={row.bar.scaleId} barId={row.bar.barId} variant="list" />
+                            <PitchLabel hz={row.bar.hz} ratioFrac={row.bar.ratioToStep0} scaleId={row.bar.scaleId} barId={row.bar.barId} variant="list" />
                           </div>
                           <div className="justify-self-start">
                             <button onClick={() => void playBarWithPaging(row.bar.barId)} className={`inline-flex h-9 w-9 items-center justify-center rounded-full border ${playingBarIds.has(row.bar.barId) ? 'border-emerald-400 bg-emerald-500/25' : 'border-rim'}`}>
@@ -577,7 +577,7 @@ export function PitchListPage() {
                     marginTop: `${(idx % 4) * 6}px`,
                   }}
                 >
-                  <PitchLabel hz={bar.hz} scaleId={bar.scaleId} barId={bar.barId} variant="pad" />
+                  <PitchLabel hz={bar.hz} ratioFrac={bar.ratioToStep0} scaleId={bar.scaleId} barId={bar.barId} variant="pad" />
                   <div className="text-xs font-medium opacity-90">{formatHz(bar.hz).text} Hz</div>
                   <div className="mt-1 text-xs opacity-80">{selectedInstruments.has('composite') ? `×${count}` : instrumentLabel(bar)}</div>
                 </button>
