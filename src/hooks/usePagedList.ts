@@ -5,10 +5,13 @@ type UsePagedListParams<T> = {
   rowHeightPx: number;
   minRows: number;
   maxRows: number;
-  containerRef: RefObject<HTMLElement | null>;
+  viewportRef: RefObject<HTMLElement | null>;
   stickyHeaderRef?: RefObject<HTMLElement | null>;
+  paginatorRef?: RefObject<HTMLElement | null>;
   getAnchorKey?: (item: T) => string;
   initialPage?: number;
+  verticalPaddingAdjustPx?: number;
+  onMeasure?: (metrics: { viewport: number; header: number; pager: number; row: number; rowsPerPage: number }) => void;
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -20,10 +23,13 @@ export function usePagedList<T>({
   rowHeightPx,
   minRows,
   maxRows,
-  containerRef,
+  viewportRef,
   stickyHeaderRef,
+  paginatorRef,
   getAnchorKey,
   initialPage = 0,
+  verticalPaddingAdjustPx = 0,
+  onMeasure,
 }: UsePagedListParams<T>) {
   const [rowsPerPage, setRowsPerPage] = useState(minRows);
   const [pageIndex, setPageIndexState] = useState(() => Math.max(0, initialPage));
@@ -32,12 +38,14 @@ export function usePagedList<T>({
   const rafRef = useRef<number | null>(null);
 
   const measure = useCallback(() => {
-    const containerHeight = containerRef.current?.clientHeight ?? 0;
-    const stickyHeaderHeight = stickyHeaderRef?.current?.offsetHeight ?? 0;
-    const available = Math.max(0, containerHeight - stickyHeaderHeight);
+    const viewportHeight = viewportRef.current?.getBoundingClientRect().height ?? 0;
+    const stickyHeaderHeight = stickyHeaderRef?.current?.getBoundingClientRect().height ?? 0;
+    const paginatorHeight = paginatorRef?.current?.getBoundingClientRect().height ?? 0;
+    const available = Math.max(0, viewportHeight - stickyHeaderHeight - paginatorHeight - verticalPaddingAdjustPx);
     const nextRows = clamp(Math.floor(available / rowHeightPx), minRows, maxRows);
+    onMeasure?.({ viewport: viewportHeight, header: stickyHeaderHeight, pager: paginatorHeight, row: rowHeightPx, rowsPerPage: nextRows });
     setRowsPerPage((prev) => (prev === nextRows ? prev : nextRows));
-  }, [containerRef, maxRows, minRows, rowHeightPx, stickyHeaderRef]);
+  }, [maxRows, minRows, onMeasure, paginatorRef, rowHeightPx, stickyHeaderRef, verticalPaddingAdjustPx, viewportRef]);
 
   useEffect(() => {
     measure();
@@ -50,10 +58,12 @@ export function usePagedList<T>({
       });
     });
 
-    const container = containerRef.current;
+    const container = viewportRef.current;
     const stickyHeader = stickyHeaderRef?.current;
+    const paginator = paginatorRef?.current;
     if (container) ro.observe(container);
     if (stickyHeader) ro.observe(stickyHeader);
+    if (paginator) ro.observe(paginator);
 
     return () => {
       if (rafRef.current !== null) {
@@ -61,7 +71,7 @@ export function usePagedList<T>({
       }
       ro.disconnect();
     };
-  }, [containerRef, measure, stickyHeaderRef]);
+  }, [measure, paginatorRef, stickyHeaderRef, viewportRef]);
 
   const pageCount = Math.max(1, Math.ceil(items.length / rowsPerPage));
 

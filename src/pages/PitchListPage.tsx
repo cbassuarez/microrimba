@@ -52,7 +52,6 @@ const SCALE_ACCENTS: Record<string, string> = {
   '9edo': '265 87% 69%',
   harmonic: '338 83% 68%',
 };
-const ROW_H = 60;
 
 function barNumber(barId: string) {
   const match = barId.match(/(\d+)$/);
@@ -116,7 +115,9 @@ export function PitchListPage() {
   const [followSequence, setFollowSequence] = useState(false);
 
   const listSurfaceRef = useRef<HTMLDivElement>(null);
-  const listHeaderRef = useRef<HTMLDivElement>(null);
+  const listViewportRef = useRef<HTMLDivElement>(null);
+  const headerRowRef = useRef<HTMLDivElement>(null);
+  const paginatorRef = useRef<HTMLDivElement>(null);
   const wheelThrottleRef = useRef(0);
   const followSequenceRef = useRef(false);
   const rowAnchorRefs = useRef(new Map<string, HTMLDivElement>());
@@ -178,15 +179,20 @@ export function PitchListPage() {
 
   const initialPage = Math.max(1, Number(searchParams.get('page') ?? '1')) - 1;
 
+  const rowHeightPx = isSmOrUp ? 60 : 56;
+  const [measureDebug, setMeasureDebug] = useState({ viewport: 0, header: 0, pager: 0, row: rowHeightPx, rowsPerPage: 6 });
+
   const paged = usePagedList<PitchRow>({
     items: visibleRows,
-    rowHeightPx: ROW_H,
+    rowHeightPx,
     minRows: 6,
     maxRows: 40,
-    containerRef: listSurfaceRef,
-    stickyHeaderRef: listHeaderRef,
+    viewportRef: listViewportRef,
+    stickyHeaderRef: headerRowRef,
+    paginatorRef,
     getAnchorKey: (item) => item.key,
     initialPage,
+    onMeasure: setMeasureDebug,
   });
 
   const openRow = useMemo(() => paged.pageItems.find((item) => item.key === openDetailsKey) ?? null, [openDetailsKey, paged.pageItems]);
@@ -295,7 +301,7 @@ export function PitchListPage() {
   }
 
   return (
-    <div className="space-y-6 font-condensed">
+    <div className="flex min-h-[calc(100vh-8.5rem)] flex-col gap-6 font-condensed">
       <motion.section className="glass-panel glass-rim p-6 md:p-8" {...motionProps}>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -375,11 +381,11 @@ export function PitchListPage() {
         </AnimatePresence>
       </motion.section>
 
-      <motion.section className="glass-panel glass-rim p-4" {...motionProps}>
+      <motion.section className="glass-panel glass-rim flex min-h-0 flex-1 flex-col p-4 [--pitch-row-h:56px] sm:[--pitch-row-h:60px]" {...motionProps}>
         <div
           ref={listSurfaceRef}
           tabIndex={0}
-          className="relative h-[calc(100vh-18rem)] min-h-[420px] overflow-hidden rounded-2xl border border-rim/70 bg-white/45 p-2 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 dark:bg-slate-900/25"
+          className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-rim/70 bg-white/45 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 dark:bg-slate-900/25"
           onWheel={(event) => {
             const now = performance.now();
             if (now - wheelThrottleRef.current < 300) return;
@@ -406,10 +412,12 @@ export function PitchListPage() {
             }
           }}
         >
-          <div className="overflow-x-auto overflow-y-hidden overscroll-x-contain">
+          {/* This viewport is what rowsPerPage uses so we fill the visible list region exactly. */}
+          <div ref={listViewportRef} className="flex min-h-0 flex-1 flex-col px-2 pt-2">
+            <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden overscroll-x-contain">
             <div className="w-max min-w-full">
               {/* Drift prevention: header and data rows must always use PitchGridRow with shared cols constants. */}
-              <div ref={listHeaderRef}>
+              <div ref={headerRowRef}>
                 <PitchGridRow
                   variant="header"
                   cols={cols}
@@ -451,9 +459,9 @@ export function PitchListPage() {
                           rowAnchorRefs.current.set(row.key, element);
                         }}
                         className="my-1 rounded-2xl border border-rim/80 bg-white/40 py-0.5 dark:bg-slate-900/30"
-                        style={{ borderColor: `hsla(${SCALE_ACCENTS[row.bar.scaleId] ?? '220 10% 50%'}, 0.32)`, minHeight: `${ROW_H}px` }}
+                        style={{ borderColor: `hsla(${SCALE_ACCENTS[row.bar.scaleId] ?? '220 10% 50%'}, 0.32)`, minHeight: `var(--pitch-row-h)` }}
                       >
-                        <PitchGridRow variant="row" cols={cols} className="h-[60px] text-sm">
+                        <PitchGridRow variant="row" cols={cols} className="h-[var(--pitch-row-h)] text-sm">
                           <div className="tabular-nums text-right justify-self-end">{row.absoluteIndex + 1}</div>
                           <div className="min-w-0 text-left justify-self-start">
                             <PitchLabel hz={row.bar.hz} ratio={row.bar.ratioToStep0} instrumentId={row.bar.instrumentId} scaleId={row.bar.scaleId} barId={row.bar.barId} variant="list" />
@@ -488,6 +496,48 @@ export function PitchListPage() {
             </div>
           </div>
 
+            <div ref={paginatorRef} className="pointer-events-auto mt-2 flex items-center justify-end">
+              <div className="rounded-2xl border border-black/10 bg-white/55 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-black/30">
+                <div className="flex items-center gap-2 px-3 py-2">
+                  <button
+                    type="button"
+                    onClick={stepPrev}
+                    disabled={paged.pageIndex <= 0}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl hover:bg-black/5 active:scale-[0.98] disabled:opacity-40 dark:hover:bg-white/10"
+                    aria-label="Previous page"
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={stepNext}
+                    disabled={paged.pageIndex >= paged.pageCount - 1}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl hover:bg-black/5 active:scale-[0.98] disabled:opacity-40 dark:hover:bg-white/10"
+                    aria-label="Next page"
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                  <div className="text-sm tabular-nums">Page {Math.min(paged.pageIndex + 1, paged.pageCount)}/{paged.pageCount}</div>
+                  <div className="text-xs text-slate-600 tabular-nums dark:text-slate-300">{paged.rangeLabel}</div>
+                  <PitchListPaginator
+                    pageIndex={paged.pageIndex}
+                    pageCount={paged.pageCount}
+                    rangeLabel={paged.rangeLabel}
+                    onPrev={stepPrev}
+                    onNext={stepNext}
+                    onJump={(page) => jumpWithDirection(page - 1)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {import.meta.env.DEV && (
+              <div className="pointer-events-none absolute right-3 top-3 z-30 rounded bg-black/70 px-2 py-1 font-mono text-[10px] text-white">
+                v:{Math.round(measureDebug.viewport)} h:{Math.round(measureDebug.header)} p:{Math.round(measureDebug.pager)} r:{Math.round(measureDebug.row)} rows:{measureDebug.rowsPerPage}
+              </div>
+            )}
+          </div>
+
           <PitchRowDetailsOverlay
             openRow={openRow}
             containerRef={listSurfaceRef}
@@ -500,39 +550,6 @@ export function PitchListPage() {
             onPlayBar={playBarWithPaging}
             onClose={() => setOpenDetailsKey(null)}
           />
-
-          <div className="pointer-events-auto absolute bottom-3 right-3 z-20 rounded-2xl border border-black/10 bg-white/55 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-black/30">
-            <div className="flex items-center gap-2 px-3 py-2">
-              <button
-                type="button"
-                onClick={stepPrev}
-                disabled={paged.pageIndex <= 0}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-xl hover:bg-black/5 active:scale-[0.98] disabled:opacity-40 dark:hover:bg-white/10"
-                aria-label="Previous page"
-              >
-                <ChevronUp className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={stepNext}
-                disabled={paged.pageIndex >= paged.pageCount - 1}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-xl hover:bg-black/5 active:scale-[0.98] disabled:opacity-40 dark:hover:bg-white/10"
-                aria-label="Next page"
-              >
-                <ChevronDown className="h-4 w-4" />
-              </button>
-              <div className="text-sm tabular-nums">Page {Math.min(paged.pageIndex + 1, paged.pageCount)}/{paged.pageCount}</div>
-              <div className="text-xs text-slate-600 tabular-nums dark:text-slate-300">{paged.rangeLabel}</div>
-              <PitchListPaginator
-                pageIndex={paged.pageIndex}
-                pageCount={paged.pageCount}
-                rangeLabel={paged.rangeLabel}
-                onPrev={stepPrev}
-                onNext={stepNext}
-                onJump={(page) => jumpWithDirection(page - 1)}
-              />
-            </div>
-          </div>
         </div>
       </motion.section>
 
