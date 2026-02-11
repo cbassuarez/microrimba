@@ -18,7 +18,7 @@ export function installNotationFonts(): void {
   style.id = NOTATION_STYLE_ID;
   style.textContent = `
     @font-face {
-      font-family: "HEJI2Music";
+      font-family: "HEJI2";
       src: url("${heji2Url}") format("opentype");
       font-weight: 400;
       font-style: normal;

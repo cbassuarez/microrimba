@@ -4,6 +4,7 @@ import { Play, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { Bar, PitchGroup } from '../data/types';
 import { formatHz } from '../lib/format';
+import { formatSignedCents, getPitchLabelModel } from '../lib/pitchLabel';
 
 type PitchRowItem = {
   key: string;
@@ -84,6 +85,15 @@ export function PitchRowDetailsOverlay({
   const content = useMemo(() => {
     if (!openRow) return null;
 
+    const debugHeji = import.meta.env.DEV
+      ? getPitchLabelModel({
+          hz: openRow.bar.hz,
+          scaleId: openRow.bar.scaleId,
+          barId: openRow.bar.barId,
+          ratioFrac: openRow.bar.ratioToStep0,
+        })
+      : null;
+
     return (
       <div className="space-y-2 text-xs">
         <div className="grid grid-cols-2 gap-2 md:grid-cols-6">
@@ -97,6 +107,12 @@ export function PitchRowDetailsOverlay({
         {openRow.cluster && (
           <div className="border-t border-rim pt-2">Tolerance ±{tolerance}c · members {openRow.cluster.stats.count} · max spread {openRow.cluster.stats.maxCentsSpread.toFixed(2)} cents</div>
         )}
+        {import.meta.env.DEV && debugHeji ? (
+          <div className="rounded border border-rim/60 px-2 py-1 text-[11px] text-slate-600 dark:text-slate-300">
+            limit: {debugHeji.heji.finalLimit} (ratio {debugHeji.heji.ratioPrimeLimit}, hz-fit {debugHeji.heji.hzPrimeLimit}) · micro: {debugHeji.heji.microFrac} · residual: {formatSignedCents(debugHeji.heji.residualCents)}
+          </div>
+        ) : null}
+
         {openRow.cluster && (
           <div className="space-y-1 pl-4">
             {openRow.members.map((member) => (

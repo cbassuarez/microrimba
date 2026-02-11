@@ -1,13 +1,12 @@
-import { chooseHejiFromCents, type HejiRender } from './hejiAccidental';
+import { renderHeji2Accidental, type Heji2AccidentalResult } from './heji2Accidental';
+import type { DiatonicAccidental } from './heji2Mapping';
 
 export type PitchLetter = 'C' | 'D' | 'E' | 'F' | 'G' | 'A' | 'B';
-export type BaseAccidental = '' | '#' | 'b';
-export type HejiConfidence = 'exact' | 'approx' | 'fallback';
 
 export type PitchNote = {
   letter: PitchLetter;
   octave: number;
-  baseAccidental: BaseAccidental;
+  diatonicAccidental: DiatonicAccidental;
   midi: number;
 };
 
@@ -16,25 +15,29 @@ export type PitchLabelModel = {
   hz: number;
   midiFloat: number;
   centsOffset: number;
-  heji: HejiRender;
-  display: { noteText: string; centsText: string | null };
+  heji: Heji2AccidentalResult;
+  display: {
+    noteText: string;
+    hejiAccidentalText: string;
+    centsText: string | null;
+  };
 };
 
-const SAFE_FALLBACK_NOTE: PitchNote = { letter: 'C', octave: 0, baseAccidental: '', midi: 12 };
+const SAFE_FALLBACK_NOTE: PitchNote = { letter: 'C', octave: 0, diatonicAccidental: '', midi: 12 };
 
-const SHARP_SPELLINGS: Array<{ letter: PitchLetter; baseAccidental: BaseAccidental }> = [
-  { letter: 'C', baseAccidental: '' },
-  { letter: 'C', baseAccidental: '#' },
-  { letter: 'D', baseAccidental: '' },
-  { letter: 'D', baseAccidental: '#' },
-  { letter: 'E', baseAccidental: '' },
-  { letter: 'F', baseAccidental: '' },
-  { letter: 'F', baseAccidental: '#' },
-  { letter: 'G', baseAccidental: '' },
-  { letter: 'G', baseAccidental: '#' },
-  { letter: 'A', baseAccidental: '' },
-  { letter: 'A', baseAccidental: '#' },
-  { letter: 'B', baseAccidental: '' },
+const SHARP_SPELLINGS: Array<{ letter: PitchLetter; diatonicAccidental: DiatonicAccidental }> = [
+  { letter: 'C', diatonicAccidental: '' },
+  { letter: 'C', diatonicAccidental: '#' },
+  { letter: 'D', diatonicAccidental: '' },
+  { letter: 'D', diatonicAccidental: '#' },
+  { letter: 'E', diatonicAccidental: '' },
+  { letter: 'F', diatonicAccidental: '' },
+  { letter: 'F', diatonicAccidental: '#' },
+  { letter: 'G', diatonicAccidental: '' },
+  { letter: 'G', diatonicAccidental: '#' },
+  { letter: 'A', diatonicAccidental: '' },
+  { letter: 'A', diatonicAccidental: '#' },
+  { letter: 'B', diatonicAccidental: '' },
 ];
 
 const HARMONIC_SCALE_ID = 'harmonic';
@@ -82,8 +85,8 @@ export function nearestMidiForPitchClass(midiFloat: number, pitchClass: number):
   return bestMidi;
 }
 
-export function getPitchLabelModel(args: { hz: number; scaleId?: string; barId?: string }): PitchLabelModel {
-  const { hz, scaleId, barId } = args;
+export function getPitchLabelModel(args: { hz: number; scaleId?: string; barId?: string; ratioFrac?: string }): PitchLabelModel {
+  const { hz, scaleId, barId, ratioFrac = '1/1' } = args;
 
   if (!Number.isFinite(hz) || hz <= 0) {
     return {
@@ -91,8 +94,17 @@ export function getPitchLabelModel(args: { hz: number; scaleId?: string; barId?:
       hz,
       midiFloat: Number.NaN,
       centsOffset: 0,
-      heji: { diatonic: 0, components: [], glyph: '', residualCents: 0, confidence: 'fallback' },
-      display: { noteText: '—', centsText: null },
+      heji: {
+        diatonicGlyph: '',
+        primeGlyphs: [],
+        microFrac: '1/1',
+        residualCents: 0,
+        confidence: 'fallback',
+        finalLimit: 3,
+        ratioPrimeLimit: 3,
+        hzPrimeLimit: 3,
+      },
+      display: { noteText: '—', hejiAccidentalText: '', centsText: null },
     };
   }
 
@@ -105,11 +117,17 @@ export function getPitchLabelModel(args: { hz: number; scaleId?: string; barId?:
 
   const centsOffset = computeCentsOffset(midiFloat, midiBase);
   const note = midiToSpelling(midiBase);
-  const heji = chooseHejiFromCents(centsOffset, note.baseAccidental);
+  const heji = renderHeji2Accidental({
+    hz,
+    midiBase,
+    diatonicAccidental: note.diatonicAccidental,
+    ratioFrac,
+  });
 
-  const noteText = `${note.letter}${note.baseAccidental}${note.octave}`;
-  const centsText = heji.confidence === 'fallback' || Math.abs(heji.residualCents) > 3
-    ? formatSignedCents(centsOffset)
+  const noteText = `${note.letter}${note.octave}`;
+  const hejiAccidentalText = `${heji.diatonicGlyph}${heji.primeGlyphs.join('')}`;
+  const centsText = heji.confidence === 'fallback' || Math.abs(heji.residualCents) > 5
+    ? formatSignedCents(heji.residualCents)
     : null;
 
   return {
@@ -120,6 +138,7 @@ export function getPitchLabelModel(args: { hz: number; scaleId?: string; barId?:
     heji,
     display: {
       noteText,
+      hejiAccidentalText,
       centsText,
     },
   };
