@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 
 type UsePagedListParams<T> = {
+  enabled?: boolean;
   items: T[];
   rowHeightPx: number;
   minRows: number;
@@ -19,6 +20,7 @@ function clamp(value: number, min: number, max: number) {
 }
 
 export function usePagedList<T>({
+  enabled = true,
   items,
   rowHeightPx,
   minRows,
@@ -38,6 +40,7 @@ export function usePagedList<T>({
   const rafRef = useRef<number | null>(null);
 
   const measure = useCallback(() => {
+    if (!enabled) return;
     const viewportHeight = viewportRef.current?.getBoundingClientRect().height ?? 0;
     const stickyHeaderHeight = stickyHeaderRef?.current?.getBoundingClientRect().height ?? 0;
     const paginatorHeight = paginatorRef?.current?.getBoundingClientRect().height ?? 0;
@@ -45,9 +48,10 @@ export function usePagedList<T>({
     const nextRows = clamp(Math.floor(available / rowHeightPx), minRows, maxRows);
     onMeasure?.({ viewport: viewportHeight, header: stickyHeaderHeight, pager: paginatorHeight, row: rowHeightPx, rowsPerPage: nextRows });
     setRowsPerPage((prev) => (prev === nextRows ? prev : nextRows));
-  }, [maxRows, minRows, onMeasure, paginatorRef, rowHeightPx, stickyHeaderRef, verticalPaddingAdjustPx, viewportRef]);
+  }, [enabled, maxRows, minRows, onMeasure, paginatorRef, rowHeightPx, stickyHeaderRef, verticalPaddingAdjustPx, viewportRef]);
 
   useEffect(() => {
+    if (!enabled) return;
     measure();
 
     const ro = new ResizeObserver(() => {
@@ -71,51 +75,55 @@ export function usePagedList<T>({
       }
       ro.disconnect();
     };
-  }, [measure, paginatorRef, stickyHeaderRef, viewportRef]);
+  }, [enabled, measure, paginatorRef, stickyHeaderRef, viewportRef]);
 
-  const pageCount = Math.max(1, Math.ceil(items.length / rowsPerPage));
+  const effectiveRowsPerPage = enabled ? rowsPerPage : Math.max(1, items.length || minRows);
+  const pageCount = enabled ? Math.max(1, Math.ceil(items.length / effectiveRowsPerPage)) : 1;
 
   const setPageIndex = useCallback((next: number) => {
+    if (!enabled) return;
     setPageIndexState(clamp(next, 0, pageCount - 1));
-  }, [pageCount]);
+  }, [enabled, pageCount]);
 
   useEffect(() => {
+    if (!enabled) return;
     setPageIndexState((prev) => clamp(prev, 0, pageCount - 1));
-  }, [pageCount]);
+  }, [enabled, pageCount]);
 
   const pageItems = useMemo(() => {
-    const start = pageIndex * rowsPerPage;
-    return items.slice(start, start + rowsPerPage);
-  }, [items, pageIndex, rowsPerPage]);
+    if (!enabled) return items;
+    const start = pageIndex * effectiveRowsPerPage;
+    return items.slice(start, start + effectiveRowsPerPage);
+  }, [enabled, items, pageIndex, effectiveRowsPerPage]);
 
   const setAnchorByKey = useCallback((key: string) => {
     anchorKeyRef.current = key;
   }, []);
 
   const reanchor = useCallback(() => {
-    if (!getAnchorKey || !anchorKeyRef.current || !items.length) return;
+    if (!enabled || !getAnchorKey || !anchorKeyRef.current || !items.length) return;
     const newIndex = items.findIndex((item) => getAnchorKey(item) === anchorKeyRef.current);
     if (newIndex >= 0) {
-      setPageIndexState(clamp(Math.floor(newIndex / rowsPerPage), 0, Math.max(0, pageCount - 1)));
+      setPageIndexState(clamp(Math.floor(newIndex / effectiveRowsPerPage), 0, Math.max(0, pageCount - 1)));
     }
-  }, [getAnchorKey, items, pageCount, rowsPerPage]);
+  }, [enabled, getAnchorKey, items, pageCount, effectiveRowsPerPage]);
 
   useEffect(() => {
-    if (!getAnchorKey) {
+    if (!enabled || !getAnchorKey) {
       prevItemsRef.current = items;
       return;
     }
 
     if (prevItemsRef.current !== items) {
       const previousItems = prevItemsRef.current;
-      const previousFirst = previousItems[pageIndex * rowsPerPage];
+      const previousFirst = previousItems[pageIndex * effectiveRowsPerPage];
       const fallbackAnchor = previousFirst ? getAnchorKey(previousFirst) : null;
       const anchor = anchorKeyRef.current ?? fallbackAnchor;
 
       if (anchor) {
         const newIndex = items.findIndex((item) => getAnchorKey(item) === anchor);
         if (newIndex >= 0) {
-          setPageIndexState(clamp(Math.floor(newIndex / rowsPerPage), 0, Math.max(0, pageCount - 1)));
+          setPageIndexState(clamp(Math.floor(newIndex / effectiveRowsPerPage), 0, Math.max(0, pageCount - 1)));
         } else {
           setPageIndexState((prev) => clamp(prev, 0, Math.max(0, pageCount - 1)));
         }
@@ -123,10 +131,10 @@ export function usePagedList<T>({
     }
 
     prevItemsRef.current = items;
-  }, [getAnchorKey, items, pageCount, pageIndex, rowsPerPage]);
+  }, [enabled, getAnchorKey, items, pageCount, pageIndex, effectiveRowsPerPage]);
 
-  const firstIndex = items.length === 0 ? 0 : pageIndex * rowsPerPage + 1;
-  const lastIndex = items.length === 0 ? 0 : Math.min(items.length, (pageIndex + 1) * rowsPerPage);
+  const firstIndex = items.length === 0 ? 0 : pageIndex * effectiveRowsPerPage + 1;
+  const lastIndex = items.length === 0 ? 0 : Math.min(items.length, (pageIndex + 1) * effectiveRowsPerPage);
 
   const rangeLabel = `Items ${firstIndex}–${lastIndex} of ${items.length}`;
 
@@ -134,7 +142,7 @@ export function usePagedList<T>({
     pageIndex,
     setPageIndex,
     pageCount,
-    rowsPerPage,
+    rowsPerPage: effectiveRowsPerPage,
     pageItems,
     rangeLabel,
     nextPage: () => setPageIndex(pageIndex + 1),

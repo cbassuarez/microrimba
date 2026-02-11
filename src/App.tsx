@@ -28,7 +28,7 @@ export function App() {
             <Route element={<AppShell />}>
               <Route path="/" element={<PitchListPage />} />
               <Route path="/scale/:scaleId" element={<ScaleInstrumentProfilePage />} />
-              <Route path="/instrument/:instrumentId" element={<InstrumentProfilePage />} />
+              <Route path="/instrument/:instrumentId" element={<InstrumentProfilePage showModeChips={false} forcedMode="all" pagination="none" />} />
               <Route path="/groups" element={<GroupsPage />} />
               <Route path="/bar/:barId" element={<BarDetailPage />} />
               <Route path="/about" element={<AboutPage />} />

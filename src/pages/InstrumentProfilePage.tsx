@@ -1,13 +1,16 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ChevronDown, ChevronUp, Play, Square, Volume2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAudio } from '../audio/AudioContextProvider';
-import { PitchListPaginator } from '../components/PitchListPaginator';
 import { PitchRowDetailsOverlay } from '../components/PitchRowDetailsOverlay';
 import { PitchLabel } from '../components/PitchLabel';
 import { PitchGridRow } from '../components/pitch/PitchGridRow';
-import { PITCH_GRID_COLS_DESKTOP, PITCH_GRID_COLS_MOBILE } from '../components/pitch/pitchGridCols';
+import {
+  PITCH_GRID_COLS_DESKTOP,
+  PITCH_GRID_COLS_MOBILE,
+  PITCH_TABLE_INNER_CLASS,
+} from '../components/pitch/pitchGridCols';
 import { useMicrorimbaData } from '../data/useMicrorimbaData';
 import type { Bar, PitchGroup } from '../data/types';
 import { usePagedList } from '../hooks/usePagedList';
@@ -74,11 +77,13 @@ function playOpts(scaleId: string) {
 export function InstrumentProfilePage({
   instrumentId: forcedInstrumentId,
   showModeChips = true,
-  forcedMode = null,
+  forcedMode,
+  pagination = 'paged',
 }: {
   instrumentId?: string;
   showModeChips?: boolean;
-  forcedMode?: ModeKey | null;
+  forcedMode?: ModeKey;
+  pagination?: 'paged' | 'none';
 }) {
   const { instrumentId: routeInstrumentId } = useParams();
   const instrumentId = forcedInstrumentId ?? routeInstrumentId;
@@ -87,13 +92,9 @@ export function InstrumentProfilePage({
   const cols = isSmOrUp ? PITCH_GRID_COLS_DESKTOP : PITCH_GRID_COLS_MOBILE;
   const navigate = useNavigate();
   const { bars, pitchIndex, instruments, loading, error } = useMicrorimbaData();
-  const [searchParams] = useSearchParams();
   const { toggleBar, stopAll, playingBarIds, playSequenceByBarIds } = useAudio();
 
-  const [mode, setMode] = useState<ModeKey>(() => {
-    if (forcedMode) return forcedMode;
-    return (searchParams.get('mode') as ModeKey) === 'all' ? 'all' : 'unique';
-  });
+  const [mode, setMode] = useState<ModeKey>(forcedMode ?? 'unique');
   const [tolerance] = useState<TolKey>('5');
   const [openDetailsKey, setOpenDetailsKey] = useState<string | null>(null);
   const [pageDirection, setPageDirection] = useState(0);
@@ -109,6 +110,8 @@ export function InstrumentProfilePage({
     if (!forcedMode) return;
     setMode(forcedMode);
   }, [forcedMode]);
+
+  const isPaged = pagination === 'paged';
 
   const barById = useMemo(() => new Map(bars.map((bar) => [bar.barId, bar])), [bars]);
   const meta = useMemo(() => getInstrumentMeta(instruments, instrumentId ?? ''), [instruments, instrumentId]);
@@ -133,6 +136,7 @@ export function InstrumentProfilePage({
   }, [barById, barsForInstrument, instrumentId, mode, pitchIndex, tolerance]);
 
   const paged = usePagedList<PitchRow>({
+    enabled: isPaged,
     items: rows,
     rowHeightPx: ROW_H,
     minRows: 4,
@@ -144,7 +148,9 @@ export function InstrumentProfilePage({
     onMeasure: setMeasureDebug,
   });
 
-  const openRow = useMemo(() => paged.pageItems.find((row) => row.key === openDetailsKey) ?? null, [openDetailsKey, paged.pageItems]);
+  const visibleRows = isPaged ? paged.pageItems : rows;
+
+  const openRow = useMemo(() => visibleRows.find((row) => row.key === openDetailsKey) ?? null, [openDetailsKey, visibleRows]);
 
   if (loading) return <p>Loading…</p>;
   if (error || !pitchIndex) return <p>{error ?? 'Failed to load instrument profile.'}</p>;
@@ -185,10 +191,12 @@ export function InstrumentProfilePage({
   };
 
   const stepNext = () => {
+    if (!isPaged) return;
     setPageDirection(1);
     paged.nextPage();
   };
   const stepPrev = () => {
+    if (!isPaged) return;
     setPageDirection(-1);
     paged.prevPage();
   };
@@ -261,20 +269,20 @@ export function InstrumentProfilePage({
         <div ref={listSurfaceRef} className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-rim/70 bg-white/45 dark:bg-slate-900/25">
           <div ref={listViewportRef} className="flex min-h-0 flex-1 flex-col px-2 pt-2">
             <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden overscroll-x-contain">
-              <div className="w-max">
+              <div className={PITCH_TABLE_INNER_CLASS}>
                 <div ref={listHeaderRef}>
                   <PitchGridRow variant="header" cols={cols} className="sticky top-0 z-10 border-b border-rim bg-white/70 py-3 text-xs uppercase tracking-wide backdrop-blur dark:bg-slate-900/70">
-                    <div className="text-left justify-self-start">Index</div><div className="text-left justify-self-start">Pitch</div><div className="text-left justify-self-center">Play</div><div className="tabular-nums text-right justify-self-end">Hz</div><div className="text-left justify-self-start">Instrument</div><div className="tabular-nums text-right justify-self-end">Bar #</div><div className="text-left justify-self-start">Scale</div><div className="tabular-nums text-right justify-self-end">Degree</div><div className="tabular-nums text-right justify-self-end">Ratio</div><div className="text-left justify-self-center">More</div>
+                    <div className="text-left justify-self-start tabular-nums">Index</div><div className="text-left justify-self-center">Play</div><div className="text-left justify-self-start">Pitch</div><div className="tabular-nums text-right justify-self-end">Hz</div><div className="text-left justify-self-start">Instrument</div><div className="tabular-nums text-right justify-self-end">Bar #</div><div className="text-left justify-self-start">Scale</div><div className="tabular-nums text-right justify-self-end">Degree</div><div className="tabular-nums text-right justify-self-end">Ratio</div><div className="text-left justify-self-center">More</div>
                   </PitchGridRow>
                 </div>
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.div key={`instrument-page-${paged.pageIndex}`} initial={reduced ? { opacity: 0 } : { opacity: 0, y: pageDirection >= 0 ? 14 : -14 }} animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }} exit={reduced ? { opacity: 0 } : { opacity: 0, y: pageDirection >= 0 ? -14 : 14 }} transition={{ duration: 0.2 }}>
-                    {paged.pageItems.map((row) => (
+                    {visibleRows.map((row) => (
                       <div key={row.key} ref={(element) => { if (!element) rowAnchorRefs.current.delete(row.key); else rowAnchorRefs.current.set(row.key, element); }} className="my-1 rounded-2xl border border-rim/80 bg-white/40 py-0.5 dark:bg-slate-900/30" style={{ borderColor: `hsla(${SCALE_ACCENTS[row.bar.scaleId] ?? '220 10% 50%'}, 0.32)`, minHeight: `${ROW_H}px` }}>
                         <PitchGridRow variant="row" cols={cols} className="h-[60px] text-sm">
-                          <div className="tabular-nums text-right justify-self-end">{row.absoluteIndex + 1}</div>
-                          <div className="min-w-0 text-left justify-self-start"><PitchLabel hz={row.bar.hz} ratio={row.bar.ratioToStep0} instrumentId={row.bar.instrumentId} scaleId={row.bar.scaleId} barId={row.bar.barId} variant="list" /></div>
+                          <div className="tabular-nums text-left justify-self-start">{row.absoluteIndex + 1}</div>
                           <div className="justify-self-center"><button onClick={() => void toggleBar(row.members[0].barId)} className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-rim">{playingBarIds.has(row.members[0].barId) ? <Volume2 className="h-4 w-4" /> : <Play className="h-4 w-4" />}</button></div>
+                          <div className="min-w-0 text-left justify-self-start"><PitchLabel hz={row.bar.hz} ratio={row.bar.ratioToStep0} instrumentId={row.bar.instrumentId} scaleId={row.bar.scaleId} barId={row.bar.barId} variant="list" /></div>
                           <div className="tabular-nums text-right justify-self-end">{formatHz(row.bar.hz).text}</div>
                           <div className="min-w-0 truncate text-left justify-self-start">{meta.label}</div>
                           <div className="tabular-nums text-right justify-self-end">{barNumber(row.members[0].barId)}</div>
@@ -290,19 +298,21 @@ export function InstrumentProfilePage({
               </div>
             </div>
 
-            <div ref={paginatorRef} className="pointer-events-auto mt-2 flex items-center justify-end">
-              <div className="rounded-2xl border border-black/10 bg-white/55 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-black/30">
-                <div className="flex items-center gap-2 px-3 py-2">
-                  <button onClick={stepPrev} disabled={paged.pageIndex <= 0} className="inline-flex h-9 w-9 items-center justify-center rounded-xl disabled:opacity-40" aria-label="Previous page"><ChevronUp className="h-4 w-4" /></button>
-                  <button onClick={stepNext} disabled={paged.pageIndex >= paged.pageCount - 1} className="inline-flex h-9 w-9 items-center justify-center rounded-xl disabled:opacity-40" aria-label="Next page"><ChevronDown className="h-4 w-4" /></button>
-                  <div className="text-sm tabular-nums">Page {Math.min(paged.pageIndex + 1, paged.pageCount)}/{paged.pageCount}</div>
-                  <PitchListPaginator pageIndex={paged.pageIndex} pageCount={paged.pageCount} rangeLabel={paged.rangeLabel} onPrev={stepPrev} onNext={stepNext} onJump={(page) => paged.setPageIndex(page - 1)} />
+            {isPaged && (
+              <div ref={paginatorRef} className="pointer-events-auto mt-2 flex justify-center pb-3">
+                <div className="shrink-0 rounded-2xl border border-black/10 bg-white/55 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-black/30">
+                  <div className="flex items-center gap-2 px-3 py-2">
+                    <button onClick={stepPrev} disabled={paged.pageIndex <= 0} className="inline-flex h-9 w-9 items-center justify-center rounded-xl disabled:opacity-40" aria-label="Previous page"><ChevronUp className="h-4 w-4" /></button>
+                    <button onClick={stepNext} disabled={paged.pageIndex >= paged.pageCount - 1} className="inline-flex h-9 w-9 items-center justify-center rounded-xl disabled:opacity-40" aria-label="Next page"><ChevronDown className="h-4 w-4" /></button>
+                    <div className="text-sm tabular-nums">Page {Math.min(paged.pageIndex + 1, paged.pageCount)}/{paged.pageCount}</div>
+                    <div className="text-xs text-slate-600 tabular-nums dark:text-slate-300">{paged.rangeLabel}</div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
-          {import.meta.env.DEV && (
+          {isPaged && import.meta.env.DEV && (
             <div className="pointer-events-none absolute right-3 top-3 z-30 rounded bg-black/70 px-2 py-1 font-mono text-[10px] text-white">
               viewport:{Math.round(measureDebug.viewport)} header:{Math.round(measureDebug.header)} pager:{Math.round(measureDebug.pager)} row:{Math.round(measureDebug.row)} rowsPerPage:{measureDebug.rowsPerPage}
             </div>
@@ -369,7 +379,7 @@ export function ScaleInstrumentProfilePage() {
   const { scaleId } = useParams();
   const { instruments } = useMicrorimbaData();
 
-  if (!scaleId) return <><Meta title="Scale" description="Playable profile: measured pitches, range, tuning notes." canonicalPath="/scale" /><InstrumentProfilePage showModeChips={false} forcedMode="all" /></>;
+  if (!scaleId) return <><Meta title="Scale" description="Playable profile: measured pitches, range, tuning notes." canonicalPath="/scale" /><InstrumentProfilePage showModeChips={false} forcedMode="all" pagination="none" /></>;
   const instrumentId = getDefaultInstrumentForScale(instruments, scaleId);
-  return <><Meta title={scaleId} description="Playable profile: measured pitches, range, tuning notes." canonicalPath={`/scale/${scaleId}`} /><InstrumentProfilePage instrumentId={instrumentId ?? undefined} showModeChips={false} forcedMode="all" /></>;
+  return <><Meta title={scaleId} description="Playable profile: measured pitches, range, tuning notes." canonicalPath={`/scale/${scaleId}`} /><InstrumentProfilePage instrumentId={instrumentId ?? undefined} showModeChips={false} forcedMode="all" pagination="none" /></>;
 }
