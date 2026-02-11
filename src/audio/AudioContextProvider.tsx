@@ -4,6 +4,7 @@ import { loadBars } from '../data/loaders';
 import type { BarId } from '../data/types';
 import type { SequenceOpts } from '../lib/sequencer';
 import { ensureAudioReady, getAudioDiagnostics, isAudioUnlocked, isIosSafari, primeOnFirstUserGesture } from './iosUnmute';
+import { clampScheduleTime } from './playAllScheduler';
 
 type Voice = { id: string; barId: BarId; startedAt: number; stop: () => void };
 
@@ -16,6 +17,20 @@ type SequenceState = {
   voiceIds: string[];
   anchorVoiceId: string | null;
 };
+
+
+type PlayAllPlan = {
+  barIds: BarId[];
+  durationsByIndex: number[];
+  bufferPromises: Promise<AudioBuffer>[];
+};
+
+let playAllPrepPromise: Promise<PlayAllPlan> | null = null;
+
+const PLAYALL_PREROLL_S = 0.18;
+const PLAYALL_LOOKAHEAD_S = 1.25;
+const PLAYALL_TICK_MS = 25;
+const PLAYALL_PRELOAD_BARS = 40;
 
 type AudioApi = {
   voices: Voice[];
@@ -59,6 +74,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const [audioUnlocked, setAudioUnlocked] = useState(() => isAudioUnlocked());
   const [unlockToast, setUnlockToast] = useState<string | null>(null);
   const playSequenceToken = useRef(0);
+  const schedulerRef = useRef<number | null>(null);
 
   const mark = useCallback((name: string) => {
     if (!import.meta.env.DEV) return;
@@ -85,6 +101,10 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     performance.clearMarks();
   }, []);
 
+  const clearPlayAllPrepCache = useCallback(() => {
+    playAllPrepPromise = null;
+  }, []);
+
   const clearSequenceStepTimers = useCallback(() => {
     sequenceStepTimers.current.forEach((timer) => window.clearTimeout(timer));
     sequenceStepTimers.current = [];
@@ -107,6 +127,10 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       endTimers.current.forEach((timer) => window.clearTimeout(timer));
       endTimers.current.clear();
       clearSequenceStepTimers();
+      if (schedulerRef.current !== null) {
+        window.clearInterval(schedulerRef.current);
+        schedulerRef.current = null;
+      }
       if (unlockToastTimer.current) {
         window.clearTimeout(unlockToastTimer.current);
       }
@@ -152,11 +176,55 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       });
   }, [engine, mark, measure]);
 
-  const prewarmBars = useCallback((barIds: BarId[]) => {
-    barIds.forEach((barId) => {
-      void engine.getBuffer(barId).catch(() => undefined);
-    });
+  const preparePlayAll = useCallback(async (barIds: BarId[], opts: SequenceOpts) => {
+    if (!barIds.length) {
+      return {
+        barIds: [],
+        durationsByIndex: [],
+        bufferPromises: [],
+      } satisfies PlayAllPlan;
+    }
+    if (!playAllPrepPromise) {
+      playAllPrepPromise = (async () => {
+        if (import.meta.env.DEV) {
+          performance.mark('playall_prepare_start');
+        }
+        const durationsByIndex: number[] = [];
+        for (let i = 0; i < barIds.length; i += 1) {
+          const dt = opts.mode === 'expAccelerando'
+            ? Math.max(opts.minIntervalMs ?? 20, opts.intervalMs * Math.pow(opts.expFactor ?? 0.93, i))
+            : opts.intervalMs;
+          durationsByIndex.push(dt / 1000);
+        }
+        const bufferPromises = barIds.map((barId) => engine.getBuffer(barId));
+        const preloadCount = Math.min(barIds.length, PLAYALL_PRELOAD_BARS);
+        await Promise.all(bufferPromises.slice(0, preloadCount));
+        if (import.meta.env.DEV) {
+          performance.mark('playall_prepare_end');
+          try {
+            performance.measure('playall_prepare', 'playall_prepare_start', 'playall_prepare_end');
+          } catch {
+            // ignore
+          }
+        }
+        return {
+          barIds,
+            durationsByIndex,
+          bufferPromises,
+        } satisfies PlayAllPlan;
+      })().catch((error) => {
+        playAllPrepPromise = null;
+        throw error;
+      });
+    }
+    return playAllPrepPromise;
   }, [engine]);
+
+  const prewarmBars = useCallback((barIds: BarId[]) => {
+    void preparePlayAll(barIds, { intervalMs: 55, overlapMs: 0, mode: 'constant', gain: 0.9 }).catch(() => {
+      clearPlayAllPrepCache();
+    });
+  }, [clearPlayAllPrepCache, preparePlayAll]);
 
   const stopVoice = useCallback((id: string) => {
     const timer = endTimers.current.get(id);
@@ -185,6 +253,10 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   }, [engine]);
 
   const stopSequenceInternal = useCallback((opts?: { protectedVoiceIds?: Set<string> }) => {
+    if (schedulerRef.current !== null) {
+      window.clearInterval(schedulerRef.current);
+      schedulerRef.current = null;
+    }
     clearSequenceStepTimers();
     setSequence((prev) => {
       stopVoicesByIds(prev.voiceIds, opts);
@@ -238,104 +310,141 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     }
     if (token !== playSequenceToken.current) return;
 
-    mark('playall_buildPlan_start');
-    const startAt = engine.context.currentTime + 0.03;
-    const whenByIndex: number[] = [];
-    let t = startAt;
-    for (let i = 0; i < barIds.length; i += 1) {
-      whenByIndex.push(t);
-      const dt = opts.mode === 'expAccelerando'
-        ? Math.max(opts.minIntervalMs ?? 20, opts.intervalMs * Math.pow(opts.expFactor ?? 0.93, i))
-        : opts.intervalMs;
-      t += dt / 1000;
+    let plan: PlayAllPlan;
+    try {
+      plan = await preparePlayAll(barIds, opts);
+    } catch {
+      clearPlayAllPrepCache();
+      return;
     }
-    const bufferPromises = barIds.map((barId) => engine.getBuffer(barId));
-    mark('playall_buildPlan_end');
-    measure('playall_buildPlan', 'playall_buildPlan_start', 'playall_buildPlan_end');
-
-    mark('playall_scheduleFirst_start');
-    const firstBuffer = await bufferPromises[0];
     if (token !== playSequenceToken.current) return;
-    const firstId = engine.playBufferAt(barIds[0], firstBuffer, whenByIndex[0], { gain: opts.gain });
-    const firstStartedAt = performance.now() + (whenByIndex[0] - engine.context.currentTime) * 1000;
-    const firstVoice = scheduleCleanup(firstId, barIds[0], firstStartedAt, firstBuffer.duration);
-    setVoices((v) => [...v, firstVoice]);
-    mark('playall_scheduleFirst_end');
-    measure('playall_scheduleFirst', 'playall_scheduleFirst_start', 'playall_scheduleFirst_end');
-    measure('playall_total_to_scheduleFirst', 'playall_click', 'playall_scheduleFirst_end');
 
-    const ids: string[] = [firstId];
+    const ctx = engine.context;
+    const t0 = ctx.currentTime + PLAYALL_PREROLL_S;
+    if (import.meta.env.DEV) {
+      performance.mark('playall_schedule_start');
+    }
 
     clearSequenceStepTimers();
+    const ids: string[] = [];
     setSequence({
       active: true,
       name: meta?.name ?? 'Glissando',
       currentStep: 0,
-      totalSteps: barIds.length,
-      barIds,
+      totalSteps: plan.barIds.length,
+      barIds: plan.barIds,
       voiceIds: ids,
-      anchorVoiceId: oldestActiveVoiceId ?? firstId,
+      anchorVoiceId: oldestActiveVoiceId ?? null,
     });
 
-    const firstStepTimer = window.setTimeout(() => {
-      setSequence((prev) => {
-        if (!prev.active || prev.voiceIds[0] !== firstId) return prev;
-        if (prev.totalSteps <= 1) {
-          return { ...prev, currentStep: 1, active: false };
-        }
-        return { ...prev, currentStep: 1 };
-      });
-    }, Math.max(0, firstStartedAt - performance.now()));
-    sequenceStepTimers.current.push(firstStepTimer);
+    let nextIndex = 0;
+    let nextTime = t0;
+    let scheduledCount = 0;
+    let droppedAvoidedCount = 0;
+    let nearMissWarned = false;
+    let firstScheduled = false;
 
-    mark('playall_scheduleRest_start');
-
-    let index = 1;
-    const chunkSize = 8;
-    const scheduleChunk = () => {
-      if (token !== playSequenceToken.current) return;
-      const end = Math.min(index + chunkSize, barIds.length);
-      for (let i = index; i < end; i += 1) {
-        void bufferPromises[i].then((buffer) => {
-          if (token !== playSequenceToken.current) return;
-          const id = engine.playBufferAt(barIds[i], buffer, whenByIndex[i], { gain: opts.gain });
-          ids[i] = id;
-          const startedAt = performance.now() + (whenByIndex[i] - engine.context.currentTime) * 1000;
-          const voice = scheduleCleanup(id, barIds[i], startedAt, buffer.duration);
-          setVoices((v) => [...v, voice]);
-          const stepTimer = window.setTimeout(() => {
-            setSequence((prev) => {
-              if (!prev.active || prev.voiceIds[0] !== firstId) return prev;
-              const nextStep = i + 1;
-              if (nextStep >= prev.totalSteps) {
-                return { ...prev, currentStep: nextStep, active: false };
-              }
-              return { ...prev, currentStep: nextStep };
-            });
-          }, Math.max(0, startedAt - performance.now()));
-          sequenceStepTimers.current.push(stepTimer);
+    const scheduleIndex = (i: number, scheduleTime: number) => {
+      void plan.bufferPromises[i].then((buffer) => {
+        if (token !== playSequenceToken.current) return;
+        const id = engine.playBufferAt(plan.barIds[i], buffer, scheduleTime, { gain: opts.gain });
+        ids[i] = id;
+        const startedAt = performance.now() + Math.max(0, (scheduleTime - engine.context.currentTime) * 1000);
+        const voice = scheduleCleanup(id, plan.barIds[i], startedAt, buffer.duration);
+        setVoices((v) => [...v, voice]);
+        const stepTimer = window.setTimeout(() => {
           setSequence((prev) => {
-            if (!prev.active || prev.voiceIds[0] !== firstId) return prev;
-            const nextVoiceIds = prev.voiceIds.slice();
-            nextVoiceIds[i] = id;
-            return { ...prev, voiceIds: nextVoiceIds };
+            const firstVoiceId = ids[0];
+            if (!firstVoiceId || !prev.active || prev.voiceIds[0] !== firstVoiceId) return prev;
+            const nextStep = i + 1;
+            if (nextStep >= prev.totalSteps) {
+              return { ...prev, currentStep: nextStep, active: false };
+            }
+            return { ...prev, currentStep: nextStep };
           });
+        }, Math.max(0, startedAt - performance.now()));
+        sequenceStepTimers.current.push(stepTimer);
+        setSequence((prev) => {
+          if (!prev.active) return prev;
+          const nextVoiceIds = prev.voiceIds.slice();
+          nextVoiceIds[i] = id;
+          return {
+            ...prev,
+            voiceIds: nextVoiceIds,
+            anchorVoiceId: prev.anchorVoiceId ?? oldestActiveVoiceId ?? id,
+          };
+        });
+      });
+    };
+
+    const finalizeSequence = () => {
+      if (import.meta.env.DEV) {
+        console.info('[playall] scheduling summary', {
+          scheduledCount,
+          droppedAvoidedCount,
+          totalBars: plan.barIds.length,
         });
       }
-      index = end;
-      if (index < barIds.length) {
-        window.setTimeout(scheduleChunk, 0);
-        return;
-      }
-      mark('playall_scheduleRest_end');
-      measure('playall_scheduleRest', 'playall_scheduleRest_start', 'playall_scheduleRest_end');
       flushPlayAllPerf();
     };
-    scheduleChunk();
-  }, [clearSequenceStepTimers, engine, ensureReady, flushPlayAllPerf, mark, measure, scheduleCleanup, stopSequenceInternal, voices]);
+
+    const runTick = () => {
+      if (token !== playSequenceToken.current) {
+        return;
+      }
+      const horizon = ctx.currentTime + PLAYALL_LOOKAHEAD_S;
+      while (nextTime < horizon && nextIndex < plan.barIds.length) {
+        if (import.meta.env.DEV && !nearMissWarned && nextTime <= ctx.currentTime + 0.01) {
+          nearMissWarned = true;
+          console.warn('[playall] near-past schedule detected', {
+            currentTime: ctx.currentTime,
+            nextTime,
+            nextIndex,
+            coldStart: scheduledCount === 0,
+          });
+        }
+
+        const clamp = clampScheduleTime(nextTime, ctx.currentTime);
+        if (clamp.clamped) {
+          droppedAvoidedCount += 1;
+        }
+        const scheduledTime = clamp.scheduledTime;
+        scheduleIndex(nextIndex, scheduledTime);
+        if (!firstScheduled) {
+          firstScheduled = true;
+          if (import.meta.env.DEV) {
+            performance.mark('playall_first_bar_scheduled');
+            try {
+              performance.measure('playall_schedule_to_first_bar', 'playall_schedule_start', 'playall_first_bar_scheduled');
+              performance.measure('playall_total_to_first_bar', 'playall_click', 'playall_first_bar_scheduled');
+            } catch {
+              // ignore missing marks
+            }
+          }
+        }
+
+        scheduledCount += 1;
+        nextTime = scheduledTime + (plan.durationsByIndex[nextIndex] ?? 0);
+        nextIndex += 1;
+      }
+
+      if (nextIndex >= plan.barIds.length && schedulerRef.current !== null) {
+        window.clearInterval(schedulerRef.current);
+        schedulerRef.current = null;
+        finalizeSequence();
+      }
+    };
+
+    schedulerRef.current = window.setInterval(runTick, PLAYALL_TICK_MS);
+    runTick();
+  }, [clearPlayAllPrepCache, clearSequenceStepTimers, engine, ensureReady, flushPlayAllPerf, mark, measure, preparePlayAll, scheduleCleanup, stopSequenceInternal, voices]);
 
   const stopAll = useCallback(() => {
     playSequenceToken.current += 1;
+    if (schedulerRef.current !== null) {
+      window.clearInterval(schedulerRef.current);
+      schedulerRef.current = null;
+    }
     clearSequenceStepTimers();
     setSequence(idleSequence);
     endTimers.current.forEach((timer) => window.clearTimeout(timer));
