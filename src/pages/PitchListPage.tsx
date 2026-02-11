@@ -6,7 +6,6 @@ import {
   Moon,
   Play,
   Search,
-  Square,
   Sun,
   Volume2,
 } from 'lucide-react';
@@ -31,6 +30,7 @@ import {
 } from '../components/pitch/pitchGridCols';
 import { PitchLabel } from '../components/PitchLabel';
 import { DEFAULT_DESCRIPTION, Meta } from '../components/Meta';
+import { PlayAllCTA } from '../components/PlayAllCTA';
 
 type TolKey = '5' | '15' | '30';
 type ModeKey = 'unique' | 'all';
@@ -319,27 +319,36 @@ export function PitchListPage() {
             <h1 className="mt-1 text-4xl font-semibold md:text-5xl">Microtonal Marimba Instruments</h1>
             <p className="mt-3 max-w-2xl text-base text-slate-700 dark:text-slate-200">CalArts recently got some microtonal marimbas, and we measured and recorded the bars as a pitch set. View all pitches in a table, hear a whole-set gliss, or listen to the overtone marimba glissando (ooh, ahh).</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <button className="rounded-full border border-rim bg-white/60 px-4 py-2 text-sm shadow-sm dark:bg-black/20" onClick={() => {
-              setSequenceFollow(true);
-              void playSequenceByBarIds(uniqueVisible.map((row) => row.rep.barId), { intervalMs: 55, overlapMs: 0, mode: 'constant', gain: 0.9 }, { name: 'Play All (Unique)' });
-            }}> <Play className="mr-1 inline h-4 w-4" /> Play All </button>
-            <button className="rounded-full border border-rim px-4 py-2 text-sm" onClick={stopAllWithFollowReset}><Square className="mr-1 inline h-4 w-4" /> Stop All</button>
-            <button className="rounded-full border border-rim px-3 py-2 text-sm" onClick={() => setShowGroupingMenu((v) => !v)}><Filter className="h-4 w-4" /></button>
-            <button
-              className="rounded-full border border-rim px-3 py-2 text-sm"
-              onClick={() => {
-                const next = theme === 'dark' ? 'light' : 'dark';
-                setTheme(next);
-                setThemeState(next);
+          <div className="flex w-full max-w-lg flex-col gap-2">
+            <PlayAllCTA
+              isPlaying={sequence.active}
+              onToggle={() => {
+                if (sequence.active) {
+                  stopAllWithFollowReset();
+                  return;
+                }
+                setSequenceFollow(true);
+                void playSequenceByBarIds(uniqueVisible.map((row) => row.rep.barId), { intervalMs: 55, overlapMs: 0, mode: 'constant', gain: 0.9 }, { name: 'Play All (Unique)' });
               }}
-            >
-              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
-            <label className="flex items-center gap-2 rounded-full border border-rim px-3 py-2 text-sm">
-              <Search className="h-4 w-4" />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} className="w-52 bg-transparent outline-none" placeholder="Search bar / instrument / scale" />
-            </label>
+              className="h-[60px] sm:h-[64px]"
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <button className="rounded-full border border-rim px-3 py-2 text-sm" onClick={() => setShowGroupingMenu((v) => !v)}><Filter className="h-4 w-4" /></button>
+              <button
+                className="rounded-full border border-rim px-3 py-2 text-sm"
+                onClick={() => {
+                  const next = theme === 'dark' ? 'light' : 'dark';
+                  setTheme(next);
+                  setThemeState(next);
+                }}
+              >
+                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
+              <label className="flex flex-1 items-center gap-2 rounded-full border border-rim px-3 py-2 text-sm">
+                <Search className="h-4 w-4" />
+                <input value={query} onChange={(e) => setQuery(e.target.value)} className="w-full min-w-28 bg-transparent outline-none" placeholder="Search bar / instrument / scale" />
+              </label>
+            </div>
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
