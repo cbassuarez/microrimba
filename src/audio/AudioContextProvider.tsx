@@ -14,6 +14,7 @@ type SequenceState = {
   totalSteps: number;
   barIds: BarId[];
   voiceIds: string[];
+  anchorVoiceId: string | null;
 };
 
 type AudioApi = {
@@ -43,6 +44,7 @@ const idleSequence: SequenceState = {
   totalSteps: 0,
   barIds: [],
   voiceIds: [],
+  anchorVoiceId: null,
 };
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
@@ -122,23 +124,33 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     setVoices((v) => v.filter((voice) => voice.id !== id));
   }, [engine]);
 
-  const stopSequence = useCallback(() => {
+  const stopVoicesByIds = useCallback((ids: string[], opts?: { protectedVoiceIds?: Set<string> }) => {
+    const protectedVoiceIds = opts?.protectedVoiceIds;
+    const toStop = ids.filter((id) => !protectedVoiceIds?.has(id));
+    toStop.forEach((id) => {
+      const timer = endTimers.current.get(id);
+      if (timer) {
+        window.clearTimeout(timer);
+        endTimers.current.delete(id);
+      }
+      engine.stopVoice(id);
+    });
+    if (toStop.length) {
+      setVoices((v) => v.filter((voice) => !toStop.includes(voice.id)));
+    }
+  }, [engine]);
+
+  const stopSequenceInternal = useCallback((opts?: { protectedVoiceIds?: Set<string> }) => {
     clearSequenceStepTimers();
     setSequence((prev) => {
-      prev.voiceIds.forEach((id) => {
-        const timer = endTimers.current.get(id);
-        if (timer) {
-          window.clearTimeout(timer);
-          endTimers.current.delete(id);
-        }
-        engine.stopVoice(id);
-      });
-      if (prev.voiceIds.length) {
-        setVoices((v) => v.filter((voice) => !prev.voiceIds.includes(voice.id)));
-      }
+      stopVoicesByIds(prev.voiceIds, opts);
       return idleSequence;
     });
-  }, [clearSequenceStepTimers, engine]);
+  }, [clearSequenceStepTimers, stopVoicesByIds]);
+
+  const stopSequence = useCallback(() => {
+    stopSequenceInternal();
+  }, [stopSequenceInternal]);
 
   const stopBar = useCallback((barId: BarId) => {
     const toStop = voices.filter((v) => v.barId === barId).map((v) => v.id);
@@ -161,7 +173,14 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   const playSequenceByBarIds = useCallback(async (barIds: BarId[], opts: SequenceOpts, meta?: { name?: string }) => {
     if (!barIds.length) return;
-    stopSequence();
+
+    const oldestActiveVoiceId = voices
+      .slice()
+      .sort((a, b) => a.startedAt - b.startedAt)[0]?.id;
+    const protectedVoiceIds = oldestActiveVoiceId ? new Set([oldestActiveVoiceId]) : undefined;
+
+    stopSequenceInternal({ protectedVoiceIds });
+
     try {
       await ensureReady();
     } catch {
@@ -179,6 +198,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       totalSteps: barIds.length,
       barIds,
       voiceIds: ids,
+      anchorVoiceId: oldestActiveVoiceId ?? ids[0] ?? null,
     });
 
     let t = startAt;
@@ -204,7 +224,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         : opts.intervalMs;
       t += dt / 1000;
     }
-  }, [clearSequenceStepTimers, engine, ensureReady, scheduleCleanup, stopSequence]);
+  }, [clearSequenceStepTimers, engine, ensureReady, scheduleCleanup, stopSequenceInternal, voices]);
 
   const stopAll = useCallback(() => {
     clearSequenceStepTimers();
