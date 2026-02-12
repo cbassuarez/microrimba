@@ -18,8 +18,10 @@ import { formatHz } from '../lib/format';
 import { getBarsForInstrument, getDefaultInstrumentForScale, getInstrumentMeta } from '../lib/instruments';
 import { prettyInstrumentLabel } from '../lib/labels';
 import { normalizeFracString } from '../lib/rational';
+import type { SequenceOpts } from '../lib/sequencer';
 import { glassHoverMotion } from '../ui/glassHoverMotion';
 import { Meta } from '../components/Meta';
+import { getSweepOptsForInstrument } from './instrumentSweepOpts';
 
 type ModeKey = 'unique' | 'all';
 type TolKey = '5' | '15' | '30';
@@ -92,13 +94,14 @@ export function InstrumentProfilePage({
   const cols = isSmOrUp ? PITCH_GRID_COLS_DESKTOP : PITCH_GRID_COLS_MOBILE;
   const navigate = useNavigate();
   const { bars, pitchIndex, instruments, loading, error } = useMicrorimbaData();
-  const { toggleBar, stopAll, playingBarIds, playSequenceByBarIds } = useAudio();
+  const { toggleBar, stopAll, stopSequence, playingBarIds, playSequenceByBarIds, sequence } = useAudio();
 
   const [mode, setMode] = useState<ModeKey>(forcedMode ?? 'unique');
   const [tolerance] = useState<TolKey>('5');
   const [openDetailsKey, setOpenDetailsKey] = useState<string | null>(null);
   const [pageDirection, setPageDirection] = useState(0);
   const [measureDebug, setMeasureDebug] = useState({ viewport: 0, header: 0, pager: 0, row: ROW_H, rowsPerPage: 4 });
+  const [isSweepStarting, setIsSweepStarting] = useState(false);
 
   const listSurfaceRef = useRef<HTMLDivElement>(null);
   const listViewportRef = useRef<HTMLDivElement>(null);
@@ -116,7 +119,6 @@ export function InstrumentProfilePage({
   const barById = useMemo(() => new Map(bars.map((bar) => [bar.barId, bar])), [bars]);
   const meta = useMemo(() => getInstrumentMeta(instruments, instrumentId ?? ''), [instruments, instrumentId]);
   const barsForInstrument = useMemo(() => getBarsForInstrument(bars, instrumentId ?? '').sort((a, b) => a.hz - b.hz || a.barId.localeCompare(b.barId)), [bars, instrumentId]);
-
   const rows = useMemo<PitchRow[]>(() => {
     if (!pitchIndex) return [];
     if (mode === 'all') {
@@ -135,6 +137,10 @@ export function InstrumentProfilePage({
     return scopedRows;
   }, [barById, barsForInstrument, instrumentId, mode, pitchIndex, tolerance]);
 
+  const sweepBars = useMemo(() => (mode === 'all' ? barsForInstrument : rows.map((row) => row.members[0])), [barsForInstrument, mode, rows]);
+  const baseSweepOpts = useMemo<SequenceOpts>(() => ({ intervalMs: 90, overlapMs: 55, mode: 'constant', gain: 0.8 }), []);
+  const sweepOpts = useMemo(() => getSweepOptsForInstrument(instrumentId ?? '', baseSweepOpts), [baseSweepOpts, instrumentId]);
+
   const paged = usePagedList<PitchRow>({
     enabled: isPaged,
     items: rows,
@@ -151,6 +157,27 @@ export function InstrumentProfilePage({
   const visibleRows = isPaged ? paged.pageItems : rows;
 
   const openRow = useMemo(() => visibleRows.find((row) => row.key === openDetailsKey) ?? null, [openDetailsKey, visibleRows]);
+
+  const handleSweepClick = () => {
+    if (sequence.active) {
+      setIsSweepStarting(false);
+      stopSequence();
+      return;
+    }
+    if (isSweepStarting) return;
+    setIsSweepStarting(true);
+    const sweepBarIds = sweepBars.map((bar) => bar.barId);
+    if (import.meta.env.DEV && instrumentId === 'harmonic') {
+      console.assert(
+        sweepBarIds.every((barId) => barId.startsWith('harmonic-')),
+        'Expected harmonic sweep to use harmonic-scoped barIds only',
+      );
+    }
+
+    void playSequenceByBarIds(sweepBarIds, sweepOpts, { name: instrumentId === 'harmonic' ? 'Harmonic Sweep' : 'Instrument Sweep' })
+      .catch(() => undefined)
+      .finally(() => setIsSweepStarting(false));
+  };
 
   if (loading) return <p>Loading…</p>;
   if (error || !pitchIndex) return <p>{error ?? 'Failed to load instrument profile.'}</p>;
@@ -239,10 +266,10 @@ export function InstrumentProfilePage({
       <section className="glass-panel glass-rim p-4">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-xl font-semibold">Instrument Pads</h2>
-          <button className="rounded-full border border-rim px-3 py-1 text-xs" onClick={() => void playSequenceByBarIds((mode === 'all' ? barsForInstrument : rows.map((row) => row.members[0])).map((bar) => bar.barId), { intervalMs: 90, overlapMs: 55, mode: 'constant', gain: 0.8 })}>Play sweep</button>
+          <button className="rounded-full border border-rim px-3 py-1 text-xs" onClick={handleSweepClick} disabled={isSweepStarting}>{sequence.active ? 'Stop sweep' : isSweepStarting ? 'Starting…' : 'Play sweep'}</button>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
-          {(mode === 'all' ? barsForInstrument : rows.map((row) => row.members[0])).map((bar) => (
+          {sweepBars.map((bar) => (
             <motion.button
               key={bar.barId}
               onClick={() => void toggleBar(bar.barId)}
